@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="500" height="66" viewBox="0 0 500 66">
+  <defs>
+    <clipPath id="clip-Custom_Size_1">
+      <rect width="500" height="66"/>
+    </clipPath>
+  </defs>
+  <g id="Custom_Size_1" data-name="Custom Size – 1" clip-path="url(#clip-Custom_Size_1)">
+    <g id="frgsvg" transform="translate(0 -341.09)">
+      <rect id="Rectangle_1" data-name="Rectangle 1" width="1.413" height="64.743" transform="translate(104.744 341.181)"/>
+      <text id="FLYNN_LAB" data-name="FLYNN LAB" transform="translate(105.45 403.59)" fill="#231f20" font-size="86" font-family="SegoeUI-Semibold, Segoe UI" font-weight="600" letter-spacing="-0.07em"><tspan x="0" y="0">FLYNN LAB</tspan></text>
+      <path id="Path_1" data-name="Path 1" d="M45.26,382.789,26.72,357.451v18.431H34.1v18.211H0V375.882H6.908V347.545H0v-18.2H26.782L45.26,354.877,63.754,329.35H90.536v18.2H83.613v28.337h6.923v18.211h-34.1V375.882H63.8V357.451Z" transform="translate(0 11.831)" fill="#231f20"/>
+    </g>
+  </g>
+</svg>

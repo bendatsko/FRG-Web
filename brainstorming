@@ -1,0 +1,8 @@
+We're going to use NextUI for our UI kit
+Main frontend will be built with NextJS
+We're going to have a main login page with some sort of secure authentication
+
+
+Send users an account creation invite link through the site
+Allow users to create the account, then they can login. We can also do sign in with google.
+those with admin permissions on the website can login and send account invite links to specific email addresses.
