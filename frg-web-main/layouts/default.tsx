@@ -2,6 +2,7 @@
 import { Navbar } from "@/components/navbar";
 import { Link } from "@nextui-org/link";
 import { Head } from "./head";
+import {Divider} from "@nextui-org/react";
 
 interface DefaultLayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,8 @@ export default function DefaultLayout({
     <div className="relative flex flex-col h-screen">
       <Head />
       {showNavbar && <Navbar />}
+        <Divider className="my-4" />
+
       <main className="container mx-auto max-w-7xl px-6 flex-grow pt-16">
         {children}
       </main>

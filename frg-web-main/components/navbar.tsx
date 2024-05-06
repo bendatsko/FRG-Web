@@ -11,12 +11,14 @@ import {
 	NavbarItem,
 	NavbarMenuItem,
 } from "@nextui-org/react";
+import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem,  User} from "@nextui-org/react";
 
 import { link as linkStyles } from "@nextui-org/theme";
-
+import {Avatar, AvatarGroup, AvatarIcon} from "@nextui-org/avatar";
 import { siteConfig } from "@/config/site";
 import NextLink from "next/link";
 import clsx from "clsx";
+import React from "react";
 
 import { ThemeSwitch } from "@/components/theme-switch";
 import {
@@ -28,6 +30,9 @@ import {
 } from "@/components/icons";
 
 import { Logo } from "@/components/icons";
+import {Breadcrumbs, BreadcrumbItem} from "@nextui-org/react";
+import {Tabs, Tab, Card, CardBody, CardHeader} from "@nextui-org/react";
+import {useRouter} from "next/router";
 
 export const Navbar = () => {
 	const searchInput = (
@@ -50,73 +55,92 @@ export const Navbar = () => {
 			type="search"
 		/>
 	);
+    const [currentPage, setCurrentPage] = React.useState("home");
+	let tabs = [
+		{
+			id: "home",
+			label: "Home",
+			content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+		},
+		{
+			id: "run",
+			label: "Run New Test",
+			content: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+		},
 
+	];
+
+	const router = useRouter();
+
+	const handleLogout = () => {
+		router.push("/");
+	};
 	return (
 		<NextUINavbar maxWidth="xl" position="sticky">
 			<NavbarContent className="basis-1/5 sm:basis-full" justify="start">
 				<NavbarBrand className="gap-3 max-w-fit">
-					<NextLink className="flex justify-start items-center gap-1" href="/">
+					<NextLink className="flex justify-start items-center gap-1" href="/home">
 						<Logo />
-						<p className="font-bold text-inherit">ACME</p>
-					</NextLink>
+													</NextLink>
 				</NavbarBrand>
-				<div className="hidden lg:flex gap-4 justify-start ml-2">
-					{siteConfig.navItems.map((item) => (
-						<NavbarItem key={item.href}>
-							<NextLink
-								className={clsx(
-									linkStyles({ color: "foreground" }),
-									"data-[active=true]:text-primary data-[active=true]:font-medium"
-								)}
-								color="foreground"
-								href={item.href}
-							>
-								{item.label}
-							</NextLink>
-						</NavbarItem>
-					))}
-				</div>
+			</NavbarContent>
+			<NavbarContent className="basis-1/5 sm:basis-full" justify="start">
+
+      <Tabs aria-label="Dynamic tabs" items={tabs}>
+        {(item) => (
+			<Tab key={item.id} title={item.label} >
+
+          </Tab>
+		)}
+      </Tabs>
+
 			</NavbarContent>
 
-      <NavbarContent className="hidden sm:flex basis-1/5 sm:basis-full" justify="end">
-				<NavbarItem className="hidden sm:flex gap-2">
-					<Link isExternal href={siteConfig.links.twitter}>
-						<TwitterIcon className="text-default-500" />
-					</Link>
-					<Link isExternal href={siteConfig.links.discord}>
-						<DiscordIcon className="text-default-500" />
-					</Link>
-					<Link isExternal href={siteConfig.links.github}>
-						<GithubIcon className="text-default-500" />
-					</Link>
-					<ThemeSwitch />
-				</NavbarItem>
-				<NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
-				<NavbarItem className="hidden md:flex">
-					<Button
-						isExternal
-						as={Link}
-						className="text-sm font-normal text-default-600 bg-default-100"
-						href={siteConfig.links.sponsor}
-						startContent={<HeartFilledIcon className="text-danger" />}
-						variant="flat"
-					>
-						Sponsor
-					</Button>
-				</NavbarItem>
-			</NavbarContent>
 
-			<NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <Link isExternal href={siteConfig.links.github}>
-          <GithubIcon className="text-default-500" />
-        </Link>
-        <ThemeSwitch />
-				<NavbarMenuToggle />
-      </NavbarContent>
+
+<Dropdown placement="bottom-start">
+
+        <DropdownTrigger>
+          <User
+			  as="button"
+			  avatarProps={{
+				  src: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
+			  }}
+			  description="@tonyreichert"
+			  name="Tony Reichert"
+		  />
+        </DropdownTrigger>
+        <DropdownMenu aria-label="User Actions" variant="flat">
+          <DropdownItem key="profile" className="h-14 gap-2">
+            <p className="font-bold">Signed in as</p>
+            <p className="font-bold">@tonyreichert</p>
+          </DropdownItem>
+          <DropdownItem key="settings">
+            My Settings
+          </DropdownItem>
+          <DropdownItem key="team_settings">Team Settings</DropdownItem>
+          <DropdownItem key="analytics">
+            Analytics
+          </DropdownItem>
+          <DropdownItem key="system">System</DropdownItem>
+          <DropdownItem key="configurations">Configurations</DropdownItem>
+          <DropdownItem key="help_and_feedback">
+            Help & Feedback
+          </DropdownItem>
+          <DropdownItem key="logout" color="danger" onClick={handleLogout}>
+            Log Out
+          </DropdownItem>
+        </DropdownMenu>
+
+      </Dropdown>
+
+
 
       <NavbarMenu>
 				{searchInput}
+
 				<div className="mx-4 mt-2 flex flex-col gap-2">
+
 					{siteConfig.navMenuItems.map((item, index) => (
 						<NavbarMenuItem key={`${item}-${index}`}>
 							<Link
@@ -136,6 +160,8 @@ export const Navbar = () => {
 					))}
 				</div>
 			</NavbarMenu>
+
 		</NextUINavbar>
+
 	);
 };
