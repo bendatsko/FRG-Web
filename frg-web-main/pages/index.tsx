@@ -1,58 +1,70 @@
-import { Link } from "@nextui-org/link";
-import { Snippet } from "@nextui-org/snippet";
-import { Code } from "@nextui-org/code";
-import { button as buttonStyles } from "@nextui-org/theme";
-import { siteConfig } from "@/config/site";
-import { title, subtitle } from "@/components/primitives";
-import { GithubIcon } from "@/components/icons";
+import React, {useState} from "react";
 import DefaultLayout from "@/layouts/default";
+import {Button, Input} from "@nextui-org/react";
+import {EyeFilledIcon} from "../components/EyeFilledIcon";
+import {EyeSlashFilledIcon} from "../components/EyeSlashFilledIcon";
+import {useTheme} from "next-themes";
+import {ThemeSwitch} from "@/components/theme-switch";
+import Logo from "../components/Logo";
+import {useRouter} from "next/router";
+
 
 export default function IndexPage() {
-	return (
-		<DefaultLayout>
-			<section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-				<div className="inline-block max-w-lg text-center justify-center">
-					<h1 className={title()}>Make&nbsp;</h1>
-					<h1 className={title({ color: "violet" })}>beautiful&nbsp;</h1>
-					<br />
-					<h1 className={title()}>
-						websites regardless of your design experience.
-					</h1>
-					<h4 className={subtitle({ class: "mt-4" })}>
-						Beautiful, fast and modern React UI library.
-					</h4>
-				</div>
+    const [isVisible, setIsVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+    const {theme} = useTheme();
+    const toggleVisibility = () => setIsVisible(!isVisible);
 
-				<div className="flex gap-3">
-					<Link
-						isExternal
-						href={siteConfig.links.docs}
-						className={buttonStyles({
-							color: "primary",
-							radius: "full",
-							variant: "shadow",
-						})}
-					>
-						Documentation
-					</Link>
-					<Link
-						isExternal
-						className={buttonStyles({ variant: "bordered", radius: "full" })}
-						href={siteConfig.links.github}
-					>
-						<GithubIcon size={20} />
-						GitHub
-					</Link>
-				</div>
+    const handleButtonClick = () => {
+        setIsLoading(true);
+        router.push("/dashboard");
+    };
 
-				<div className="mt-8">
-					<Snippet hideSymbol hideCopyButton variant="bordered">
-						<span>
-							Get started by editing <Code color="primary">pages/index.tsx</Code>
-						</span>
-					</Snippet>
-				</div>
-			</section>
-		</DefaultLayout>
-	);
+
+    return (<DefaultLayout showNavbar={false}>
+        <section className="flex flex-col items-center justify-center gap-6 py-8 md:py-10 px-4">
+            <Logo/>
+            <Input
+                isClearable
+                type="email"
+                label="Email"
+                variant="bordered"
+                placeholder="Email"
+                defaultValue=""
+                onClear={() => console.log("input cleared")}
+                className="w-full max-w-xs"
+            />
+            <Input
+                label="Password"
+                variant="bordered"
+                placeholder="Password"
+                endContent={<button
+                    className="focus:outline-none"
+                    type="button"
+                    onClick={toggleVisibility}
+                >
+                    {isVisible ? (
+                        <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none"/>) : (
+                        <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none"/>)}
+                </button>}
+                type={isVisible ? "text" : "password"}
+                className="w-full max-w-xs"
+            />
+            <Button
+                fullWidth
+                color="primary"
+                className={`w-full max-w-xs ${isLoading ? "isLoading" : ""}`}
+                onClick={handleButtonClick}
+                isLoading={isLoading}
+            >
+
+                {isLoading ? "Signing in..." : "Sign in"}
+            </Button>
+        </section>
+        <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8">
+            <ThemeSwitch/>
+        </div>
+
+    </DefaultLayout>);
 }

@@ -41,14 +41,14 @@ const LogoComponent: FC = () => {
         >
             {resolvedTheme === "dark" ? (
                 <Image
-                    src="http://localhost:3000/frg-logo-white.png"
+                    src="https://lh3.googleusercontent.com/pw/AP1GczPneeqbuXK02y0GyANVHn2SD3Rc7MRELcVzLgwqbz50LCLDbVV0_fXhjz7yIE9evCV-ZEyh6jeLwLFmmSTK2SQp6YWYb8ybmSPAq7KhJnz2rA1U8EpmqRdIq38SdTC_RYi-ZI_MZ1W-Jhz85Bioyide=w1347-h1508-s-no-gm?authuser=0"
                     width={150}
                     height={150}
                     alt="NextUI Album Cover (Dark Mode)"
                 />
             ) : (
                 <Image
-                    src="http://localhost:3000/frg-logo-black.png"
+                    src="https://lh3.googleusercontent.com/pw/AP1GczNIT0H6h6wP04N1QdAuvoeqwRs5YdVovGDWmpC8JOP_2rPLJqLCLvCYIRIaENB5m2iOX4IlDiQvCr9Qn_t23ZNx3bv8Dvu5Kgj6EP_Io7_3zuNYCvQOhOrdJI0RjG25rkfNXpwe1_taKsjHgTv1UsBY=w1347-h1508-s-no-gm?authuser=0"
                     width={150}
                     height={150}
                     alt="NextUI Album Cover (Light Mode)"
