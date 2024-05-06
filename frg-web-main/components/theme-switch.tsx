@@ -1,10 +1,12 @@
 import { FC, useState, useEffect } from "react";
 import { VisuallyHidden } from "@react-aria/visually-hidden";
-import { SwitchProps, useSwitch } from "@nextui-org/react";
+import {Button, Link, SwitchProps, useSwitch} from "@nextui-org/react";
 import { useTheme } from "next-themes";
 import clsx from "clsx";
 
-import { SunFilledIcon, MoonFilledIcon } from "@/components/icons";
+
+import {SunFilledIcon, MoonFilledIcon, HeartFilledIcon} from "@/components/icons";
+import {siteConfig} from "@/config/site";
 
 export interface ThemeSwitchProps {
 	className?: string;
@@ -43,6 +45,16 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
   if (!isMounted) return <div className="w-6 h-6" />;
 
 	return (
+
+		<Button
+
+			variant="flat"
+			onClick={onChange}
+
+		>
+
+
+
 		<Component
 			{...getBaseProps({
 				className: clsx(
@@ -81,5 +93,6 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
 				)}
 			</div>
 		</Component>
+		</Button>
 	);
 };

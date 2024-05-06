@@ -11,35 +11,41 @@ import { EyeFilledIcon } from "../components/EyeFilledIcon";
 import { EyeSlashFilledIcon } from "../components/EyeSlashFilledIcon";
 import React from "react";
 import { Button } from "@nextui-org/react";
-import FrgLogo from "../public/flynnlab-logo.svg";
-import Image from "next/image";
+import FrgLogo from "../public/frg-logo.png";
+import {Image} from "@nextui-org/react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
+import {ThemeSwitch} from "@/components/theme-switch";
+import Logo from "../components/Logo";
 
 export default function IndexPage() {
   const [isVisible, setIsVisible] = React.useState(false);
   const toggleVisibility = () => setIsVisible(!isVisible);
   const { theme } = useTheme();
 
-  const logoColor = theme === "dark" ? "white" : "black";
 
   return (
     <DefaultLayout showNavbar={false}>
       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            width: "20rem",
-            paddingBottom: "1rem",
-          }}
-        >
-          <Image
-            alt="FlynnLab Logo"
-            src={FrgLogo}
-            style={{ color: logoColor }}
-          />
-        </div>
+
+          <Logo/>
+          {/*<ThemeSwitch/>*/}
+
+
+
+        {/*  <div*/}
+        {/*  style={{*/}
+        {/*    display: "flex",*/}
+        {/*    justifyContent: "center",*/}
+        {/*    width: "10rem",*/}
+        {/*    // paddingBottom: "1rem",*/}
+        {/*  }}*/}
+        {/*>*/}
+        {/*    <Image*/}
+        {/*        src="/frg-logo-black.png"*/}
+        {/*        alt="NextUI Album Cover"*/}
+        {/*    />*/}
+        {/*</div>*/}
 
         <Input
           isClearable
@@ -76,6 +82,10 @@ export default function IndexPage() {
           <Button radius="quarter" fullWidth="true" color="primary">
             Sign in
           </Button>
+
+            <div className="absolute bottom-4 right-4">
+                <ThemeSwitch />
+            </div>
         </div>
       </section>
     </DefaultLayout>
