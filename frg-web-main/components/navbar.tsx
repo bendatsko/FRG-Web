@@ -1,76 +1,19 @@
-import {
-    Badge,
-    Button,
-    Divider,
-    Dropdown,
-    DropdownItem,
-    DropdownMenu,
-    DropdownTrigger,
-    Image,
-    Input,
-    Kbd,
-    Link,
-    Navbar as NextUINavbar,
-    NavbarBrand,
-    NavbarContent,
-    NavbarMenu,
-    NavbarMenuItem,
-    Tab,
-    Tabs,
-    User,
-} from "@nextui-org/react";
-import {siteConfig} from "@/config/site";
+import {Image, Link, Navbar as NextUINavbar, NavbarBrand, NavbarContent, NavbarItem,} from "@nextui-org/react";
 import NextLink from "next/link";
 import React, {useEffect, useState} from "react";
-import {SearchIcon} from "@/components/icons";
 import {useRouter} from "next/router";
 import {ThemeSwitch} from "@/components/theme-switch";
 import {useTheme} from "next-themes";
 import DarkImg from "@/public/blockm-white.png";
 import LightImg from "@/public/blockm-black.png";
-import {NotificationIcon} from "@/components/NotificationIcon";
-
 
 export const Navbar = () => {
-    const searchInput = (
-        <Input
-            aria-label="Search"
-            classNames={{
-                inputWrapper: "bg-default-100",
-                input: "text-sm",
-            }}
-            endContent={
-                <Kbd className="hidden lg:inline-block" keys={["command"]}>
-                    K
-                </Kbd>
-            }
-            labelPlacement="outside"
-            placeholder="Search..."
-            startContent={
-                <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0"/>
-            }
-            type="search"
-        />
-    );
-
     const router = useRouter();
     const [currentPage, setCurrentPage] = useState("home");
-
-    const handleTabChange = (key: string) => {
-        switch (key) {
-            case "home":
-                router.push("/home");
-                break;
-            case "create":
-                router.push("/create");
-                break;
-            default:
-                break;
-        }
-    };
-
     const [isMounted, setIsMounted] = useState(false);
     const {resolvedTheme} = useTheme();
+    const getColorForTab = (tab: string) =>
+        currentPage === tab ? "primary" : "foreground";
 
     useEffect(() => {
         setIsMounted(true);
@@ -85,21 +28,6 @@ export const Navbar = () => {
     const handleLogout = () => {
         router.push("/");
     };
-
-    const handleHelp = () => {
-        router.push("/help");
-    };
-
-    const tabs = [
-        {
-            id: "home",
-            label: "Home",
-        },
-        {
-            id: "create",
-            label: "Run New Test",
-        },
-    ];
 
     useEffect(() => {
         const handleRouteChange = (url: string) => {
@@ -120,115 +48,60 @@ export const Navbar = () => {
         };
     }, [router]);
 
+    if (!isMounted) return null;
+
     return (
         <>
-            <NextUINavbar maxWidth="xl" position="sticky">
+            <NextUINavbar maxWidth="xl" position="sticky" isBordered>
                 <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
                     <NavbarBrand className="gap-3 max-w-fit">
-                        <NextLink className="flex justify-start items-center gap-1" href="/home">
+                        <NextLink
+                            className="flex justify-start items-center gap-1"
+                            href="/home"
+                        >
                             <div
                                 style={{
                                     display: "flex",
                                     justifyContent: "center",
+                                    paddingRight: ".1rem",
                                 }}
                             >
                                 <Image
                                     src={logoSrc}
-
-                                    width={30}
-                                    height={30}
-                                    radius={0}
+                                    width={20}
+                                    height={20}
+                                    radius="none"
                                     alt={`FRG Logo (${resolvedTheme || "default"} Mode)`}
                                 />
                             </div>
+                            {/*<p className="font-bold text-inherit">FLYNN LAB</p>*/}
                         </NextLink>
+                        <p className="font-normal text-inherit">Hello, User</p>
                     </NavbarBrand>
                 </NavbarContent>
-                <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-                    <Tabs
-                        aria-label="Dynamic tabs"
-                        items={tabs}
-                        selectedKey={currentPage}
-                        onSelectionChange={handleTabChange}
-                    >
-                        {(item) => (
-                            <Tab key={item.id} title={item.label}></Tab>
-                        )}
-                    </Tabs>
+                <NavbarContent className="basis-1/5 sm:basis-full flex items-center" justify="end">
+                    <NavbarItem isActive={currentPage === "home"}>
+                        <NextLink href="/home" passHref>
+                            <Link color={getColorForTab("home")} aria-current="page">
+                                Home
+                            </Link>
+                        </NextLink>
+                    </NavbarItem>
+                    <NavbarItem isActive={currentPage === "create"}>
+                        <NextLink href="/create" passHref>
+                            <Link color={getColorForTab("create")}>New test</Link>
+                        </NextLink>
+                    </NavbarItem>
+                    <NavbarItem>
+                        <NextLink href="/" passHref onClick={handleLogout}>
+                            <Link color="foreground">Log out</Link>
+                        </NextLink>
+                    </NavbarItem>
+                    <NavbarItem className="flex items-center">
+                        <ThemeSwitch/>
+                    </NavbarItem>
                 </NavbarContent>
-
-                <Dropdown placement="bottom-start">
-                    <DropdownTrigger>
-                        <Button
-                            radius="full"
-                            isIconOnly
-                            aria-label="notifications"
-                            variant="light"
-                        >
-                            <Badge content="2" shape="circle" color="danger">
-
-                                <NotificationIcon size={24}/>
-                            </Badge>
-
-                        </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                        aria-label="Notification actions"
-                        onAction={(key) => alert(key)}
-                    >
-                        <DropdownItem key="new">Simulation id 299 complete</DropdownItem>
-                        <DropdownItem key="copy">Simulation id 298 complete</DropdownItem>
-                        <DropdownItem key="edit">Simulation id 287 failed</DropdownItem>
-                        <DropdownItem key="delete" className="text-danger" color="danger">
-                            Clear notifications
-                        </DropdownItem>
-                    </DropdownMenu>
-                </Dropdown>
-
-                <ThemeSwitch/>
-                <Dropdown placement="bottom-start">
-                    <DropdownTrigger>
-                        <User
-                            as="button"
-                            avatarProps={{
-                                src: "https://images.unsplash.com/broken",
-                            }}
-                            description="@admin"
-                            name="Administrator"
-                        />
-                    </DropdownTrigger>
-                    <DropdownMenu aria-label="User Actions" variant="flat">
-                        <DropdownItem key="help_and_feedback " onClick={handleHelp}>Help & Feedback</DropdownItem>
-                        <DropdownItem key="logout" color="danger" onClick={handleLogout}>
-                            Log Out
-                        </DropdownItem>
-                    </DropdownMenu>
-                </Dropdown>
-
-                <NavbarMenu>
-                    {searchInput}
-                    <div className="mx-4 mt-2 flex flex-col gap-2">
-                        {siteConfig.navMenuItems.map((item, index) => (
-                            <NavbarMenuItem key={`${item}-${index}`}>
-                                <Link
-                                    color={
-                                        index === 2
-                                            ? "primary"
-                                            : index === siteConfig.navMenuItems.length - 1
-                                                ? "danger"
-                                                : "foreground"
-                                    }
-                                    href="#"
-                                    size="lg"
-                                >
-                                    {item.label}
-                                </Link>
-                            </NavbarMenuItem>
-                        ))}
-                    </div>
-                </NavbarMenu>
             </NextUINavbar>
-            <Divider className="my-4"/>
         </>
     );
 };

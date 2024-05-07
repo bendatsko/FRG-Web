@@ -1,13 +1,17 @@
 // index.tsx (IndexPage)
 
+
 import React, {useEffect, useState} from "react";
 import DefaultLayout from "@/layouts/default";
-import {Button, Input} from "@nextui-org/react";
+import {Button, Image, Input} from "@nextui-org/react";
 import {EyeFilledIcon} from "../components/EyeFilledIcon";
 import {EyeSlashFilledIcon} from "../components/EyeSlashFilledIcon";
 import {useTheme} from "next-themes";
-import LogoComponent from "@/components/LogoComponent";
 import {useRouter} from "next/router";
+import DarkImg from "@/public/blockm-white.png";
+import LightImg from "@/public/blockm-black.png";
+import NextLink from "next/link";
+
 
 export default function IndexPage() {
     const [username, setUsername] = useState("");
@@ -19,11 +23,19 @@ export default function IndexPage() {
     const router = useRouter();
     const {resolvedTheme} = useTheme();
 
+
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
+
     const toggleVisibility = () => setIsVisible(!isVisible);
+    const logoSrc = !isMounted
+        ? DarkImg.src
+        : resolvedTheme === "dark"
+            ? DarkImg.src
+            : LightImg.src;
+
 
     const handleLogin = () => {
         setIsLoading(true);
@@ -37,22 +49,50 @@ export default function IndexPage() {
         }
     };
 
+
     const getButtonStyles = () => {
         if (!isMounted) {
             return {backgroundColor: "white", color: "black"}; // Default dark theme style
         }
 
+
         if (resolvedTheme === "dark") {
             return {backgroundColor: "white", color: "black"};
         }
 
+
         return {backgroundColor: "rgba(0, 0, 0, 0.85)", color: "white"};
     };
+
 
     return (
         <DefaultLayout showNavbar={false}>
             <section className="flex flex-col items-center justify-center gap-6 py-8 md:py-10 px-4">
-                <LogoComponent/>
+                {/*<LogoComponent />*/}
+
+
+                <NextLink
+                    className="flex justify-start items-center gap-2"
+                    href="/home"
+                >
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            paddingRight: ".1rem",
+                        }}
+                    >
+                        <Image
+                            src={logoSrc}
+                            width={40} // Increase image size
+                            height={40}
+                            radius="none"
+                            alt={`FRG Logo (${resolvedTheme || "default"} Mode)`}
+                        />
+                    </div>
+                    <p className="font-bold text-inherit text-3xl">FLYNN LAB</p>{" "}
+                    {/* Adjust font size here */}
+                </NextLink>
                 <Input
                     isClearable
                     type="email"
@@ -103,3 +143,6 @@ export default function IndexPage() {
         </DefaultLayout>
     );
 }
+
+
+
