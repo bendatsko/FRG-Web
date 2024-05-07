@@ -1,8 +1,9 @@
 import {Link} from "@nextui-org/link";
 import DefaultLayout from "@/layouts/default";
-import {Card, CardBody, CardFooter, CardHeader, Divider, Image} from "@nextui-org/react";
+import {Card, CardBody, CardFooter, CardHeader, Divider, Image, Spacer} from "@nextui-org/react";
 import HistoryTable from "@/components/table";
 import React from "react";
+import {title} from "@/components/primitives";
 
 export default function IndexPage() {
 
@@ -38,8 +39,12 @@ export default function IndexPage() {
                     </Link>
                 </CardFooter>
             </Card>
-            <Divider className="my-5"/>
+            <Spacer y={6}/>
 
+            <div className='flex justify-start inline-block max-w-med'>
+                <h4 className={title()}>History</h4>
+            </div>
+            <Spacer x={4}/>
 
             <div className="overflow-x-auto">
                 <HistoryTable/>

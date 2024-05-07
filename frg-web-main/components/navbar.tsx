@@ -86,6 +86,10 @@ export const Navbar = () => {
         router.push("/");
     };
 
+    const handleHelp = () => {
+        router.push("/help");
+    };
+
     const tabs = [
         {
             id: "home",
@@ -161,12 +165,12 @@ export const Navbar = () => {
                             aria-label="notifications"
                             variant="light"
                         >
-
-                            <NotificationIcon size={24}/>
                             <Badge content="2" shape="circle" color="danger">
-                            </Badge>
-                        </Button>
 
+                                <NotificationIcon size={24}/>
+                            </Badge>
+
+                        </Button>
                     </DropdownTrigger>
                     <DropdownMenu
                         aria-label="Notification actions"
@@ -194,9 +198,7 @@ export const Navbar = () => {
                         />
                     </DropdownTrigger>
                     <DropdownMenu aria-label="User Actions" variant="flat">
-                        <DropdownItem key="settings">My Settings</DropdownItem>
-                        <DropdownItem key="analytics">Analytics</DropdownItem>
-                        <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
+                        <DropdownItem key="help_and_feedback " onClick={handleHelp}>Help & Feedback</DropdownItem>
                         <DropdownItem key="logout" color="danger" onClick={handleLogout}>
                             Log Out
                         </DropdownItem>
