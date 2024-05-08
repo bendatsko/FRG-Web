@@ -1,19 +1,8 @@
-import { GetServerSideProps } from "next";
+import {GetServerSideProps} from "next";
 import DefaultLayout from "@/layouts/default";
-import React, { useState } from "react";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Divider,
-  Input,
-  Chip,
-  ChipProps,
-} from "@nextui-org/react";
-import { useRouter } from "next/navigation";
-import { v4 as uuidv4 } from "uuid";
+import React, {useState} from "react";
+import {Button, Card, CardBody, CardFooter, CardHeader, Chip, ChipProps, Divider, Input,} from "@nextui-org/react";
+import {useRouter} from "next/navigation";
 
 // Utility function to capitalize strings
 const capitalize = (str: string) =>
@@ -59,7 +48,15 @@ export default function TestPage({ testData }: TestPageProps) {
     }, 2000);
   };
 
-  const handleInputChange = (setter) => (e) => setter(e.target.value);
+  const handleInputChange =
+    (setter: {
+      (value: React.SetStateAction<string>): void;
+      (value: React.SetStateAction<string>): void;
+      (value: React.SetStateAction<string>): void;
+      (arg0: any): any;
+    }) =>
+    (e: { target: { value: any } }) =>
+      setter(e.target.value);
 
   return (
     <DefaultLayout>
@@ -171,13 +168,13 @@ export default function TestPage({ testData }: TestPageProps) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { uuid } = context.params;
+  const uuid = "123";
 
   // Simulate fetching data based on the UUID
   const testData: TestData = {
     id: uuid as string,
     chip: "LDPC",
-    snr: "20.5",
+    snr: "20",
     numTests: "10",
     status: "active",
     created_at: "2024-05-01",

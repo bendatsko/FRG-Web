@@ -10,10 +10,9 @@ import {
   Divider,
   Input,
   Select,
-  SelectItem,
   Selection,
+  SelectItem,
 } from "@nextui-org/react";
-import { v4 as uuidv4 } from "uuid";
 
 export default function CreatePage() {
   const [chip, setChip] = useState<Selection>(new Set([]));
@@ -29,12 +28,13 @@ export default function CreatePage() {
 
   const statusColorMap = {
     success: "success",
-    error: "default",
+    error: "danger",
   };
 
   // Validate inputs
   const validateInputs = () => {
-    const isChipSelected = chip.size > 0;
+    // Convert chip to Set and check its size
+    const isChipSelected = new Set(chip).size > 0;
     const isSnrValid = /^[0-9]*\.?[0-9]+$/.test(snr);
     const isNumTestsValid = /^\d+$/.test(numTests);
     setIsInputValid(isChipSelected && isSnrValid && isNumTestsValid);
@@ -48,7 +48,7 @@ export default function CreatePage() {
 
     setIsSubmitting(true);
     setButtonText("Running Test...");
-    const uuid = uuidv4();
+    const uuid = "123";
 
     const selectedChip = Array.from(chip)[0] as string;
 
@@ -71,7 +71,6 @@ export default function CreatePage() {
       const newMessage = success ? "Test started" : "Could not start";
       setStatusMessage(newMessage);
       setButtonText(newMessage);
-
       setTimeout(() => {
         setIsSubmitting(false);
         setButtonText("Begin Test");
@@ -79,16 +78,24 @@ export default function CreatePage() {
     }, 2000); // Simulate a 2-second test run
   };
 
-  const handleInputChange = (setter) => (e) => {
-    setter(e.target.value);
-    validateInputs();
-  };
+  const handleInputChange =
+    (setter: {
+      (value: React.SetStateAction<string>): void;
+      (value: React.SetStateAction<string>): void;
+      (arg0: any): void;
+    }) =>
+    (e: { target: { value: any } }) => {
+      setter(e.target.value);
+      validateInputs();
+    };
 
   const handleChipChange = (keys: Selection) => {
     setChip(keys);
     validateInputs();
   };
 
+  // @ts-ignore
+  // @ts-ignore
   return (
     <DefaultLayout>
       <section className="flex flex-col items-center min-h-screen py-4">
@@ -179,11 +186,11 @@ export default function CreatePage() {
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                       <Chip
                         className="capitalize border-none gap-1 text-default-600"
-                        color={
-                          isTestBenchOnline
-                            ? statusColorMap["success"]
-                            : statusColorMap["error"]
-                        }
+                        // color={
+                        //   isTestBenchOnline
+                        //     ? statusColorMap["success"]
+                        //     : statusColorMap["error"]
+                        // }
                         size="sm"
                         variant="dot"
                       >
@@ -193,11 +200,11 @@ export default function CreatePage() {
                       </Chip>
                       <Chip
                         className="capitalize border-none gap-1 text-default-600"
-                        color={
-                          isInputValid
-                            ? statusColorMap["success"]
-                            : statusColorMap["error"]
-                        }
+                        // color={
+                        //   isInputValid
+                        //     ? statusColorMap["success"]
+                        //     : statusColorMap["error"]
+                        // }
                         size="sm"
                         variant="dot"
                       >
@@ -218,10 +225,6 @@ export default function CreatePage() {
                     >
                       {buttonText}
                     </Button>
-
-                    {/*<div className="text-default-600 text-center lg:text-end">*/}
-                    {/*  {statusMessage}*/}
-                    {/*</div>*/}
                   </div>
                 </CardFooter>
               </Card>

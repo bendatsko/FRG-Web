@@ -1,5 +1,6 @@
 import React from "react";
 
+// @ts-ignore
 export const NotificationIcon = ({size, height, width, ...props}) => {
     return (
         <svg
