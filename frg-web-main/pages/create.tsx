@@ -159,7 +159,7 @@ export default function CreatePage() {
                     <p className="text-md font-bold">
                       Specify Number of Tests to Run
                     </p>
-                    <p class="text-small text-default-500">
+                    <p className="text-small text-default-500">
                       The total number of tests to execute.
                     </p>
                   </div>
