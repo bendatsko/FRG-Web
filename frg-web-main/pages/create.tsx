@@ -99,7 +99,7 @@ export default function CreatePage() {
         <div className="max-w-[100%] w-full text-center">
           <Card className="mt-1">
             <CardHeader className="flex flex-col items-center gap-3 py-8">
-              <h2 className="text-3xl">New Test</h2>
+              <h2 className="text-3xl">New test</h2>
               <p className="text-small text-default-500">
                 Complete the fields below.
               </p>
