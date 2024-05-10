@@ -9,7 +9,6 @@ import {
 import NextLink from "next/link";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { ThemeSwitch } from "@/components/theme-switch";
 import { useTheme } from "next-themes";
 import DarkImg from "@/public/blockm-white.png";
 import LightImg from "@/public/blockm-black.png";
@@ -93,7 +92,9 @@ export const Navbar = () => {
                 NETCHIP
               </p>
             </NextLink>
-            <p className="font-normal text-md hidden sm:inline">Hello, User</p>
+            <p className="font-normal text-md hidden sm:inline">
+              Hello, Generic Name
+            </p>
           </NavbarBrand>
         </NavbarContent>
         <NavbarContent
@@ -121,9 +122,9 @@ export const Navbar = () => {
               </Link>
             </NextLink>
           </NavbarItem>
-          <NavbarItem className="flex items-center">
-            <ThemeSwitch />
-          </NavbarItem>
+          {/*<NavbarItem className="flex items-center">*/}
+          {/*<ThemeSwitch />*/}
+          {/*</NavbarItem>*/}
         </NavbarContent>
       </NextUINavbar>
     </>

@@ -26,14 +26,13 @@ export default function CreatePage() {
 
   const [buttonText, setButtonText] = useState("Begin Test");
 
-  const statusColorMap = {
+  const statusColorMap: Record<string, "success" | "danger"> = {
     success: "success",
     error: "danger",
   };
 
   // Validate inputs
   const validateInputs = () => {
-    // Convert chip to Set and check its size
     const isChipSelected = new Set(chip).size > 0;
     const isSnrValid = /^[0-9]*\.?[0-9]+$/.test(snr);
     const isNumTestsValid = /^\d+$/.test(numTests);
@@ -94,8 +93,6 @@ export default function CreatePage() {
     validateInputs();
   };
 
-  // @ts-ignore
-  // @ts-ignore
   return (
     <DefaultLayout>
       <section className="flex flex-col items-center min-h-screen py-4">
@@ -177,8 +174,8 @@ export default function CreatePage() {
               </Card>
 
               <Card className="shadow-sm rounded-lg mt-4">
-                <CardFooter className="flex flex-col lg:flex-row gap-4 lg:gap-8 justify-center lg:justify-between items-center lg:items-start p-4">
-                  <div className="flex flex-col gap-2 items-left lg:items-start">
+                <CardFooter className="flex flex-col lg:flex-row gap-4 lg:gap-8 justify-center lg:justify-between items-center lg:items-center p-4">
+                  <div className="flex flex-col gap-2 items-center lg:items-center">
                     <p className="text-md font-bold">Verify and Run</p>
                     <p className="text-small text-default-500 text-left lg:text-start">
                       Ensure all inputs are valid before starting the test.
@@ -186,11 +183,11 @@ export default function CreatePage() {
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                       <Chip
                         className="capitalize border-none gap-1 text-default-600"
-                        // color={
-                        //   isTestBenchOnline
-                        //     ? statusColorMap["success"]
-                        //     : statusColorMap["error"]
-                        // }
+                        color={
+                          isTestBenchOnline
+                            ? statusColorMap["success"]
+                            : statusColorMap["error"]
+                        }
                         size="sm"
                         variant="dot"
                       >
@@ -200,11 +197,11 @@ export default function CreatePage() {
                       </Chip>
                       <Chip
                         className="capitalize border-none gap-1 text-default-600"
-                        // color={
-                        //   isInputValid
-                        //     ? statusColorMap["success"]
-                        //     : statusColorMap["error"]
-                        // }
+                        color={
+                          isInputValid
+                            ? statusColorMap["success"]
+                            : statusColorMap["error"]
+                        }
                         size="sm"
                         variant="dot"
                       >
@@ -221,7 +218,11 @@ export default function CreatePage() {
                       disabled={!isInputValid || isSubmitting}
                       variant={!isInputValid || isSubmitting ? "flat" : "solid"}
                       onClick={handleFormSubmit}
-                      className={`w-full max-w-xs lg:w-auto ${!isInputValid || isSubmitting ? "pointer-events-none" : ""}`}
+                      className={`w-full max-w-xs lg:w-auto ${
+                        !isInputValid || isSubmitting
+                          ? "pointer-events-none"
+                          : ""
+                      }`}
                     >
                       {buttonText}
                     </Button>

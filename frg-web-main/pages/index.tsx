@@ -35,7 +35,7 @@ export default function IndexPage() {
   const handleLogin = () => {
     setIsLoading(true);
     // Simulate authentication process
-    if (username === "test@email.com" && password === "password") {
+    if (username === "admin@umich.edu" && password === "password") {
       setErrorMessage("");
       router.push("/home");
     } else {
