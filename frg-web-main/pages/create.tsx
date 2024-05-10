@@ -159,7 +159,7 @@ export default function CreatePage() {
                     <p className="text-md font-bold">
                       Specify Number of Tests to Run
                     </p>
-                    <p className="text-small text-default-500">
+                    <p class="text-small text-default-500">
                       The total number of tests to execute.
                     </p>
                   </div>
@@ -174,10 +174,10 @@ export default function CreatePage() {
               </Card>
 
               <Card className="shadow-sm rounded-lg mt-4">
-                <CardFooter className="flex flex-col lg:flex-row gap-4 lg:gap-8 justify-center lg:justify-between items-center lg:items-center p-4">
-                  <div className="flex flex-col gap-2 items-center lg:items-center">
+                <CardFooter className="flex flex-col lg:flex-row gap-4 lg:gap-8 justify-center lg:justify-between items-center lg:items-start p-4 text-center lg:text-left">
+                  <div className="flex flex-col gap-2 items-center lg:items-start">
                     <p className="text-md font-bold">Verify and Run</p>
-                    <p className="text-small text-default-500 text-left lg:text-start">
+                    <p className="text-small text-default-500">
                       Ensure all inputs are valid before starting the test.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
