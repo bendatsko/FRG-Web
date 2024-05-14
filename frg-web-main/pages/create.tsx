@@ -1,5 +1,6 @@
 import DefaultLayout from "@/layouts/default";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Button,
   Card,
@@ -19,17 +20,24 @@ export default function CreatePage() {
   const [snr, setSnr] = useState("");
   const [numTests, setNumTests] = useState("");
   const [isInputValid, setIsInputValid] = useState(false);
-  const [isTestBenchOnline, setIsTestBenchOnline] = useState(true);
+  const [isTestBenchOnline, setIsTestBenchOnline] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [responseMessage, setResponseMessage] = useState("");
   const chipList = [{ label: "LDPC", value: "ldpc" }];
 
   const [buttonText, setButtonText] = useState("Begin Test");
 
   const statusColorMap: Record<string, "success" | "danger"> = {
     success: "success",
-    error: "danger",
+    failure: "danger",
   };
+
+  useEffect(() => {
+    if (chip.size > 0) {
+      checkTestBenchStatus();
+    }
+  }, [chip]);
 
   // Validate inputs
   const validateInputs = () => {
@@ -39,7 +47,26 @@ export default function CreatePage() {
     setIsInputValid(isChipSelected && isSnrValid && isNumTestsValid);
   };
 
-  const handleFormSubmit = () => {
+  const checkTestBenchStatus = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/status");
+      const { data } = response;
+
+      if (data.status === "success") {
+        setIsTestBenchOnline(true);
+        setStatusMessage(data.message);
+      } else {
+        setIsTestBenchOnline(false);
+        setStatusMessage(data.message);
+      }
+    } catch (error) {
+      console.error("Error checking test bench status:", error);
+      setIsTestBenchOnline(false);
+      setStatusMessage("Error checking test bench status");
+    }
+  };
+
+  const handleFormSubmit = async () => {
     if (!isInputValid) {
       alert("Please ensure all inputs are valid.");
       return;
@@ -47,34 +74,31 @@ export default function CreatePage() {
 
     setIsSubmitting(true);
     setButtonText("Running Test...");
-    const uuid = "123";
-
-    const selectedChip = Array.from(chip)[0] as string;
 
     const payload = {
-      id: uuid,
-      chip: selectedChip,
-      snr,
-      numTests,
+      x: parseInt(snr),
+      y: parseInt(numTests),
     };
 
     console.log("Form Data: ", payload);
 
-    // Set the button to loading and update the status
-    setIsSubmitting(true);
-    setButtonText("Submitting request...");
+    try {
+      const response = await axios.post("http://localhost:5000/send", payload);
+      const { data } = response;
 
-    // Simulate a test running
-    setTimeout(() => {
-      const success = Math.random() > 0.5; // Simulate test outcome
-      const newMessage = success ? "Test started" : "Could not start";
-      setStatusMessage(newMessage);
-      setButtonText(newMessage);
-      setTimeout(() => {
-        setIsSubmitting(false);
-        setButtonText("Begin Test");
-      }, 2000); // Delay for 2 seconds after test outcome
-    }, 2000); // Simulate a 2-second test run
+      if (data.status === "success") {
+        setResponseMessage(`Success: ${data.response}`);
+      } else {
+        setResponseMessage(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error sending request:", error);
+      setResponseMessage("Error sending request");
+    }
+
+    // Reset form and state
+    setIsSubmitting(false);
+    setButtonText("Begin Test");
   };
 
   const handleInputChange =
@@ -186,7 +210,7 @@ export default function CreatePage() {
                         color={
                           isTestBenchOnline
                             ? statusColorMap["success"]
-                            : statusColorMap["error"]
+                            : statusColorMap["failure"]
                         }
                         size="sm"
                         variant="dot"
@@ -200,7 +224,7 @@ export default function CreatePage() {
                         color={
                           isInputValid
                             ? statusColorMap["success"]
-                            : statusColorMap["error"]
+                            : statusColorMap["failure"]
                         }
                         size="sm"
                         variant="dot"
@@ -215,11 +239,17 @@ export default function CreatePage() {
                     <Button
                       color="primary"
                       isLoading={isSubmitting}
-                      disabled={!isInputValid || isSubmitting}
-                      variant={!isInputValid || isSubmitting ? "flat" : "solid"}
+                      disabled={
+                        !isInputValid || isSubmitting || !isTestBenchOnline
+                      }
+                      variant={
+                        !isInputValid || isSubmitting || !isTestBenchOnline
+                          ? "flat"
+                          : "solid"
+                      }
                       onClick={handleFormSubmit}
                       className={`w-full max-w-xs lg:w-auto ${
-                        !isInputValid || isSubmitting
+                        !isInputValid || isSubmitting || !isTestBenchOnline
                           ? "pointer-events-none"
                           : ""
                       }`}
@@ -229,6 +259,10 @@ export default function CreatePage() {
                   </div>
                 </CardFooter>
               </Card>
+              <div className="mt-4">
+                <p>{responseMessage}</p>
+                <p>{statusMessage}</p>
+              </div>
             </CardBody>
           </Card>
         </div>
