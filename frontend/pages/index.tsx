@@ -60,60 +60,31 @@ export default function IndexPage() {
 
   return (
     <DefaultLayout showNavbar={false}>
-      <section className="flex flex-col items-center justify-center gap-6 py-8 md:py-10 px-4">
-        <NextLink className="flex justify-start items-center gap-2" href="/home">
-          <div style={{ display: 'flex', justifyContent: 'center', paddingRight: '.1rem' }}>
-            <Image
-              src={logoSrc}
-              width={35}
-              height={35}
-              radius="none"
-              alt={`FRG Logo (${resolvedTheme || 'default'} Mode)`}
-            />
-          </div>
-          <p className="font-bold text-inherit text-3xl">DAQROC</p>{' '}
-        </NextLink>
-        <Input
-          isClearable
-          type="email"
-          label="Username"
-          variant="bordered"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          onClear={() => setUsername('')}
-          className="w-full max-w-xs"
-        />
-        <Input
-          label="Password"
-          variant="bordered"
-          placeholder="Password"
-          endContent={
-            <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
-              {isVisible ? (
-                <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-              ) : (
-                <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
-              )}
-            </button>
-          }
-          type={isVisible ? 'text' : 'password'}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full max-w-xs"
-        />
-        {errorMessage && <p className="text-red-600">{errorMessage}</p>}
-        <p className="text-default-400">or</p>
-        <Button
-          fullWidth
-          className={`w-full max-w-xs ${isLoading ? 'isLoading' : ''}`}
-          style={getButtonStyles()}
-          onClick={handleLogin}
-          isLoading={isLoading}
-        >
-          {isLoading ? 'Signing in...' : 'Sign in with Microsoft'}
-        </Button>
-      </section>
+      <div className="flex items-start justify-center min-h-screen">
+        <section className="flex flex-col items-center justify-center gap-6 py-8 md:py-10 px-4 w-full max-w-xs mt-16">
+          <NextLink className="flex justify-start items-center gap-2" href="">
+            <div style={{ display: 'flex', justifyContent: 'center', paddingRight: '.1rem'}}>
+              <Image
+                src={logoSrc}
+                width={35}
+                height={35}
+                radius="none"
+                alt={`FRG Logo (${resolvedTheme || 'default'} Mode)`}
+              />
+            </div>
+            <p className="font-bold text-inherit text-3xl">DAQROC</p>
+          </NextLink>
+          <Button
+            fullWidth
+            className={`w-full max-w-xs ${isLoading ? 'isLoading' : ''}`}
+            style={getButtonStyles()}
+            onClick={handleLogin}
+            isLoading={isLoading}
+          >
+            {isLoading ? 'Signing in...' : 'Sign in '}
+          </Button>
+        </section>
+      </div>
     </DefaultLayout>
   );
 }
