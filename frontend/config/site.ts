@@ -1,8 +1,8 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "NetChip | Flynn Lab",
-  description: "Manage IC testing remotely.",
+  name: "DAQROC | Flynn Lab",
+  description: "",
   navItems: [
     {
       label: "Documentation",

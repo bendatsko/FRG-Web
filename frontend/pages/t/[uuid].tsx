@@ -3,6 +3,7 @@ import DefaultLayout from "@/layouts/default";
 import React, {useState} from "react";
 import {Button, Card, CardBody, CardHeader, ChipProps, Divider,} from "@nextui-org/react";
 import {useRouter} from "next/navigation";
+import PrivateRoute from '@/components/PrivateRoute';
 
 // Utility function to capitalize strings
 const capitalize = (str: string) =>
@@ -59,6 +60,7 @@ export default function TestPage({ testData }: TestPageProps) {
   };
 
   return (
+    <PrivateRoute>
     <DefaultLayout>
       <section className="flex flex-col items-center min-h-screen py-4">
         <div className="max-w-[100%] w-full text-center">
@@ -96,6 +98,7 @@ export default function TestPage({ testData }: TestPageProps) {
         </div>
       </section>
     </DefaultLayout>
+    </PrivateRoute>
   );
 }
 

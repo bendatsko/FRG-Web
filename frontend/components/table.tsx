@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Chip,
@@ -11,6 +11,7 @@ import {
   Pagination,
   Selection,
   SortDescriptor,
+  User, Tooltip,
   Table,
   TableBody,
   TableCell,
@@ -18,47 +19,90 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
+
 import { useRouter } from "next/navigation";
 import { VerticalDotsIcon } from "./Icons/VerticalDotsIcon";
 import { capitalize } from "./utils";
+import { EditIcon } from "./Icons/EditIcon";
+import { DeleteIcon } from "./Icons/DeleteIcon";
+import { EyeIcon } from "./Icons/EyeIcon";
+import axios from "axios";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
-  active: "success",
+  finished: "success",
   failed: "danger",
-  paused: "warning",
+  paused: "default",
+  running: "primary",
+  queued: "warning",
 };
 
 const columns = [
   { name: "ID", uid: "id", sortable: false },
+  { name: "Created By", uid: "created_by", sortable: false },
   { name: "Chip", uid: "chip", sortable: true },
-  { name: "Created At", uid: "created_at", sortable: true },
+  { name: "Date", uid: "date", sortable: true },
+  { name: "Start Time", uid: "start_time", sortable: true },
+  { name: "End Time", uid: "end_time", sortable: true },
   { name: "Status", uid: "status", sortable: true },
-  { name: "Actions", uid: "actions" },
+  { name: "", uid: "actions" },
 ];
 
 type TestData = {
   id: string;
+  user_name: string;
   chip: string;
-  created_at: string;
+  snr: number;
+  num_tests: number;
+  date: string;
+  start_time: string;
+  end_time: string;
   status: string;
 };
 
-interface HistoryTableProps {
-  data: TestData[];
-}
-
-export default function HistoryTable({ data }: HistoryTableProps) {
+export default function HistoryTable() {
   const router = useRouter();
-  const [filterValue, setFilterValue] = React.useState("");
-  const [selectedKeys, setSelectedKeys] = React.useState<Selection>(
-    new Set([]),
-  );
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
-    column: "created_at",
+  const [filterValue, setFilterValue] = useState("");
+  const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
+    column: "date",
     direction: "ascending",
   });
-  const [page, setPage] = React.useState(1);
+  const [page, setPage] = useState(1);
+  const [data, setData] = useState<TestData[]>([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/tests");
+      if (response.data.status === "success") {
+        setData(response.data.tests);
+      } else {
+        console.error("Failed to fetch data:", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const deleteTest = async (id: string) => {
+    try {
+      const response = await axios.delete(`http://localhost:5000/tests/${id}`);
+      if (response.data.status === "success") {
+        setData(data.filter(test => test.id !== id));
+        setTimeout(() => {
+          fetchData();
+        }, 1000);
+      } else {
+        console.error("Failed to delete test:", response.data);
+      }
+    } catch (error) {
+      console.error("Error deleting test:", error);
+    }
+  };
 
   const pages = Math.ceil(data.length / rowsPerPage);
 
@@ -93,11 +137,25 @@ export default function HistoryTable({ data }: HistoryTableProps) {
     router.push(`/t/${id}`);
   };
 
+  const handleDelete = (id: string) => {
+    deleteTest(id);
+  };
+
   const renderCell = React.useCallback(
     (item: TestData, columnKey: React.Key) => {
       const cellValue = item[columnKey as keyof TestData];
 
       switch (columnKey) {
+        case "created_by":
+          return (
+            <User
+              avatarProps={{ radius: "sm", src: "avatar.com" }}
+              description={"email@example.com"}
+              name={"User Name"}
+            >
+              {"email@example.com"}
+            </User>
+          );
         case "status":
           return (
             <Chip
@@ -111,24 +169,28 @@ export default function HistoryTable({ data }: HistoryTableProps) {
           );
         case "actions":
           return (
-            <div className="relative flex justify-end items-center gap-2">
-              <Dropdown className="bg-background border-1 border-default-200">
-                <DropdownTrigger>
-                  <Button isIconOnly radius="full" size="sm" variant="light">
-                    <VerticalDotsIcon
-                      className="text-default-400"
-                      width={undefined}
-                      height={undefined}
-                    />
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu>
-                  <DropdownItem onClick={() => handleViewEdit(item.id)}>
-                    View/Edit
-                  </DropdownItem>
-                  <DropdownItem>Delete</DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
+            <div className="relative flex items-center gap-2">
+              <Tooltip content="View Detailed Results">
+                <span
+                  className="text-lg text-default-400 cursor-pointer active:opacity-50"
+                  onClick={() => handleViewEdit(item.id)}
+                >
+                  <EyeIcon />
+                </span>
+              </Tooltip>
+              <Tooltip content="Manage Access">
+                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                  <EditIcon />
+                </span>
+              </Tooltip>
+              <Tooltip color="danger" content="Delete">
+                <span
+                  className="text-lg text-danger cursor-pointer active:opacity-50"
+                  onClick={() => handleDelete(item.id)}
+                >
+                  <DeleteIcon />
+                </span>
+              </Tooltip>
             </div>
           );
         default:
@@ -149,7 +211,6 @@ export default function HistoryTable({ data }: HistoryTableProps) {
           }}
           placeholder="Search by UUID or Chip..."
           size="sm"
-          // startContent={<SearchIcon className="text-default-300" />}
           value={filterValue}
           variant="bordered"
           onClear={() => setFilterValue("")}

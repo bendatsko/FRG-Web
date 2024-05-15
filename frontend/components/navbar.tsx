@@ -5,6 +5,10 @@ import {
   NavbarBrand,
   NavbarContent,
   NavbarItem,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
 } from "@nextui-org/react";
 import NextLink from "next/link";
 import React, { useEffect, useState } from "react";
@@ -28,8 +32,8 @@ export const Navbar = () => {
   const logoSrc = !isMounted
     ? DarkImg.src
     : resolvedTheme === "dark"
-      ? DarkImg.src
-      : LightImg.src;
+    ? DarkImg.src
+    : LightImg.src;
 
   const handleLogout = () => {
     router.push("/");
@@ -54,6 +58,12 @@ export const Navbar = () => {
     };
   }, [router]);
 
+
+  const handleNavigation = (path: string) => {
+    router.push(path);
+  };
+
+  
   if (!isMounted) return null;
 
   return (
@@ -89,7 +99,7 @@ export const Navbar = () => {
                 style={{ paddingLeft: ".1rem" }}
                 className="font-bold text-2xl hidden sm:inline"
               >
-                NETCHIP
+                DAQROC
               </p>
             </NextLink>
             <p className="font-normal text-md hidden sm:inline">
@@ -109,22 +119,50 @@ export const Navbar = () => {
             </NextLink>
           </NavbarItem>
           <NavbarItem isActive={currentPage === "create"}>
-            <NextLink href="/create" passHref>
-              <Link color={getColorForTab("create")}>
-                <span className="text-md">New test</span>
+            <Dropdown>
+            <DropdownTrigger >
+                <Link color={getColorForTab("create")}>
+                <span className="text-md">
+                  <a style={{ cursor: 'pointer' }}>New Test</a>
+                </span>                
+                </Link>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="New Test Menu"
+                css={{
+                  $$dropdownMenuBgColor: "$background",
+                  $$dropdownMenuBorderRadius: "8px",
+                }}
+              >
+                <DropdownItem
+                  key="ldpc"
+                  css={{
+                    "&:hover": { backgroundColor: "$primaryLightHover", cursor: "pointer" },
+                  }}
+                  onClick={() => handleNavigation("/create/ldpc")}
+                >
+                  <span css={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
+                    LDPC
+                  </span>
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </NavbarItem>
+          <NavbarItem isActive={currentPage === "docs"}>
+            <NextLink href="/docs" passHref>
+              <Link color={getColorForTab("docs")} aria-current="page">
+                <span className="text-md">Docs</span>
               </Link>
             </NextLink>
           </NavbarItem>
           <NavbarItem>
             <NextLink href="/" passHref onClick={handleLogout}>
               <Link color="foreground">
-                <span className="text-md">Log out</span>
+                <span className="text-md">Log Out</span>
               </Link>
             </NextLink>
           </NavbarItem>
-          {/*<NavbarItem className="flex items-center">*/}
-          {/*<ThemeSwitch />*/}
-          {/*</NavbarItem>*/}
+          
         </NavbarContent>
       </NextUINavbar>
     </>
