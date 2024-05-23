@@ -1,6 +1,6 @@
 import DefaultLayout from "@/layouts/default";
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
-import HistoryTable from "@/components/HistoryTable";
+import UsersTable from "@/components/UsersTable";
 import React, { useState } from "react";
 import { title } from "@/components/primitives";
 import PrivateRoute from '@/components/PrivateRoute';
@@ -17,7 +17,7 @@ const initialTestData = [
   //...other data
 ];
 
-const HomePage = () => {
+export default function IndexPage() {
   const [testData, setTestData] = useState(initialTestData);
 
   const handleDelete = async (id: string) => {
@@ -36,13 +36,11 @@ const HomePage = () => {
           <div className="max-w-[100%] w-full text-center">
             <Card>
               <CardHeader className="flex flex-col items-center gap-3 py-8">
-                <h2 className="text-3xl">Your History</h2>
-                <p className="text-small text-default-500">
-                  For keeping track of your tests.
-                </p>
+                <h2 className="text-3xl">Admin Portal</h2>
               </CardHeader>
               <CardBody>
-                <HistoryTable data={initialTestData} onDelete={handleDelete} />
+
+                <UsersTable />
               </CardBody>
             </Card>
           </div>
@@ -51,6 +49,3 @@ const HomePage = () => {
     </PrivateRoute>
   );
 }
-
-export default HomePage;
-

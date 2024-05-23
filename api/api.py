@@ -2,39 +2,23 @@ import os
 import time
 import logging
 import sqlite3
+import uuid  # Import uuid module
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-# import serial  # Commented out for now
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
-
-# Configuration
-# COM_PORT = os.getenv('COM_PORT', '/dev/tty.usbmodem14101')  # Adjust for macOS
-# BAUD_RATE = int(os.getenv('BAUD_RATE', '9600'))
-# TIMEOUT = int(os.getenv('TIMEOUT', '1'))
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize serial connection
-# def init_serial_connection(port, baud_rate, timeout):
-#     try:
-#         ser = serial.Serial(port, baud_rate, timeout=timeout)
-#         logger.info(f"Opened serial port {port} successfully.")
-#         return ser
-#     except serial.SerialException as e:
-#         logger.error(f"Could not open port {port}: {e}")
-#         return None
-
-# ser = init_serial_connection(COM_PORT, BAUD_RATE, TIMEOUT)
-
 # Database setup
-DATABASE = 'data.db'
+DATA_DATABASE = 'data.db'
+USER_DATABASE = 'users.db'
 
-def init_db():
-    conn = sqlite3.connect(DATABASE)
+def init_data_db():
+    conn = sqlite3.connect(DATA_DATABASE)
     c = conn.cursor()
     c.execute('''
         CREATE TABLE IF NOT EXISTS tests (
@@ -52,77 +36,72 @@ def init_db():
     conn.commit()
     conn.close()
 
-init_db()
+def init_user_db():
+    conn = sqlite3.connect(USER_DATABASE)
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            email TEXT,
+            role TEXT,
+            last_online TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
 
-@app.route('/send', methods=['POST'])
-def send_message():
-    # if not ser:
-    #     return jsonify({"status": "failure", "error": "Serial connection not initialized"}), 500
+init_data_db()
+init_user_db()
 
+@app.route('/adduser', methods=['POST'])
+def add_user():
     try:
         data = request.get_json()
         logger.info(f"Received data: {data}")
-        required_fields = ['uuid', 'userName', 'chip', 'numTests', 'date', 'startTime', 'status']
+        required_fields = ['email']
         
         if not all(field in data for field in required_fields):
             logger.error("Invalid input data")
             return jsonify({"status": "failure", "error": "Invalid input data"}), 400
 
-        uuid = data['uuid']
-        user_name = data['userName']
-        chip = data['chip']
-        snr = data.get('snr', None)  # snr can be None if not provided
-        num_tests = data['numTests']
-        date = data['date']
-        start_time = data['startTime']
-        end_time = data.get('endTime', '-')
-        status = data['status']
+        email = data['email']
         
-        logger.info(f"Inserting into database: {uuid}, {user_name}, {chip}, {snr}, {num_tests}, {date}, {start_time}, {end_time}, {status}")
-        
-        conn = sqlite3.connect(DATABASE)
+        conn = sqlite3.connect(USER_DATABASE)
         c = conn.cursor()
         c.execute('''
-            INSERT INTO tests (id, user_name, chip, snr, num_tests, date, start_time, end_time, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (uuid, user_name, chip, snr, num_tests, date, start_time, end_time, status))
+            INSERT INTO users (id, name, email, role, last_online)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (str(uuid.uuid4()), "-", email, "Invitee", "-"))
         conn.commit()
         conn.close()
 
-        # x = data['x']
-        # y = data['y']
-        # message = f"{x} {y}\n"
-
-        # Send the message to the Teensy
-        # ser.write(message.encode())
-        # logger.info(f"Sent message to Teensy: {message.strip()}")
-
-        # Read the response from the Teensy
-        # time.sleep(1)  # Adjust based on your Teensy's response time
-        # response = ser.readline().decode().strip()
-        # logger.info(f"Received response from Teensy: {response}")
-
-        # if response:
-        #     return jsonify({"status": "success", "response": response})
-        # else:
-        #     return jsonify({"status": "failure", "error": "No response from Teensy"})
-        
-        # Since we're skipping the hardware part, return a success response directly
-        return jsonify({"status": "success", "response": "Simulated response from Teensy"})
+        return jsonify({"status": "success", "message": f"Email '{email}' has been added to the registrar of authorized emails. Users with authorized emails can sign in freely"})
     except Exception as e:
-        logger.error(f"Error in /send route: {e}")
+        logger.error(f"Error in /adduser route: {e}")
+        return jsonify({"status": "failure", "error": str(e)}), 500
+
+
+@app.route('/deleteuser/<id>', methods=['DELETE'])
+def delete_user(id):
+    try:
+        conn = sqlite3.connect(USER_DATABASE)
+        c = conn.cursor()
+        c.execute('DELETE FROM users WHERE id = ?', (id,))
+        conn.commit()
+        conn.close()
+        return jsonify({"status": "success", "message": "User deleted successfully"})
+    except Exception as e:
+        logger.error(f"Error in /deleteuser/<id> DELETE route: {e}")
         return jsonify({"status": "failure", "error": str(e)}), 500
 
 @app.route('/status', methods=['GET'])
 def check_status():
-    # if ser and ser.is_open:
-    #     return jsonify({"status": "success", "message": "Test bench is online"})
-    # else:
-        return jsonify({"status": "success", "message": "Test bench is online"})
+    return jsonify({"status": "success", "message": "Test bench is online"})
 
 @app.route('/tests/<user_name>', methods=['GET'])
 def get_user_tests(user_name):
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATA_DATABASE)
     c = conn.cursor()
     c.execute('''
         SELECT * FROM tests WHERE user_name = ?
@@ -134,13 +113,12 @@ def get_user_tests(user_name):
 
 @app.route('/tests', methods=['GET'])
 def get_all_tests():
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATA_DATABASE)
     c = conn.cursor()
     c.execute('SELECT * FROM tests')
     tests = c.fetchall()
     conn.close()
 
-    # Map results to a list of dictionaries
     test_list = [
         {
             "id": row[0],
@@ -158,10 +136,51 @@ def get_all_tests():
 
     return jsonify({"status": "success", "tests": test_list})
 
+
+@app.route('/users', methods=['GET'])
+def get_all_users():
+    try:
+        conn = sqlite3.connect(USER_DATABASE)
+        c = conn.cursor()
+        c.execute('SELECT * FROM users')
+        users = c.fetchall()
+        conn.close()
+
+        user_list = [
+            {
+                "id": row[0],
+                "name": row[1],
+                "email": row[2],
+                "role": row[3],
+                "last_online": row[4]
+            }
+            for row in users
+        ]
+
+        return jsonify({"status": "success", "users": user_list})
+    except Exception as e:
+        logger.error(f"Error in /users route: {e}")
+        return jsonify({"status": "failure", "error": str(e)}), 500
+
+
+@app.route('/verifyemail', methods=['POST'])
+def verify_email():
+    email = request.json.get('email')
+    conn = sqlite3.connect(USER_DATABASE)
+    c = conn.cursor()
+    c.execute('SELECT * FROM users WHERE email = ?', (email,))
+    user = c.fetchone()
+    conn.close()
+    if user:
+        return jsonify({"status": "success", "authorized": True})
+    else:
+        return jsonify({"status": "failure", "authorized": False})
+
+
 @app.route('/tests/<id>', methods=['DELETE'])
 def delete_test(id):
     try:
-        conn = sqlite3.connect(DATABASE)
+        conn = sqlite3.connect(DATA_DATABASE)
         c = conn.cursor()
         c.execute('DELETE FROM tests WHERE id = ?', (id,))
         conn.commit()
