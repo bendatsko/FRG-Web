@@ -1,3 +1,4 @@
+// authConfig.js
 import { LogLevel } from "@azure/msal-browser";
 
 export const msalConfig = {
@@ -5,11 +6,10 @@ export const msalConfig = {
         clientId: "b1b65f58-fe30-4c6c-9362-7cd76a152e33",
         authority: "https://login.microsoftonline.com/d0d43762-49e6-4326-90ec-01635c1bd3d8",
         redirectUri: "http://localhost:3000/",
-        postLogoutRedirectUri: "http://localhost:3000/logout-complete" // Ensure this is correctly set
     },
     cache: {
-        cacheLocation: "sessionStorage", // This configures where your cache will be stored
-        storeAuthStateInCookie: false, // Set this to "true" if you are having issues on IE11 or Edge
+        cacheLocation: "sessionStorage",
+        storeAuthStateInCookie: false,
     },
     system: {
         loggerOptions: {
@@ -33,15 +33,12 @@ export const msalConfig = {
                     default:
                         return;
                 }
-            }
-        }
-    }
+            },
+            logLevel: LogLevel.Info,
+        },
+    },
 };
 
 export const loginRequest = {
     scopes: ["User.Read"]
-};
-
-export const graphConfig = {
-    graphMeEndpoint: "https://graph.microsoft.com/v1.0/me"
 };
