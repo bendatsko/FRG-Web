@@ -1,6 +1,5 @@
 import {
   Image,
-  Link,
   Navbar as NextUINavbar,
   NavbarBrand,
   NavbarContent,
@@ -9,21 +8,24 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  Button, ButtonGroup, User, Avatar,
 } from "@nextui-org/react";
-import NextLink from "next/link";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useTheme } from "next-themes";
 import DarkImg from "@/public/blockm-white.png";
 import LightImg from "@/public/blockm-black.png";
 import { useMsal } from "@azure/msal-react";
+import { callMsGraph } from './graph';
 
-const Navbar = ({ userName }) => {
+const Navbar = ({ userName, email, isAdmin, setCurrentPage }) => {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState("home");
+  const [currentPage, setCurrentPageInternal] = useState("home");
   const [isMounted, setIsMounted] = useState(false);
   const { resolvedTheme } = useTheme();
   const { instance } = useMsal();
+
+
 
   useEffect(() => {
     setIsMounted(true);
@@ -39,29 +41,10 @@ const Navbar = ({ userName }) => {
     router.push("/logout"); // Redirect to the logout page
   };
 
-  useEffect(() => {
-    const handleRouteChange = (url) => {
-      if (url.startsWith("/home")) {
-        setCurrentPage("home");
-      } else if (url.startsWith("/create")) {
-        setCurrentPage("create");
-      } else if (url.startsWith("/docs")) {
-        setCurrentPage("docs");
-      }
-    };
-
-    handleRouteChange(router.pathname);
-    router.events.on("routeChangeComplete", handleRouteChange);
-
-    return () => {
-      router.events.off("routeChangeComplete", handleRouteChange);
-    };
-  }, [router]);
-
-  const handleNavigation = (path) => {
-    router.push(path);
+  const handleNavigation = (page) => {
+    setCurrentPage(page);
+    setCurrentPageInternal(page);
   };
-
 
   if (!isMounted) return null;
 
@@ -69,7 +52,7 @@ const Navbar = ({ userName }) => {
       <NextUINavbar maxWidth="xl" position="sticky" isBordered className="py-2 px-3">
         <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
           <NavbarBrand className="gap-3 max-w-fit">
-            <NextLink className="flex justify-start items-center gap-1" href="/home">
+            <button onClick={() => handleNavigation('home')} className="flex justify-start items-center gap-1" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
               <div style={{ display: "flex", justifyContent: "center", paddingRight: ".1rem" }}>
                 <Image
                     src={logoSrc}
@@ -82,46 +65,72 @@ const Navbar = ({ userName }) => {
               <p style={{ paddingLeft: ".1rem" }} className="text-white text-2xl hidden sm:inline font-semibold">
                 DAQROC
               </p>
-            </NextLink>
-            <p className="text-white text-md hidden sm:inline font-semibold">
-              Hello, {userName || "User"}
-            </p>
+            </button>
+            {/*<p className="text-white text-lg hidden sm:inline">*/}
+            {/*  Hello, {userName || "User"}*/}
+            {/*</p>*/}
+            <NavbarItem>
+              <Button className="bg-tr" disableRipple radius={"sm"} onClick={() => handleNavigation('home')} >
+                Your History
+              </Button>
+            </NavbarItem>
+            <NavbarItem>
+              <Button className="bg-tr" disableRipple radius={"sm"} onClick={() => handleNavigation('docs')} >
+                Documentation
+              </Button>
+            </NavbarItem>
+            <NavbarItem>
+              <Dropdown placement="bottom-end">
+                <DropdownTrigger>
+                  <Button className="bg-white" color={"success"}  radius={"sm"} disableRipple>
+                    New Test
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu aria-label="New Test Options">
+                  <DropdownItem key="ldpc" onClick={() => handleNavigation('create')}>
+                    LDPC
+                  </DropdownItem>
+                  <DropdownItem isDisabled key="3sat" onClick={() => handleNavigation('create')}>
+                    3-SAT
+                  </DropdownItem>
+                  <DropdownItem isDisabled key="ksat" onClick={() => handleNavigation('create')}>
+                    k-SAT
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </NavbarItem>
           </NavbarBrand>
         </NavbarContent>
         <NavbarContent className="basis-1/5 sm:basis-full flex items-center" justify="end">
-          <NavbarItem>
-            <NextLink href="/" passHref>
-              <span className="text-md font-normal">Home</span>
-            </NextLink>
-          </NavbarItem>
-          <NavbarItem>
 
-            <Dropdown>
 
-              <DropdownTrigger>
-                <NextLink href="/" passHref>
-                  <span className="text-md" >Create</span>
-                </NextLink>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="New Test Options">
-                <DropdownItem key="ldpc" onClick={() => handleNavigation('/create/ldpc')}>
-                  LDPC
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </NavbarItem>
-          <NavbarItem>
-            <NextLink href="/docs" passHref>
-              <span className="text-md">Docs</span>
-            </NextLink>
-          </NavbarItem>
-          <NavbarItem>
-            <button onClick={handleLogout} className="text-md" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'white' }}>
-              <NextLink href="/" passHref>
-                <span className="text-md">Log out</span>
-              </NextLink>
-            </button>
-          </NavbarItem>
+
+            <NavbarItem>
+              <Dropdown placement="bottom-start">
+                <DropdownTrigger>
+                  <User
+                      as="button"
+                      className="transition-transform"
+                      description={email || "user@example.com"}
+                      name={userName || "User"}
+                  />
+                </DropdownTrigger>
+                <DropdownMenu aria-label="User Actions" variant="flat">
+
+                  {isAdmin && (
+                      <DropdownItem onClick={() => handleNavigation('admin')}>
+                          Admin Panel
+                      </DropdownItem>
+                  )}
+                  <DropdownItem key="logout" color="danger" onClick={handleLogout}>
+                    Log Out
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+              {/*<Button className="bg-tr" variant="bordered" radius={"sm"} disableRipple onClick={handleLogout}>*/}
+              {/*  Log out*/}
+              {/*</Button>*/}
+            </NavbarItem>
         </NavbarContent>
       </NextUINavbar>
   );
