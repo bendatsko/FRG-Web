@@ -24,7 +24,11 @@ import {
 import { useRouter } from "next/navigation";
 import { EditIcon } from "./Icons/EditIcon";
 import { DeleteIcon } from "./Icons/DeleteIcon";
-import axios from "axios";
+import { useMsalInstance } from '../contexts/MsalProvider'; // Ensure the correct path
+import { AuthCodeMSALBrowserAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser';
+import { Client } from '@microsoft/microsoft-graph-client';
+import { InteractionType } from '@azure/msal-browser';
+import { loginRequest } from '../pages/authConfig'; // Ensure the correct path
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     finished: "success",
@@ -35,79 +39,70 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 };
 
 const columns = [
-    { name: "Name", uid: "name", sortable: false },
-    { name: "Email", uid: "email", sortable: false },
-    { name: "Role", uid: "role", sortable: true },
-    { name: "Last Online", uid: "last_online", sortable: true },
-    { name: "", uid: "actions" },
+    { name: "Name", uid: "displayName", sortable: false },
+    { name: "Email", uid: "mail", sortable: false },
 ];
 
 interface User {
     id: string;
-    name: string;
-    email: string;
-    role: string;
-    last_online: string;
+    displayName: string;
+    mail: string;
+    jobTitle: string;
+    lastSignInDateTime: string;
 }
 
-export default function HistoryTable() {
+export default function UsersTable() {
     const router = useRouter();
     const [filterValue, setFilterValue] = useState("");
     const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
-        column: "last_online",
+        column: "lastSignInDateTime",
         direction: "ascending",
     });
     const [page, setPage] = useState(1);
     const [data, setData] = useState<User[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [newUserEmail, setNewUserEmail] = useState("");
+    const msalInstance = useMsalInstance();
+
+    const fetchUsersFromB2C = async () => {
+        try {
+            const accounts = msalInstance.getAllAccounts();
+            if (accounts.length === 0) {
+                await msalInstance.loginPopup(loginRequest);
+            } else {
+                msalInstance.setActiveAccount(accounts[0]);
+            }
+
+            const authResult = await msalInstance.acquireTokenSilent({
+                ...loginRequest,
+                account: msalInstance.getActiveAccount(),
+            });
+
+            if (!authResult.account) {
+                throw new Error('Could not authenticate');
+            }
+
+            const authProvider = new AuthCodeMSALBrowserAuthenticationProvider(msalInstance, {
+                account: authResult.account,
+                interactionType: InteractionType.Silent,
+                scopes: loginRequest.scopes,
+            });
+
+            const client = Client.initWithMiddleware({ authProvider });
+
+            const users = await client.api('/users').get();
+            console.log(users); // Check the output
+            setData(users.value);
+        } catch (error) {
+            console.error("Error fetching users from B2C:", error);
+        }
+    };
 
     useEffect(() => {
-        fetchData();
-    }, []);
-
-    const fetchData = async () => {
-        try {
-            const response = await axios.get("http://localhost:5000/users");
-            if (response.data.status === "success") {
-                setData(response.data.users);
-            } else {
-                console.error("Failed to fetch data:", response.data);
-            }
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        }
-    };
-
-    const addUser = async () => {
-        try {
-            const response = await axios.post("http://localhost:5000/adduser", { email: newUserEmail });
-            if (response.data.status === "success") {
-                fetchData();
-                setNewUserEmail("");
-                onOpenChange();
-            } else {
-                console.error("Failed to add user:", response.data);
-            }
-        } catch (error) {
-            console.error("Error adding user:", error);
-        }
-    };
-
-    const deleteUser = async (id: string) => {
-        try {
-            const response = await axios.delete(`http://localhost:5000/deleteuser/${id}`);
-            if (response.data.status === "success") {
-                fetchData();
-            } else {
-                console.error("Failed to delete user:", response.data);
-            }
-        } catch (error) {
-            console.error("Error deleting user:", error);
-        }
-    };
+        fetchUsersFromB2C();
+    }, [msalInstance]);
 
     const pages = Math.ceil(data.length / rowsPerPage);
 
@@ -116,8 +111,8 @@ export default function HistoryTable() {
     const filteredItems = React.useMemo(() => {
         return data.filter(
             (item) =>
-                item.name.toLowerCase().includes(filterValue.toLowerCase()) ||
-                item.email.toLowerCase().includes(filterValue.toLowerCase()),
+                item.displayName.toLowerCase().includes(filterValue.toLowerCase()) ||
+                item.mail.toLowerCase().includes(filterValue.toLowerCase()),
         );
     }, [data, filterValue]);
 
@@ -143,7 +138,7 @@ export default function HistoryTable() {
     };
 
     const handleDelete = (id: string) => {
-        deleteUser(id);
+        // Implement delete user logic
     };
 
     const renderCell = React.useCallback(
@@ -164,6 +159,8 @@ export default function HistoryTable() {
                             </Tooltip>
                         </div>
                     );
+                case "lastSignInDateTime":
+                    return cellValue ? new Date(cellValue).toLocaleString() : "N/A";
                 default:
                     return cellValue;
             }
@@ -174,16 +171,14 @@ export default function HistoryTable() {
     const topContent = React.useMemo(() => {
         return (
             <div className="flex justify-center gap-3 items-end">
-                <div>
-                    <Button onPress={onOpen} color="primary" size="sm">New User</Button>
-                </div>
+
                 <Input
                     isClearable
                     classNames={{
                         base: "w-full sm:max-w-[44%]",
                         inputWrapper: "border-1",
                     }}
-                    placeholder="Search by name or email..."
+                    placeholder="Search user by name or email..."
                     size="sm"
                     value={filterValue}
                     variant="bordered"
@@ -222,34 +217,7 @@ export default function HistoryTable() {
 
     return (
         <div>
-            <Modal
-                isOpen={isOpen}
-                onOpenChange={onOpenChange}
-                placement="top-center"
-            >
-                <ModalContent>
-                    {(onClose) => (
-                        <>
-                            <ModalHeader className="flex flex-col gap-1">Add New User</ModalHeader>
-                            <ModalBody>
-                                <Input
-                                    autoFocus
-                                    label="User's Email"
-                                    placeholder="foo@umich.edu"
-                                    variant="bordered"
-                                    value={newUserEmail}
-                                    onChange={(e) => setNewUserEmail(e.target.value)}
-                                />
-                            </ModalBody>
-                            <ModalFooter>
-                                <Button color="primary" onPress={addUser}>
-                                    Submit
-                                </Button>
-                            </ModalFooter>
-                        </>
-                    )}
-                </ModalContent>
-            </Modal>
+
 
             <Table
                 isCompact

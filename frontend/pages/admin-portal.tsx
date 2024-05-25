@@ -15,11 +15,13 @@ import {
 import UsersTable from "@/components/UsersTable";
 import React, { useState } from "react";
 import PrivateRoute from '@/components/PrivateRoute';
-import { useMsalInstance } from '../contexts/MsalProvider'; // Ensure the correct path
+import { useMsalInstance } from '../contexts/MsalProvider';
 import { AuthCodeMSALBrowserAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser';
 import { Client } from '@microsoft/microsoft-graph-client';
-import { InteractionType } from '@azure/msal-browser'; // Ensure correct import
-import { loginRequest } from '../pages/authConfig'; // Ensure the correct path
+import { InteractionType } from '@azure/msal-browser';
+import { loginRequest } from '../pages/authConfig';
+import NextLink from "next/link";
+import { Link } from "@nextui-org/link";
 
 export default function IndexPage() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -30,8 +32,8 @@ export default function IndexPage() {
 
   const handleAddUser = async () => {
     setIsSubmitting(true);
-    setStatusMessage(""); // Reset the status message
-    console.log('Submitting new user email:', newUserEmail); // Log email being submitted
+    setStatusMessage("");
+    console.log('Submitting new user email:', newUserEmail);
 
     if (!msalInstance) {
       console.error('MSAL instance not initialized');
@@ -49,7 +51,7 @@ export default function IndexPage() {
 
       const authProvider = new AuthCodeMSALBrowserAuthenticationProvider(msalInstance, {
         account: authResult.account,
-        interactionType: InteractionType.Popup, // Ensure InteractionType.Popup is correctly used
+        interactionType: InteractionType.Popup,
         scopes: loginRequest.scopes,
       });
 
@@ -57,10 +59,11 @@ export default function IndexPage() {
 
       const invitation = {
         invitedUserEmailAddress: newUserEmail,
-        inviteRedirectUrl: 'https://myapp.contoso.com', // Change this to your app's URL
-        sendInvitationMessage: true, // Ensure the user receives an email
-        messageLanguage: 'en-US', // Set the language for the invitation email
-        roles: ["Member"] // Set the user as a member
+        inviteRedirectUrl: 'https://localhost:3000',
+        sendInvitationMessage: true,
+        messageLanguage: 'en-US',
+        roles: ["Member"],
+        jobTitle: "Default"
       };
 
       await client.api('/invitations').post(invitation);
@@ -83,18 +86,18 @@ export default function IndexPage() {
                   <h2 className="text-3xl">Admin Portal</h2>
                 </CardHeader>
                 <CardBody>
-                  <div>
-                    <Button onPress={onOpen} color="primary">
-                      Add New User
-                    </Button>
+                  <p>
+                    To search for currently-existing users or add new users, you can use this page. To remove users, view logs, and manage permissions, please refer to the project's <Link href="https://portal.azure.com/">Azure Active Directory</Link>.
+                  </p>
+                  <div className="flex flex-col items-center py-3">
+                    <Button onPress={onOpen} color="primary" className="mb-4">New Invitation</Button>
                   </div>
-
                   <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="top-center">
                     <ModalContent>
                       {(onClose) => (
                           <>
                             <ModalHeader className="flex flex-col gap-1">
-                              Add New User
+                              New Invitation
                             </ModalHeader>
                             <ModalBody>
                               <Input
@@ -127,6 +130,7 @@ export default function IndexPage() {
                       )}
                     </ModalContent>
                   </Modal>
+                  <UsersTable />
                 </CardBody>
               </Card>
             </div>
