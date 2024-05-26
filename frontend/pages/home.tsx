@@ -2,11 +2,10 @@ import DefaultLayout from "@/layouts/default";
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
 import HistoryTable from "@/components/HistoryTable";
 import React, { useState } from "react";
-import { title } from "@/components/primitives";
 import PrivateRoute from '@/components/PrivateRoute';
 import axios from 'axios';
 
-// Mock test data
+// Mock data (to be removed)
 const initialTestData = [
   {
     id: "3fb2b76c-ae02-4aab-b7d7-b8eb28f790d7",
@@ -14,10 +13,16 @@ const initialTestData = [
     created_at: "2024-05-01",
     status: "active",
   },
-  //...other data
 ];
 
+//=============================================================
+//                         Home Page
+//=============================================================
+// This pulls data from the tests api (i.e., /backend/api.py)
+// and displays them in the TestsTable component.
+// We also have function for deleting tests in the database.
 const HomePage = () => {
+  // Set states
   const [testData, setTestData] = useState(initialTestData);
 
   const handleDelete = async (id: string) => {
@@ -29,6 +34,7 @@ const HomePage = () => {
     }
   };
 
+  // HTML layout
   return (
     <PrivateRoute>
       <DefaultLayout>

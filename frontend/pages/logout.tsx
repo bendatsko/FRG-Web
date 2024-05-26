@@ -3,7 +3,7 @@ import { useMsal } from '@azure/msal-react';
 import { useRouter } from 'next/router';
 import DefaultLayout from "@/layouts/default";
 
-
+// clears cookies and cleans up session tokens.
 const Logout = () => {
     const { instance } = useMsal();
     const router = useRouter();

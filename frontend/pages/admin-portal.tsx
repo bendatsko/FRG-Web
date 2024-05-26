@@ -23,6 +23,12 @@ import { loginRequest } from '../pages/authConfig';
 import NextLink from "next/link";
 import { Link } from "@nextui-org/link";
 
+
+//=============================================================
+//                        Admin Portal
+//=============================================================
+// Quick links to Azure dashboard and user invite button.
+
 export default function IndexPage() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [newUserEmail, setNewUserEmail] = useState("");
@@ -75,6 +81,8 @@ export default function IndexPage() {
       setIsSubmitting(false);
     }
   };
+
+
 
   return (
       <PrivateRoute>

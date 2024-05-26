@@ -3,6 +3,14 @@ import React from "react";
 import { Card, CardBody, CardHeader, Divider } from "@nextui-org/react";
 import PrivateRoute from '@/components/PrivateRoute';
 
+
+//=============================================================
+//                        Documentation
+//=============================================================
+// Documentation page for guiding users through the app with gifs
+// Most of the utility of this page is in its UI design so come
+// back to this once the product is more complete.
+
 export default function DocsPage() {
   return (
     <PrivateRoute>

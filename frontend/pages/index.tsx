@@ -13,41 +13,72 @@ import DocsPage from "@/pages/docs";
 import Navbar from "@/components/navbar";
 import AdminPanel from '@/pages/admin-portal';
 
+
+//=============================================================
+//                         Login Page
+//=============================================================
+// This is the only publically-available page on our website.
+// 0. Set theme, render page.
+// 1. Users authenticate with Microsoft Azure Active Directory
+// 2. User permissions set using checkperms api (/api/checkperms.js).
+
 export default function IndexPage() {
     const [isMounted, setIsMounted] = useState(false);
     const { resolvedTheme } = useTheme();
     const { accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     const [currentPage, setCurrentPage] = useState('home');
-    const userRoles = account?.idTokenClaims?.roles || [];  // Assuming roles are stored in an array
+    const [isAdmin, setIsAdmin] = useState(false);
 
+    // Assign user permissions
     useEffect(() => {
         setIsMounted(true);
-    }, []);
 
+        if (account) {
+            // Call the API to check if the user is an admin
+            fetch('/api/checkperms', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userId: account.username }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    setIsAdmin(data.isAdmin);
+                })
+                .catch(error => {
+                    console.error('Error checking admin status:', error);
+                });
+            console.log("Home account id: " + account.username);
+        }
+    }, [account]);
+
+    // Set theme to dark or light mode
     const logoSrc = !isMounted
         ? DarkImg.src
         : resolvedTheme === 'dark'
             ? DarkImg.src
             : LightImg.src;
 
-    const isAdmin = userRoles.includes('is_admin');  // Checking if the user is an admin
-
+    // Choose page to render
     const renderPage = () => {
         switch (currentPage) {
             case 'home':
                 return <HomePage />;
             case 'create':
-                return isAdmin ? <CreatePage /> : <HomePage />;  // Conditional access based on role
+                return isAdmin ? <CreatePage /> : <HomePage />;
             case 'docs':
                 return <DocsPage />;
             case 'admin':
-                return <AdminPanel />;
+                return isAdmin ? <AdminPanel /> : <HomePage />;
             default:
                 return <HomePage />;
         }
     };
 
+
+    // HTML for page layout
     return (
         <DefaultLayout showNavbar={true}>
             <UnauthenticatedTemplate>

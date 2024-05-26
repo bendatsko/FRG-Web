@@ -18,6 +18,17 @@ import LightImg from "@/public/blockm-black.png";
 import { useMsal } from "@azure/msal-react";
 import { callMsGraph } from './graph';
 
+
+
+
+//=============================================================
+//                         Navbar
+//=============================================================
+// This stores the user's account information throughout
+// the time they're on the site. It's the root of much of the
+// site's functionality along with the index.tsx page.
+
+
 const Navbar = ({ userName, email, isAdmin, setCurrentPage }) => {
   const router = useRouter();
   const [currentPage, setCurrentPageInternal] = useState("home");
@@ -90,12 +101,7 @@ const Navbar = ({ userName, email, isAdmin, setCurrentPage }) => {
                   <DropdownItem key="ldpc" onClick={() => handleNavigation('create')}>
                     LDPC
                   </DropdownItem>
-                  <DropdownItem isDisabled key="3sat" onClick={() => handleNavigation('create')}>
-                    3-SAT
-                  </DropdownItem>
-                  <DropdownItem isDisabled key="ksat" onClick={() => handleNavigation('create')}>
-                    k-SAT
-                  </DropdownItem>
+
                 </DropdownMenu>
               </Dropdown>
             </NavbarItem>
@@ -127,9 +133,6 @@ const Navbar = ({ userName, email, isAdmin, setCurrentPage }) => {
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
-              {/*<Button className="bg-tr" variant="bordered" radius={"sm"} disableRipple onClick={handleLogout}>*/}
-              {/*  Log out*/}
-              {/*</Button>*/}
             </NavbarItem>
         </NavbarContent>
       </NextUINavbar>

@@ -18,6 +18,17 @@ import {
 import PrivateRoute from "@/components/PrivateRoute";
 import { v4 as uuidv4 } from "uuid";
 
+
+//=============================================================
+//                        Create LDPC
+//=============================================================
+// Create page for the LDPC chip.
+// 1. Users input chip
+// 2. Make sure chip test bench is online.
+// 3. Enter SNR
+// 4. Enter num tests or auto generate until statistical significance
+// 5. Send to backend api.py
+
 export default function CreatePage() {
   const [chip, setChip] = useState<Selection>(new Set([]));
   const [snrRange, setSnrRange] = useState("");

@@ -5,15 +5,9 @@ import {Button, Card, CardBody, CardHeader, ChipProps, Divider,} from "@nextui-o
 import {useRouter} from "next/navigation";
 import PrivateRoute from '@/components/PrivateRoute';
 
-// Utility function to capitalize strings
-const capitalize = (str: string) =>
-  str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-const statusColorMap: Record<string, ChipProps["color"]> = {
-  active: "success",
-  failed: "danger",
-  paused: "warning",
-};
+
+
 
 type TestData = {
   id: string;
@@ -28,6 +22,17 @@ interface TestPageProps {
   testData: TestData;
 }
 
+
+//=============================================================
+//                         UUID Page
+//=============================================================
+// Template page for test results accessible by authenticated
+// users over the url [root]/[UUID].
+// 1. Receive test UUID from URL
+// 2. Ensure user is authenticated. Ensure the user's username
+//    is within the test's [visibleToUsers] list.
+// 3. Fetch data from backend /api.py based on test UUID and
+//    display to user.
 export default function TestPage({ testData }: TestPageProps) {
   const router = useRouter();
   const [chip, setChip] = useState(testData.chip);

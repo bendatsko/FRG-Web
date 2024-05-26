@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import DefaultLayout from "@/layouts/default";
 
+
+// Just to redirect to the home page. Pretty much useless.
 const LogoutComplete = () => {
     const router = useRouter();
 

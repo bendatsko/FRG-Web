@@ -41,6 +41,8 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 const columns = [
     { name: "Name", uid: "displayName", sortable: false },
     { name: "Email", uid: "mail", sortable: false },
+    { name: "Permissions", uid: "jobTitle", sortable: false },
+
 ];
 
 interface User {
