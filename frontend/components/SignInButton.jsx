@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useMsal } from "@azure/msal-react";
-import { loginRequest } from "../pages/authConfig";
+import { loginRequest } from "../config/authConfig";
 import { Button } from "@nextui-org/react";
 import { useTheme } from 'next-themes';
 

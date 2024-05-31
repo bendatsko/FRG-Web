@@ -19,7 +19,7 @@ import { useMsalInstance } from '../contexts/MsalProvider';
 import { AuthCodeMSALBrowserAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser';
 import { Client } from '@microsoft/microsoft-graph-client';
 import { InteractionType } from '@azure/msal-browser';
-import { loginRequest } from '../pages/authConfig';
+import { loginRequest } from '../config/authConfig';
 import NextLink from "next/link";
 import { Link } from "@nextui-org/link";
 

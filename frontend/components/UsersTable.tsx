@@ -28,7 +28,7 @@ import { useMsalInstance } from '../contexts/MsalProvider'; // Ensure the correc
 import { AuthCodeMSALBrowserAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser';
 import { Client } from '@microsoft/microsoft-graph-client';
 import { InteractionType } from '@azure/msal-browser';
-import { loginRequest } from '../pages/authConfig'; // Ensure the correct path
+import { loginRequest } from '../config/authConfig'; // Ensure the correct path
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     finished: "success",
