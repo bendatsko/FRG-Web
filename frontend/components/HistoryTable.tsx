@@ -37,7 +37,7 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 };
 
 const columns = [
-  { name: "ID", uid: "id", sortable: false },
+  // { name: "ID", uid: "id", sortable: false },
   { name: "Created By", uid: "created_by", sortable: false },
   { name: "Chip", uid: "chip", sortable: true },
   { name: "Date", uid: "date", sortable: true },
@@ -50,6 +50,7 @@ const columns = [
 type TestData = {
   id: string;
   user_name: string;
+  user_email: string;
   chip: string;
   snr: number;
   num_tests: number;
@@ -59,7 +60,7 @@ type TestData = {
   status: string;
 };
 
-export default function HistoryTable() {
+export default function HistoryTable({userEmail}) {
   const router = useRouter();
   const [filterValue, setFilterValue] = useState("");
   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
@@ -110,11 +111,12 @@ export default function HistoryTable() {
 
   const filteredItems = React.useMemo(() => {
     return data.filter(
-      (item) =>
-        item.id.toLowerCase().includes(filterValue.toLowerCase()) ||
-        item.chip.toLowerCase().includes(filterValue.toLowerCase()),
+        (item) =>
+            item.user_email === userEmail &&
+            (item.id.toLowerCase().includes(filterValue.toLowerCase()) ||
+                item.chip.toLowerCase().includes(filterValue.toLowerCase()))
     );
-  }, [data, filterValue]);
+  }, [data, filterValue, userEmail]);
 
   const sortedItems = React.useMemo(() => {
     return [...filteredItems].sort((a: TestData, b: TestData) => {
@@ -149,11 +151,9 @@ export default function HistoryTable() {
         case "created_by":
           return (
             <User
-              avatarProps={{ radius: "sm", src: "avatar.com" }}
-              description={"email@example.com"}
-              name={"User Name"}
+              description={item.user_email}
+              name={item.user_name}
             >
-              {"email@example.com"}
             </User>
           );
         case "status":
@@ -209,7 +209,8 @@ export default function HistoryTable() {
             base: "w-full sm:max-w-[44%]",
             inputWrapper: "border-1",
           }}
-          placeholder="Search by UUID or Chip..."
+          // placeholder="Search by UUID or Chip..."
+            placeholder="Search your tests"
           size="sm"
           value={filterValue}
           variant="bordered"

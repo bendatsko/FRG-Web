@@ -16,7 +16,6 @@ import { useTheme } from "next-themes";
 import DarkImg from "@/public/blockm-white.png";
 import LightImg from "@/public/blockm-black.png";
 import { useMsal } from "@azure/msal-react";
-import { callMsGraph } from './graph';
 
 
 

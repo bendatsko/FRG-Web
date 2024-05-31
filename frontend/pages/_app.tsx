@@ -12,7 +12,8 @@ export default function App({
                               pageProps: { session, ...pageProps },
                             }: AppProps) {
   const router = useRouter();
-  return (
+  // @ts-ignore
+    return (
       <SessionProvider session={session}>
         <NextUIProvider navigate={router.push}>
           <NextThemesProvider>

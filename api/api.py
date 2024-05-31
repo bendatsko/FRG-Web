@@ -24,8 +24,9 @@ def init_data_db():
         CREATE TABLE IF NOT EXISTS tests (
             id TEXT PRIMARY KEY,
             user_name TEXT,
+            user_email TEXT,
             chip TEXT,
-            snr REAL,
+            snr TEXT,
             num_tests INTEGER,
             date TEXT,
             start_time TEXT,
@@ -35,6 +36,8 @@ def init_data_db():
     ''')
     conn.commit()
     conn.close()
+
+
 
 def init_user_db():
     conn = sqlite3.connect(USER_DATABASE)
@@ -123,13 +126,14 @@ def get_all_tests():
         {
             "id": row[0],
             "user_name": row[1],
-            "chip": row[2],
-            "snr": row[3],
-            "num_tests": row[4],
-            "date": row[5],
-            "start_time": row[6],
-            "end_time": row[7],
-            "status": row[8]
+            "user_email": row[2],
+            "chip": row[3],
+            "snr": row[4],
+            "num_tests": row[5],
+            "date": row[6],
+            "start_time": row[7],
+            "end_time": row[8],
+            "status": row[9]
         }
         for row in tests
     ]
@@ -175,6 +179,42 @@ def verify_email():
         return jsonify({"status": "success", "authorized": True})
     else:
         return jsonify({"status": "failure", "authorized": False})
+
+@app.route('/addtest', methods=['POST'])
+def add_test():
+    try:
+        data = request.get_json()
+        logger.info(f"Received data for new test: {data}")
+
+        required_fields = ['UN', 'UEmail', 'chip', 'snrValues', 'numTests', 'date', 'startTime', 'endTime', 'status']
+        if not all(field in data for field in required_fields):
+            logger.error("Invalid input data")
+            return jsonify({"status": "failure", "error": "Invalid input data"}), 400
+
+        id = str(uuid.uuid4())
+        user_name = data['UN']
+        user_email = data['UEmail']
+        chip = data['chip']
+        snr_values = data['snrValues']  # This is a comma-separated string
+        num_tests = data['numTests']
+        date = data['date']
+        start_time = data['startTime']
+        end_time = data['endTime']
+        status = data['status']
+
+        conn = sqlite3.connect(DATA_DATABASE)
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO tests (id, user_name, user_email, chip, snr, num_tests, date, start_time, end_time, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (id, user_name, user_email, chip, snr_values, num_tests, date, start_time, end_time, status))
+        conn.commit()
+        conn.close()
+
+        return jsonify({"status": "success", "message": "Test added successfully"})
+    except Exception as e:
+        logger.error(f"Error in /addtest route: {e}")
+        return jsonify({"status": "failure", "error": str(e)}), 500
 
 
 @app.route('/tests/<id>', methods=['DELETE'])

@@ -65,15 +65,15 @@ export default function IndexPage() {
     const renderPage = () => {
         switch (currentPage) {
             case 'home':
-                return <HomePage />;
+                return <HomePage  userEmail={account?.username}/>;
             case 'create':
-                return isAdmin ? <CreatePage /> : <HomePage />;
+                return isAdmin ? <CreatePage userName={account?.name} userEmail={account?.username} /> : <HomePage userEmail={account?.username} />;
             case 'docs':
                 return <DocsPage />;
             case 'admin':
-                return isAdmin ? <AdminPanel /> : <HomePage />;
+                return isAdmin ? <AdminPanel /> : <HomePage userEmail={account?.username} />;
             default:
-                return <HomePage />;
+                return <HomePage userEmail={account?.username} />;
         }
     };
 

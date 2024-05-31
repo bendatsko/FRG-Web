@@ -8,6 +8,7 @@ import React from 'react';
 import { useIsAuthenticated } from '@azure/msal-react';
 import { SignInButton } from './SignInButton';
 import { SignOutButton } from './SignOutButton';
+import {Link} from "@nextui-org/link";
 
 /**
  * Renders the navbar component with a sign-in or sign-out button depending on whether or not a user is authenticated
@@ -19,9 +20,9 @@ export const PageLayout = (props) => {
     return (
         <>
             {/*<Navbar bg="primary" variant="dark" className="navbarStyle">*/}
-                <a className="navbar-brand" href="/">
+                <Link  className="navbar-brand" href="/">
                     Microsoft Identity Platform
-                </a>
+                </Link>
                 <div className="collapse navbar-collapse justify-content-end">
                     {isAuthenticated ? <SignOutButton /> : <SignInButton />}
                 </div>

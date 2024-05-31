@@ -35,7 +35,7 @@ export default function DocsPage() {
                   <li>Specify the Signal-to-Noise Ratio (SNR) in dB.</li>
                   <li>Enter the number of tests you want to run.</li>
                   <li>Verify that all inputs are valid and the test bench is online.</li>
-                  <li>Click the "Begin Test" button to start the test.</li>
+                  <li>Click the Begin Test button to start the test.</li>
                 </ol>
                 <Divider className="my-6" />
                 <h3 className="text-2xl font-bold">Viewing Test History</h3>

@@ -95,7 +95,7 @@ export default function IndexPage() {
                 </CardHeader>
                 <CardBody>
                   <p>
-                    To search for currently-existing users or add new users, you can use this page. To remove users, view logs, and manage permissions, please refer to the project's <Link href="https://portal.azure.com/">Azure Active Directory</Link>.
+                    To search for currently-existing users or add new users, you can use this page. To remove users, view logs, and manage permissions, please refer to the project&lsquo;s <Link href="https://portal.azure.com/">Azure Active Directory</Link>.
                   </p>
                   <div className="flex flex-col items-center py-3">
                     <Button onPress={onOpen} color="primary" className="mb-4">New Invitation</Button>

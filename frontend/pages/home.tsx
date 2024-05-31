@@ -21,7 +21,7 @@ const initialTestData = [
 // This pulls data from the tests api (i.e., /backend/api.py)
 // and displays them in the TestsTable component.
 // We also have function for deleting tests in the database.
-const HomePage = () => {
+const HomePage = ({userEmail}) => {
   // Set states
   const [testData, setTestData] = useState(initialTestData);
 
@@ -48,7 +48,7 @@ const HomePage = () => {
                 </p>
               </CardHeader>
               <CardBody>
-                <HistoryTable data={initialTestData} onDelete={handleDelete} />
+                <HistoryTable  userEmail={userEmail} />
               </CardBody>
             </Card>
           </div>

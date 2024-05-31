@@ -29,7 +29,7 @@ import { v4 as uuidv4 } from "uuid";
 // 4. Enter num tests or auto generate until statistical significance
 // 5. Send to backend api.py
 
-export default function CreatePage() {
+export default function CreatePage({ userName, userEmail }) {
   const [chip, setChip] = useState<Selection>(new Set([]));
   const [snrRange, setSnrRange] = useState("");
   const [numTests, setNumTests] = useState("");
@@ -52,9 +52,7 @@ export default function CreatePage() {
   const [buttonText, setButtonText] = useState("Begin Test");
 
   useEffect(() => {
-    if (chip.size > 0) {
       checkTestBenchStatus();
-    }
   }, [chip]);
 
   // Validate inputs
@@ -95,33 +93,35 @@ export default function CreatePage() {
     setButtonText("Running Test...");
 
     const uuid = uuidv4();
-    const userName = "User Name"; // Replace with the actual user name
-    const currentDate = new Date().toISOString().split("T")[0];
-    const startTime = new Date().toISOString();
+    const UN = userName;
+    const UEmail = userEmail;
+    const now = new Date();
+    const currentDate = now.toLocaleDateString('en-GB'); // Format as DD/MM/YYYY
+    const startTime = now.toLocaleTimeString('en-GB'); // Format as HH:MM:SS in 24-hour format
+
     const snrValues = parseSnrRange(snrRange);
 
     const payload = {
-      uuid,
-      userName,
+      UN,
+      UEmail,
       chip: Array.from(chip)[0], // assuming single selection
-      snrValues,
+      snrValues: snrValues.join(','), // Convert array to string
       numTests: isAuto ? -1 : parseInt(numTests),
       date: currentDate,
       startTime,
       endTime: "-", // end time will be updated when test completes
       status: "running",
-      isAuto,
     };
 
     console.log("Form Data: ", payload);
 
     try {
-      const response = await axios.post("http://localhost:5000/send", payload);
+      const response = await axios.post("http://localhost:5000/addtest", payload);
       console.log("Response: ", response);
       const { data } = response;
 
       if (data.status === "success") {
-        setResponseMessage(`Success: ${data.response}`);
+        setResponseMessage(`Success: ${data.message}`);
       } else {
         setResponseMessage(`Error: ${data.error}`);
       }
@@ -134,6 +134,7 @@ export default function CreatePage() {
     setIsSubmitting(false);
     setButtonText("Begin Test");
   };
+
 
   const handleInputChange =
     (setter: {

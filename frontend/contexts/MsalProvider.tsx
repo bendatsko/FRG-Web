@@ -12,7 +12,8 @@ export const useMsalInstance = () => {
     return useContext(MsalContext);
 };
 
-export const MsalProvider: React.FC = ({ children }) => {
+// @ts-ignore
+export const MsalProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
     return (
         <MsalContext.Provider value={msalInstance}>
             <MsalReactProvider instance={msalInstance}>
