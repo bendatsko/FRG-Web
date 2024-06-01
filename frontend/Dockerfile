@@ -17,7 +17,7 @@
 
 
 # Install dependencies only when needed
-FROM registry.access.redhat.com/ubi8/nodejs-16 AS deps
+FROM registry.access.redhat.com/ubi8/nodejs-18 AS deps
 USER 0
 WORKDIR /app
 
@@ -33,7 +33,7 @@ RUN \
   fi
 
 # Rebuild the source code only when needed
-FROM registry.access.redhat.com/ubi8/nodejs-16 AS builder
+FROM registry.access.redhat.com/ubi8/nodejs-18 AS builder
 USER 0
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
