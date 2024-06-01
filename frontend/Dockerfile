@@ -52,7 +52,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
 
 # Production image, copy all the files and run next
-FROM registry.access.redhat.com/ubi8/nodejs-16-minimal AS runner
+FROM registry.access.redhat.com/ubi8/nodejs-20-minimal AS runner
 USER 0
 WORKDIR /app
 
