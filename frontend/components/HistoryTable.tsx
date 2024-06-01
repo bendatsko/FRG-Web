@@ -78,7 +78,7 @@ export default function HistoryTable({userEmail}) {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/tests");
+      const response = await axios.get("https://68.59.5.5:5000/tests");
       if (response.data.status === "success") {
         setData(response.data.tests);
       } else {
@@ -91,7 +91,7 @@ export default function HistoryTable({userEmail}) {
 
   const deleteTest = async (id: string) => {
     try {
-      const response = await axios.delete(`http://localhost:5000/tests/${id}`);
+      const response = await axios.delete(`https://68.59.5.5:5000/tests/${id}`);
       if (response.data.status === "success") {
         setData(data.filter(test => test.id !== id));
         setTimeout(() => {
