@@ -22,6 +22,7 @@ USER 0
 WORKDIR /app
 
 RUN npm install -g yarn
+RUN npm i node@lts
 
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
