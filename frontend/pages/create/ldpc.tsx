@@ -66,7 +66,7 @@ export default function CreatePage({ userName, userEmail }) {
 
   const checkTestBenchStatus = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/status");
+      const response = await axios.get("https://api.bendatsko.com/status");
       const { data } = response;
 
       if (data.status === "success") {
@@ -116,7 +116,7 @@ export default function CreatePage({ userName, userEmail }) {
     console.log("Form Data: ", payload);
 
     try {
-      const response = await axios.post("http://localhost:5000/addtest", payload);
+      const response = await axios.post("https://apibendatsko.com/addtest", payload);
       console.log("Response: ", response);
       const { data } = response;
 
