@@ -5,7 +5,7 @@ export const msalConfig = {
     auth: {
         clientId: "b1b65f58-fe30-4c6c-9362-7cd76a152e33",
         authority: "https://login.microsoftonline.com/d0d43762-49e6-4326-90ec-01635c1bd3d8",
-        redirectUri: "https://68.59.5.5:3000/",
+        redirectUri: "https://frg-web-git-dev-bendatskos-projects.vercel.app/",
     },
     cache: {
         cacheLocation: "sessionStorage",
