@@ -6,9 +6,6 @@ export const msalConfig = {
         clientId: "b1b65f58-fe30-4c6c-9362-7cd76a152e33",
         authority: "https://login.microsoftonline.com/d0d43762-49e6-4326-90ec-01635c1bd3d8",
         redirectUri: "https://chip.bendatsko.com/auth-complete/",
-        // redirectUri: "https://localhost:3000/auth-complete/",
-
-        // redirectUri: "https://localhost:3000/",
     },
     cache: {
         cacheLocation: "sessionStorage",
