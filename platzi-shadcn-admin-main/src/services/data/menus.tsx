@@ -86,14 +86,20 @@ const menus: MenuItem[] = [
   // },
   {
     icon: <ListIcon size={18} strokeWidth={2} />,
-    title: "View All",
-    link: "/categories",
+    title: "Test History",
+    link: "/products",
     isOpen: false,
   },
   {
     icon: <Settings2 size={18} strokeWidth={2} />,
     title: "Settings",
     link: "/settings",
+    isOpen: false,
+  },
+  {
+    icon: <Settings2 size={18} strokeWidth={2} />,
+    title: "Administrator",
+    link: "/users",
     isOpen: false,
   },
 ];

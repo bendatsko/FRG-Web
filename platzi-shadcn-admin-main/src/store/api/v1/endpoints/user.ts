@@ -4,14 +4,14 @@ const userApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getUsers: builder.query({
       query: () => ({
-        url: "/users",
+        url: "https://api.escuelajs.co/api/v1/users",
         method: "GET",
       }),
       providesTags: ["User"],
     }),
     getUser: builder.query({
       query: (id) => ({
-        url: `/users/${id}`,
+        url: `https://api.escuelajs.co/api/v1/users/${id}`,
         method: "GET",
       }),
       providesTags: ["User"],

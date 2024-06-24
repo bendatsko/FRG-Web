@@ -5,8 +5,8 @@ import { Mail, User, UserCheck } from "tabler-icons-react";
 const Account: React.FC = () => {
   return (
     <div>
-      <div className=" text-xl ">Personal Information</div>
-      <div className=" text-slate-500 mt-2 ">
+      <div className=" text-2xl font-semibold">Personal Information</div>
+      <div className=" text-black/50 dark:text-white/50 mt-2 ">
         Access and manage your personal information, including personal details,
         preferences, and settings.
       </div>
@@ -19,7 +19,7 @@ const Account: React.FC = () => {
                 <div className=" flex  justify-between ">
                   Username <User />
                 </div>
-                <div className=" text-slate-500  ">John</div>
+                <div className=" text-black/50 dark:text-white/50  ">John</div>
               </CardHeader>
             </Card>
           </div>
@@ -27,9 +27,9 @@ const Account: React.FC = () => {
             <Card className=" dark:text-light dark:border-foreground ">
               <CardHeader>
                 <div className=" flex  justify-between ">
-                  Username <Mail />
+                  Email <Mail />
                 </div>
-                <div className=" text-slate-500 ">John@gmail.com</div>
+                <div className=" text-black/50 dark:text-white/50 ">John@gmail.com</div>
               </CardHeader>
             </Card>
           </div>
@@ -39,7 +39,7 @@ const Account: React.FC = () => {
                 <div className=" flex justify-between ">
                   Role <UserCheck />
                 </div>
-                <div className=" text-slate-500 ">Admin</div>
+                <div className=" text-black/50 dark:text-white/50  ">Admin</div>
               </CardHeader>
             </Card>
           </div>

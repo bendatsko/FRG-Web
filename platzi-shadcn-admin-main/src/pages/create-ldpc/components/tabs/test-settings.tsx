@@ -135,7 +135,7 @@ const TestSettings: React.FC = () => {
                                                 disabled={autoGenerateEnabled}
                                                 className="flex-1"
                                             />
-                                            <Button type="button" onClick={autoGenerateTests} className="whitespace-nowrap">
+                                            <Button variant="outline" onClick={autoGenerateTests} className="whitespace-nowrap">
                                                 {autoGenerateEnabled ? "Manual Entry" : "Auto-Generate"}
                                             </Button>
                                         </div>

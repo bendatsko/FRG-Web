@@ -1,12 +1,21 @@
+// src/store/slice/auth/index.ts
 import { createSlice } from "@reduxjs/toolkit";
 import { setCookie, removeCookie } from "typescript-cookie";
- 
+
+export interface UserType {
+  email: string;
+  username: string;
+  role: string;
+}
+
 export interface InitialStateType {
   token: string;
-};
+  user: UserType | null;
+}
 
 const initialState: InitialStateType = {
-  token: "",
+  token: localStorage.getItem('token') || "",
+  user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null,
 };
 
 export const authSlice = createSlice({
@@ -14,13 +23,21 @@ export const authSlice = createSlice({
   initialState,
   reducers: {
     saveUserInfo: (state: InitialStateType, action) => {
-      const { token } = action.payload;
+      const { token, user } = action.payload;
       state.token = token;
-      setCookie("token",token);
+      state.user = user;
+      setCookie("token", token);
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      console.log("User info saved in Redux:", state);
     },
     removeUserInfo: (state: InitialStateType) => {
       state.token = "";
+      state.user = null;
       removeCookie("token");
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      console.log("User info removed from Redux:", state);
     },
   },
 });

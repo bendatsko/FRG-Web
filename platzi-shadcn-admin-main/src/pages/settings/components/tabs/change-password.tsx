@@ -18,8 +18,8 @@ const ChangePassword: React.FC = () => {
 
   return (
     <div>
-      <div className=" text-xl ">Change Password</div>
-      <div className=" text-slate-500 mt-2 ">
+      <div className="text-2xl font-semibold">Change Password</div>
+      <div className=" text-black/50 dark:text-white/50 mt-2 ">
         Update your account's security by modifying your current password to a
         new one.
       </div>

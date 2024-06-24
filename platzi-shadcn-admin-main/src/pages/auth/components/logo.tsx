@@ -44,10 +44,12 @@ const Logo: React.FC = () => {
         </div>
       </div>
       <div className=" text-light text-center mt-8 ">
-        <div className=" lg:text-xl ">DAQROC - Flynn Lab</div>
-        {/*<div className=" lg:text-sm text-xs text-slate-500 mt-4 ">*/}
-        {/*  Digitally-Assisted Quantum Inspired Relaxation Oscillator Computing*/}
-        {/*</div>*/}
+          <div className="text-2xl font-semibold mb-4">DAQROC</div>
+
+          {/*<div className=" lg:text-xl ">DAQROC - Flynn Lab</div>*/}
+        <div className="text-sm text-white/50 mt-3 ">
+          Flynn Lab, University of Michigan
+        </div>
       </div>
     </div>
   );

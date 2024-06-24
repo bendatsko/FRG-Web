@@ -9,7 +9,7 @@ const MobileLogo : React.FC = () => {
     <div className=" lg:hidden basis-1/2 flex-col justify-center items-center ">
     <div>
       <div className=" flex items-center justify-center gap-3 ">
-        <DAQROCLogo className=" text-light text-[90px] lg:text-[150px] " height = "12rem"
+        <DAQROCLogo className=" text-light text-[90px] lg:text-[150px] " height = "8rem"
                     width = "12rem" overrideColor="black"/>
         {/*<SiPlatzi className=" text-dark  text-[90px]  " />*/}
         {/*<Plus size={70} strokeWidth={3} className=" text-dark " />*/}
@@ -45,7 +45,11 @@ const MobileLogo : React.FC = () => {
       </div>
     </div>
     <div className=" text-dark text-center mt-8 ">
-      <div className=" lg:text-xl ">DAQROC - Flynn Lab</div>
+      {/*<div className=" lg:text-xl ">DAQROC - Flynn Lab</div>*/}
+      <div className="text-2xl font-semibold mb-4">DAQROC</div>
+      <div className="text-sm text-black/70 mt-4 ">
+        Flynn Lab, University of Michigan
+      </div>
 
     </div>
   </div>

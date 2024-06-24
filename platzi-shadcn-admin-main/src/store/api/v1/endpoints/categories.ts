@@ -4,14 +4,14 @@ const categoryApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getCategories: builder.query({
       query: () => ({
-        url: "/categories",
+        url: "https://api.escuelajs.co/api/v1/categories",
         method: "GET",
       }),
       providesTags: ["Category"],
     }),
     getCategory: builder.query({
       query: (id) => ({
-        url: `/categories/${id}`,
+        url: `https://api.escuelajs.co/api/v1/categories/${id}`,
         method: "GET",
       }),
       providesTags: ["Category"],
