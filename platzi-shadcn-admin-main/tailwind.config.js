@@ -17,7 +17,7 @@ module.exports = {
       },
     },
     fontFamily: {
-      sans: ['"Inter"', "sans-serif"],
+      sans: ['"GeistSans"', "sans-serif"],
     },
     extend: {
       colors: {

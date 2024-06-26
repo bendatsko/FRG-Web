@@ -4,7 +4,7 @@ import { token } from "../../../store/slice/auth";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://api.escuelajs.co/api/v1",
+    // baseUrl: "http://localhost:3001",
     prepareHeaders: (headers) => {
       
       headers.set("Content-Type", "application/json");
