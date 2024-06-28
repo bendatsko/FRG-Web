@@ -10,11 +10,13 @@ import {
   // Shield,
   Settings2,
   Category2,
-  Package, Plus
+  Package, Plus, FileSettings
 } from "tabler-icons-react";
 import {HiCpuChip, HiMiniCpuChip} from "react-icons/hi2";
 import {ListIcon} from "lucide-react";
 import {HiChip} from "react-icons/hi";
+import {RiSettings3Fill} from "react-icons/ri";
+import Administrator from "@/pages/administrator";
 
 interface MenuItem {
   title: string;
@@ -31,13 +33,6 @@ const menus: MenuItem[] = [
     link: "/dashboard",
     isOpen: false,
   },
-
-  // {
-  //   icon: <Package size={18} strokeWidth={2} />,
-  //   title: "Products",
-  //   link: "/products",
-  //   isOpen: false,
-  // },
   {
     icon: <Plus size={20} strokeWidth={2} />,
     title: "Create",
@@ -47,49 +42,15 @@ const menus: MenuItem[] = [
         link: "/create-ldpc",
         icon: <HiChip size={18}  />,
       },
-      // {
-      //   title: "General Error",
-      //   link: "/error",
-      //   icon: <ServerOff size={18} strokeWidth={2} />,
-      // },
-      // {
-      //   title: "Lose Connection",
-      //   link: "/network-error",
-      //   icon: <WifiOff size={18} strokeWidth={2} />,
-      // },
     ],
     isOpen: false,
   },
   // {
-  //   icon: <Shield size={18} strokeWidth={2} />,
-  //   title: "Auth Pages",
-  //   link: "/users",
-  //   children: [
-  //     {
-  //       title: "Sign In",
-  //       link: "/auth/sign-in",
-  //       icon: <Login size={18} strokeWidth={2} />,
-  //     },
-  //     {
-  //       title: "Sign Up",
-  //       link: "/auth/sign-up",
-  //       icon: <UserPlus size={18} strokeWidth={2} />,
-  //     },
-  //   ],
+  //   icon: <ListIcon size={18} strokeWidth={2} />,
+  //   title: "My Tests",
+  //   link: "/products",
   //   isOpen: false,
   // },
-  // {
-  //   icon: <Users size={18} strokeWidth={2} />,
-  //   title: "Users",
-  //   link: "/users",
-  //   isOpen: false,
-  // },
-  {
-    icon: <ListIcon size={18} strokeWidth={2} />,
-    title: "My Tests",
-    link: "/products",
-    isOpen: false,
-  },
   {
     icon: <Settings2 size={18} strokeWidth={2} />,
     title: "Settings",
@@ -97,9 +58,9 @@ const menus: MenuItem[] = [
     isOpen: false,
   },
   {
-    icon: <Settings2 size={18} strokeWidth={2} />,
+    icon: <FileSettings size={18} strokeWidth={2} />,
     title: "Administrator",
-    link: "/users",
+    link: "/administrator",
     isOpen: false,
   },
 ];

@@ -27,6 +27,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "src/pages/dashboard/components/top-product.tsx"],
+  "include": ["src",
+    "src/pages/dashboard/components/recent-tests-table.tsx"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

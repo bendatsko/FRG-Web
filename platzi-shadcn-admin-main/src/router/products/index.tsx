@@ -11,7 +11,7 @@ const ProductRoutes: RouteObject[] = [
     children: [
       {
         path: "",
-        element: <Products />,
+        // element: <Products />,
       },
     ],
   },

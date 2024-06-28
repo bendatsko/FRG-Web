@@ -74,6 +74,63 @@ app.get('/users', (req, res) => {
     });
 });
 
+// Fetch all tests endpoint
+app.get('/tests', (req, res) => {
+    db.all(`SELECT * FROM tests`, [], (err, rows) => {
+        if (err) {
+            console.error('Error fetching tests:', err);
+            return res.status(500).send("Internal server error");
+        }
+        res.status(200).json(rows);
+    });
+});
+
+// Create test endpoint
+app.post('/tests', (req, res) => {
+    const { title, author, DUT, status, duration, user_id } = req.body;
+
+    db.run(`INSERT INTO tests (title, author, DUT, status, duration, user_id) VALUES (?, ?, ?, ?, ?, ?)`,
+        [title, author, DUT, status, duration, user_id], function (err) {
+            if (err) {
+                console.error('Error creating test', err);
+                return res.status(500).send("Test creation failed");
+            }
+            res.status(200).send({
+                message: "Test created successfully",
+                testId: this.lastID
+            });
+        });
+});
+
+// Modify test endpoint
+app.put('/tests/:id', (req, res) => {
+    const { id } = req.params;
+    const { title, author, DUT, status, duration } = req.body;
+
+    db.run(`UPDATE tests SET title = ?, author = ?, DUT = ?, status = ?, duration = ? WHERE id = ?`,
+        [title, author, DUT, status, duration, id], function (err) {
+            if (err) {
+                console.error('Error modifying test', err);
+                return res.status(500).send("Test modification failed");
+            }
+            res.status(200).send("Test modified successfully");
+        });
+});
+
+// Delete test endpoint
+app.delete('/tests/:id', (req, res) => {
+    const { id } = req.params;
+
+    db.run(`DELETE FROM tests WHERE id = ?`, [id], function (err) {
+        if (err) {
+            console.error('Error deleting test', err);
+            return res.status(500).send("Test deletion failed");
+        }
+        res.status(200).send("Test deleted successfully");
+    });
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

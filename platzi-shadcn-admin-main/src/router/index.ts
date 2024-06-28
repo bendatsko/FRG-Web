@@ -8,6 +8,7 @@ import CategoryRoutes from "@/router/categories";
 import ProductRoutes from "./products";
 import UserRoutes from "./users";
 import CreateRoutes from "@/router/create-ldpc";
+import ViewRoutes from "@/router/view";
 
 const router = createBrowserRouter([
   ...AuthRoutes,
@@ -19,7 +20,7 @@ const router = createBrowserRouter([
   ...SettingRoutes,
   ...ErrorRoutes,
   ...CreateRoutes,
-
+  ...ViewRoutes,
 ]);
 
 export default router;

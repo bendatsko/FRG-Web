@@ -1,29 +1,38 @@
-import { setBreadCrumb } from "@/store/slice/app";
+import {LoadingLottie} from "@/components";
+import {columns} from "./components/columns";
+import {DataTable} from "./components/recent-tests-table.tsx";
+import {useGetTestsQuery} from "@/store/api/v1/endpoints/test.ts";
+import {useDispatch} from "react-redux";
+import {setBreadCrumb} from "@/store/slice/app";
+import {Loading} from "@geist-ui/core";
+import Overview from "@/pages/dashboard/components/overview.tsx";
 import React from "react";
-import { useDispatch } from "react-redux";
-import Overview from "./components/overview";
-import TotalIncome from "./components/totalIncome";
-import TopProducts from "./components/top-product";
 
-const Dashboard: React.FC = () => {
-  const dispatch = useDispatch();
-  dispatch(setBreadCrumb([{ title: "Dashboard", link: "/" }]));
-
-  return (
-    <>
-        <div className="text-2xl font-semibold mb-4">Activity Stream</div>
-
-        <Overview />
-      <div className=" flex flex-col lg:flex-row mt-6 gap-3 ">
-        <div className=" basis-11/12 ">
-        {/*  <TotalIncome />*/}
+const Dashboard = () => {
+    const dispatch = useDispatch();
+    dispatch(setBreadCrumb([{title: "Dashboard", link: "/dashboard"}]));
+    const {data, isLoading} = useGetTestsQuery({});
 
 
-          <TopProducts />
-        </div>
-      </div>
-    </>
-  );
+    if (isLoading) {
+        return (
+            <div className=" flex justify-center pt-10">
+                {/*<Overview/>*/}
+                <div className=" w-[250px] ">
+                    <Loading/>
+                </div>
+            </div>
+        );
+    } else {
+        return (<div>
+            <div className="text-2xl font-semibold mb-4">My Tests</div>
+
+            {/*<Overview/>*/}
+
+            <DataTable columns={columns} data={data}/>
+
+        </div>);
+    }
 };
 
 export default Dashboard;

@@ -1,15 +1,16 @@
-import { ColumnDef } from '@tanstack/react-table';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
+import {ColumnDef} from '@tanstack/react-table';
+import {Checkbox} from '@/components/ui/checkbox';
+import {Button} from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal } from 'lucide-react';
+import {MoreHorizontal} from 'lucide-react';
+import axios from "axios";
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -33,13 +34,40 @@ export const columns: ColumnDef<any>[] = [
     ),
   },
   {
-    accessorKey: 'email',
-    header: 'Email',
+    accessorKey: 'id',
+    header: 'ID',
+  },
+  {
+    accessorKey: 'author',
+    header: 'Author',
+  },
+  {
+    accessorKey: 'DUT',
+    header: 'DUT',
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+  },
+  {
+    accessorKey: 'duration',
+    header: 'Duration',
   },
   {
     accessorKey: 'actions',
     header: 'Action',
     cell: ({ row }) => {
+      const handleDelete = async () => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this test?");
+        if (confirmDelete) {
+          try {
+            await axios.delete(`http://localhost:3001/tests/${row.original.id}`);
+          } catch (error) {
+            console.error('Error deleting test:', error);
+          }
+        }
+      };
+
       return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -50,13 +78,13 @@ export const columns: ColumnDef<any>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                  onClick={() => navigator.clipboard.writeText(row.getValue('email'))}
-              >
-                Copy Email
+              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.getValue('id'))}>
+                Copy ID
               </DropdownMenuItem>
+              <DropdownMenuItem>Share</DropdownMenuItem>
+              <DropdownMenuItem>View Details</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>View Detail</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
       );

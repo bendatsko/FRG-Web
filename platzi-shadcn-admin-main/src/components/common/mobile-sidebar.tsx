@@ -21,7 +21,7 @@ const MobileSideBar: React.FC = () => {
           size="icon"
           className=" rounded-full flex items-center border-none shadow-none lg:hidden"
         >
-          <RiMenuUnfoldLine className=" text-2xl" />
+          <RiMenuUnfoldLine className=" text-2xl"/>
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className=" w-60 ">

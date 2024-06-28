@@ -21,12 +21,6 @@ const Overview: React.FC = () => {
       value: 40,
       icon: <TrendingUp />,
     },
-    // {
-    //   title: "Create",
-    //   value: "13004 $",
-    //   icon: <ReportMoney />,
-    // },
-
   ]);
 
   return (

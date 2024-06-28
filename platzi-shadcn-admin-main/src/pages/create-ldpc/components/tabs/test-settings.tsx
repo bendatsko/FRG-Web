@@ -1,6 +1,6 @@
 "use client";
 
-import { useState} from "react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -25,16 +25,12 @@ import { toast } from "@/components/ui/use-toast";
 
 // Validation schema
 const TestSettingsSchema = z.object({
-    testBench: z.string().nonempty("Test bench is required"),
-    snrRange: z.string().nonempty("SNR range is required"),
-    numTests: z
-        .number()
-        .positive()
-        .int()
-        .nonnegative()
-        .refine((value) => value > 0, {
-            message: "Number of tests must be a positive integer",
-        }),
+    title: z.string().nonempty("Title is required"),
+    author: z.string().nonempty("Author is required"),
+    DUT: z.string().nonempty("DUT is required"),
+    status: z.string().nonempty("Status is required"),
+    duration: z.string().nonempty("Duration is required"),
+    user_id: z.string().nonempty("user_id is required"),
 });
 
 type TestSettingsFormValues = z.infer<typeof TestSettingsSchema>;
@@ -45,22 +41,49 @@ const TestSettings: React.FC = () => {
     const form = useForm<TestSettingsFormValues>({
         resolver: zodResolver(TestSettingsSchema),
         defaultValues: {
-            testBench: "",
-            snrRange: "",
-            numTests: undefined,
+            title: "",
+            author: "",
+            DUT: "",
+            status: "",
+            duration: "",
+            user_id: "",
         },
     });
 
-    const onSubmit = (data: TestSettingsFormValues) => {
-        toast({
-            title: "Form submitted",
-            description: (
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-            ),
-        });
-        console.log("Form data", data);
+    const onSubmit = async (data: TestSettingsFormValues) => {
+        const parsedData = {
+            ...data,
+        };
+
+        try {
+            const response = await fetch('http://localhost:3001/tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(parsedData),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                toast({
+                    title: "Test created",
+                    description: (
+                        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+                            <code className="text-white">{JSON.stringify(result, null, 2)}</code>
+                        </pre>
+                    ),
+                });
+            } else {
+                throw new Error(result.message || 'Failed to create test');
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+            });
+        }
     };
 
     const autoGenerateTests = () => {
@@ -80,26 +103,12 @@ const TestSettings: React.FC = () => {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <FormField
                             control={form.control}
-                            name="testBench"
+                            name="title"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Test Bench</FormLabel>
+                                    <FormLabel>Title</FormLabel>
                                     <FormControl>
-                                        <Controller
-                                            control={form.control}
-                                            name="testBench"
-                                            render={({ field }) => (
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select a test bench" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="bench1">Test Bench 1</SelectItem>
-                                                        <SelectItem value="bench2">Test Bench 2</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            )}
-                                        />
+                                        <Input placeholder="Enter title" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -108,12 +117,12 @@ const TestSettings: React.FC = () => {
 
                         <FormField
                             control={form.control}
-                            name="snrRange"
+                            name="author"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>SNR Range</FormLabel>
+                                    <FormLabel>Author</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Enter SNR range" {...field} />
+                                        <Input placeholder="Enter author" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -122,30 +131,59 @@ const TestSettings: React.FC = () => {
 
                         <FormField
                             control={form.control}
-                            name="numTests"
+                            name="DUT"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Number of Tests</FormLabel>
+                                    <FormLabel>DUT</FormLabel>
                                     <FormControl>
-                                        <div className="flex items-center gap-2">
-                                            <Input
-                                                type="number"
-                                                placeholder={autoGenerateEnabled ? "Auto-calculating number of tests needed." : "Enter number of tests"}
-                                                {...field}
-                                                disabled={autoGenerateEnabled}
-                                                className="flex-1"
-                                            />
-                                            <Button variant="outline" onClick={autoGenerateTests} className="whitespace-nowrap">
-                                                {autoGenerateEnabled ? "Manual Entry" : "Auto-Generate"}
-                                            </Button>
-                                        </div>
+                                        <Input placeholder="Enter DUT" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
 
+                        <FormField
+                            control={form.control}
+                            name="status"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Status</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Enter status" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
+                        <FormField
+                            control={form.control}
+                            name="duration"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Duration</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Enter duration" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="user_id"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>User ID</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Enter user ID" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
                         <div className="flex justify-end">
                             <Button type="submit">
