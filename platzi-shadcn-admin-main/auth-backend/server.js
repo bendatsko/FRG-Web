@@ -3,16 +3,23 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
-const cors = require('cors'); // Import cors
+const cors = require('cors');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 const SECRET_KEY = "your_secret_key";
 
 app.use(bodyParser.json());
-app.use(cors()); // Use cors
+app.use(cors());
 
 // Connect to the SQLite database file
-const db = new sqlite3.Database('./mydatabase.db');
+const db = new sqlite3.Database('./mydatabase.db', (err) => {
+    if (err) {
+        console.error('Could not connect to database', err);
+    } else {
+        console.log('Connected to database');
+    }
+});
 
 // Register endpoint
 app.post('/register', (req, res) => {
@@ -21,6 +28,7 @@ app.post('/register', (req, res) => {
 
     db.run(`INSERT INTO users (email, password) VALUES (?, ?)`, [email, hashedPassword], function (err) {
         if (err) {
+            console.error('Error during user registration', err);
             return res.status(500).send("User registration failed");
         }
         res.status(200).send("User registered successfully");
@@ -33,6 +41,7 @@ app.post('/login', (req, res) => {
 
     db.get(`SELECT * FROM users WHERE email = ?`, [email], (err, user) => {
         if (err) {
+            console.error('Error during login', err);
             return res.status(500).send("Internal server error");
         }
         if (!user) {
@@ -48,15 +57,22 @@ app.post('/login', (req, res) => {
         res.status(200).send({
             access_token: token,
             user: {
-                email: user.email,
-                username: user.username || "Default Username", // Handle case if username is null
-                role: user.role || "User" // Handle case if role is null
+                email: user.email
             }
         });
     });
 });
 
-
+// Fetch all users endpoint
+app.get('/users', (req, res) => {
+    db.all(`SELECT email FROM users`, [], (err, rows) => {
+        if (err) {
+            console.error('Error fetching users:', err);
+            return res.status(500).send("Internal server error");
+        }
+        res.status(200).json(rows);
+    });
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

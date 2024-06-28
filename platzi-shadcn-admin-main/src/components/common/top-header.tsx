@@ -54,8 +54,8 @@ const TopHeader: React.FC = () => {
         <DropdownMenu>
           <DropdownMenuTrigger className=" focus-visible:outline-none ">
             <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-              <AvatarFallback>AP</AvatarFallback>
+              <AvatarImage src="https://github.com/shadcn.ng" alt="@shadcn" />
+              <AvatarFallback>..</AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent

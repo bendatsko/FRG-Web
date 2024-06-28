@@ -40,10 +40,10 @@ const menus: MenuItem[] = [
   // },
   {
     icon: <Plus size={20} strokeWidth={2} />,
-    title: "New Test",
+    title: "Create",
     children: [
       {
-        title: "LDPC Decoder",
+        title: "LDPC Chip Test",
         link: "/create-ldpc",
         icon: <HiChip size={18}  />,
       },
@@ -86,7 +86,7 @@ const menus: MenuItem[] = [
   // },
   {
     icon: <ListIcon size={18} strokeWidth={2} />,
-    title: "Test History",
+    title: "My Tests",
     link: "/products",
     isOpen: false,
   },

@@ -11,7 +11,9 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
-      <Overview />
+        <div className="text-2xl font-semibold mb-4">Activity Stream</div>
+
+        <Overview />
       <div className=" flex flex-col lg:flex-row mt-6 gap-3 ">
         <div className=" basis-11/12 ">
         {/*  <TotalIncome />*/}

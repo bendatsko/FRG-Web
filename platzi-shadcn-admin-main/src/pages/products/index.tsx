@@ -8,7 +8,7 @@ import { setBreadCrumb } from "@/store/slice/app";
 
 const Products = () => {
   const dispatch = useDispatch();
-  dispatch(setBreadCrumb([{ title: "Dashboard", link: "/" },{ title: "All Tests", link: "/products" }]));
+  dispatch(setBreadCrumb([{ title: "Dashboard", link: "/" },{ title: "My Tests", link: "/products" }]));
   const { data, isLoading } = useGetProductsQuery({});
 
   if (isLoading) {
@@ -20,7 +20,7 @@ const Products = () => {
       </div>
     );
   } else {
-    return <div>      <div className="text-2xl font-semibold mb-4">All Tests</div>
+    return <div>      <div className="text-2xl font-semibold mb-4">My Tests</div>
 
       <DataTable columns={columns} data={data} /></div>;
   }

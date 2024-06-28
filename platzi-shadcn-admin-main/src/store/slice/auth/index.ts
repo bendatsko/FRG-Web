@@ -1,4 +1,3 @@
-// src/store/slice/auth/index.ts
 import { createSlice } from "@reduxjs/toolkit";
 import { setCookie, removeCookie } from "typescript-cookie";
 
@@ -13,9 +12,22 @@ export interface InitialStateType {
   user: UserType | null;
 }
 
+const getUserFromLocalStorage = () => {
+  const user = localStorage.getItem('user');
+  if (user) {
+    try {
+      return JSON.parse(user);
+    } catch (e) {
+      console.error("Error parsing user from localStorage:", e);
+      return null;
+    }
+  }
+  return null;
+};
+
 const initialState: InitialStateType = {
   token: localStorage.getItem('token') || "",
-  user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null,
+  user: getUserFromLocalStorage(),
 };
 
 export const authSlice = createSlice({

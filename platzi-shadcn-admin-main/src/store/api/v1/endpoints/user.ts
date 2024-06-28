@@ -4,7 +4,7 @@ const userApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getUsers: builder.query({
       query: () => ({
-        url: "https://api.escuelajs.co/api/v1/users",
+        url: "http://localhost:3001/users",
         method: "GET",
       }),
       providesTags: ["User"],
