@@ -12,7 +12,7 @@ const MobileLogo: React.FC = () => {
             className=" text-dark text-[90px] lg:text-[150px] "
             height="8rem"
             width="12rem"
-            overrideColor="white"
+            overrideColor="dark"
           />
           {/*<SiPlatzi className=" text-dark  text-[90px]  " />*/}
           {/*<Plus size={70} strokeWidth={3} className=" text-dark " />*/}
@@ -49,8 +49,8 @@ const MobileLogo: React.FC = () => {
       </div>
       <div className=" text-dark text-center mt-8 ">
         {/*<div className=" lg:text-xl ">DAQROC - Flynn Lab</div>*/}
-        <div className="text-2xl font-semibold mb-4 text-white">DAQROC</div>
-        <div className="text-sm text-white/70 mt-4 ">
+        <div className="text-2xl font-semibold mb-4 text-black">DAQROC</div>
+        <div className="text-sm text-black/70 mt-4 ">
           Flynn Lab, University of Michigan
         </div>
       </div>

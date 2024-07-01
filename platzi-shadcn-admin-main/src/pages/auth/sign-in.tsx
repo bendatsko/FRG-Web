@@ -64,7 +64,7 @@ const SignIn: React.FC = () => {
   return (
     <div className="w-screen h-screen flex flex-col lg:flex-row gap-5 lg:gap-0 justify-center items-center">
       <Logo />
-      <div className="lg:basis-1/2 dark:bg-black dark:text-light flex flex-col justify-center lg:flex-row items-center h-screen">
+      <div className="lg:basis-1/2 dark:bg-white dark:text-dark flex flex-col justify-center lg:flex-row items-center h-screen">
         <div className="lg:w-7/12 w-screen px-12 lg:mt-0 lg:px-0 mx-auto">
           <MobileLogo />
           <br />
@@ -79,7 +79,7 @@ const SignIn: React.FC = () => {
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="email">Email Address</Label>
                   <Input
-                    className="border-black/20"
+                    className="dark:border-black/20"
                     type="email"
                     name="email"
                     id="email"
@@ -97,7 +97,7 @@ const SignIn: React.FC = () => {
                 <div className=" flex flex-col gap-2">
                   <Label htmlFor="password">Password</Label>
                   <InputPassword
-                    className="border-black/20"
+                    className="dark:border-black/20"
                     name="password"
                     id="password"
                     value={values.password}
@@ -115,7 +115,7 @@ const SignIn: React.FC = () => {
                   type="submit"
                   variant="default"
                   disabled={isSubmitting}
-                  className="w-full"
+                  className="w-full dark:bg-black dark:text-slate-50 dark:shadow dark:hover:bg-black/90"
                 >
                   {isSubmitting && (
                     <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
