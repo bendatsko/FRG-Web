@@ -10,7 +10,7 @@ import React from "react";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  dispatch(setBreadCrumb([{ title: "Dashboard", link: "/dashboard" }]));
+  // dispatch(setBreadCrumb([{ title: "Dashboard", link: "/dashboard" }]));
   const { data, isLoading } = useGetTestsQuery({});
 
   if (isLoading) {

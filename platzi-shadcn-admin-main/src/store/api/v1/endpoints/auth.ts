@@ -10,7 +10,14 @@ const authEndPoint = api.injectEndpoints({
         body,
       }),
     }),
+    fetchUserByUUID: builder.query({
+      query: (uuid: string) => ({
+        url: `http://127.0.0.1:3001/user/uuid/${uuid}`,
+        method: "GET",
+      }),
+    }),
   }),
+  overrideExisting: false,
 });
 
-export const { useSignInMutation } = authEndPoint;
+export const { useSignInMutation, useFetchUserByUUIDQuery } = authEndPoint;

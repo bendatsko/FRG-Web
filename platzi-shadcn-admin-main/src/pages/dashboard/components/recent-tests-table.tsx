@@ -67,25 +67,6 @@ export function DataTable<TData, TValue>({
     const [email, setEmail] = useState('');
     const {theme} = useTheme(); // Access the current theme
 
-    const handleNewUser = async () => {
-        try {
-            const response = await fetch('http://localhost:3001/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({email, password: 'password123'}),
-            });
-
-            if (response.ok) {
-                console.log('User created successfully');
-            } else {
-                console.error('Error creating user');
-            }
-        } catch (error) {
-            console.error('Error creating user:', error);
-        }
-    };
 
 
     return (
@@ -93,9 +74,9 @@ export function DataTable<TData, TValue>({
             <div className="flex items-center py-4">
                 <Input
                     placeholder="Filter name..."
-                    value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+                    value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
-                        table.getColumn("name")?.setFilterValue(event.target.value)
+                        table.getColumn("title")?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
                 />

@@ -38,8 +38,8 @@ export const columns: ColumnDef<any>[] = [
     header: 'ID',
   },
   {
-    accessorKey: 'author',
-    header: 'Author',
+    accessorKey: 'title',
+    header: 'Title',
   },
   {
     accessorKey: 'DUT',
