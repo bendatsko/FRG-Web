@@ -16,7 +16,6 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <div className=" flex justify-center pt-10">
-        {/*<Overview/>*/}
         <div className=" w-[250px] ">
           <Loading />
         </div>

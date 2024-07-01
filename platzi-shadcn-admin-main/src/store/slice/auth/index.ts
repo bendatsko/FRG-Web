@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { setCookie, removeCookie } from "typescript-cookie";
+import { setCookie, getCookie, removeCookie } from "typescript-cookie";
 
-export interface UserType {
+// Define the user interface
+export interface User {
   email: string;
   username: string;
   role: string;
@@ -9,58 +10,54 @@ export interface UserType {
   uuid: string;
 }
 
-export interface InitialStateType {
+// Define the initial state interface
+export interface InitialState {
   token: string;
-  user: UserType | null;
-  storedUserData: UserType | null;
+  user: string; // Store user as a JSON string
 }
 
-const getUserFromLocalStorage = () => {
-  const user = localStorage.getItem("user");
-  if (user && user !== "undefined") {
-    try {
-      return JSON.parse(user);
-    } catch (e) {
-      console.error("Error parsing user from localStorage:", e);
-    }
-  }
-  return null;
+// Initialize the initial state
+const initialState: InitialState = {
+  token: "",
+  user: "", // Initialize user as an empty string
 };
 
-const initialState: InitialStateType = {
-  token: localStorage.getItem("token") || "",
-  user: getUserFromLocalStorage(),
-  storedUserData: null,
-};
-
-export const authSlice = createSlice({
+// Create the auth slice
+const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    saveUserInfo: (state: InitialStateType, action: PayloadAction<{ token: string; user: UserType }>) => {
+    saveUserInfo: (state, action: PayloadAction<{ token: string; user?: User }>) => {
       const { token, user } = action.payload;
-      state.token = token;
-      state.user = user;
-      state.storedUserData = user;
-      setCookie("token", token);
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      console.log("User info saved in Redux (inside reducer):", state);
-      console.log("Stored user data (inside reducer):", user);
+      if (user) {
+        console.log("Reducer: Dispatching saveUserInfo action with:", action.payload);
+        state.token = token;
+        state.user = JSON.stringify(user); // Serialize user to JSON string
+        setCookie("token", token); // Save token in cookies
+        setCookie("user", state.user); // Save user as a JSON string in cookies
+        console.log("Reducer: User information saved:", user);
+      } else {
+        console.log("Reducer: No user data provided.");
+      }
     },
-    removeUserInfo: (state: InitialStateType) => {
+    removeUserInfo: (state) => {
       state.token = "";
-      state.user = null;
-      state.storedUserData = null;
-      removeCookie("token");
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      console.log("User info removed from Redux (inside reducer):", state);
+      state.user = "";
+      removeCookie("token"); // Remove token from cookies
+      removeCookie("user"); // Remove user from cookies
     },
   },
 });
 
+// Export actions
 export const { saveUserInfo, removeUserInfo } = authSlice.actions;
-export const token = (state: { auth: InitialStateType }) => state.auth.token;
-export const storedUserData = (state: { auth: InitialStateType }) => state.auth.storedUserData;
+
+// Selectors to get the token and user data
+export const token = (state: { auth: InitialState }) => state.auth.token;
+export const selectUser = (state: { auth: InitialState }) => {
+  const userJson = getCookie("user") || state.auth.user; // Access user as a JSON string from cookies or state
+  return JSON.parse(userJson || "{}"); // Deserialize user from JSON string
+};
+
+// Export the reducer
 export default authSlice.reducer;

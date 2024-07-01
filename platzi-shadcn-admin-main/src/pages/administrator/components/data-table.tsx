@@ -29,6 +29,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogClose,
 } from "@/components/ui/dialog";
 import {Label} from "@/components/ui/label";
 
@@ -107,7 +108,7 @@ export function DataTable<TData, TValue>({
                         <DialogHeader>
                             <DialogTitle>New User</DialogTitle>
                             <DialogDescription>
-                                Add a new user by entering their email address.
+                                Add a new user by completing the following fields.
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
@@ -117,17 +118,52 @@ export function DataTable<TData, TValue>({
                                 </Label>
                                 <Input
                                     id="email"
-                                    placeholder="Enter email address..."
+                                    placeholder="johndoe@email.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="col-span-3"
+                                />
+                                <Label htmlFor="password" className="text-right">
+                                    Password
+                                </Label>
+                                <Input
+                                    id="email"
+                                    placeholder="password123"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="col-span-3"
+                                />
+                                <Label htmlFor="password" className="text-right">
+                                    Username
+                                </Label>
+                                <Input
+                                    id="email"
+                                    placeholder="doej"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="col-span-3"
+                                />
+                                <Label htmlFor="password" className="text-right">
+                                    Role
+                                </Label>
+                                <Input
+                                    id="email"
+                                    placeholder="User OR Developer"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="col-span-3"
                                 />
                             </div>
+                            
                         </div>
                         <DialogFooter>
+                        <DialogClose asChild>
+
                             <Button variant="outline" onClick={() => setEmail('')}>
                                 Cancel
                             </Button>
+                        </DialogClose>
+
                             <Button type="submit" onClick={handleNewUser}>
                                 Submit
                             </Button>

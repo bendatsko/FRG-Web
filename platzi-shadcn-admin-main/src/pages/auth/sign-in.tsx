@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,17 +16,18 @@ import Logo from "./components/logo";
 import MobileLogo from "./components/mobile-logo";
 
 const SignIn: React.FC = () => {
-  const [signIn, { isSuccess, isError, error }] = useSignInMutation();
+  const [signIn] = useSignInMutation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const dispatch = useDispatch();
 
-  const initialValues: SignInType = {
-    email: "",
-    password: "",
-    username: "",
+  // Initial form values
+  const initialFormValues: SignInType = {
+    email: "john@example.com",
+    password: "123",
   };
 
+  // Handle form submission
   const handleSubmit = async (values: SignInType, actions: any) => {
     try {
       const result = await signIn(values).unwrap();
@@ -36,22 +37,21 @@ const SignIn: React.FC = () => {
         role: result.user.role,
         uuid: result.user.uuid,
         bio: result.user.bio,
-        id: result.user.id,
       };
 
+      // Ensure the full payload is dispatched
       dispatch(
-          saveUserInfo({
-            token: result.access_token,
-            user: userInfo,
-          })
+        saveUserInfo({
+          token: result.access_token,
+          user: userInfo,
+        })
       );
 
-      console.log("User info saved in Redux (outside reducer):", userInfo);
+      console.log("Component: User information to be saved:", userInfo);
 
       actions.resetForm();
-      navigate("/settings");
+      navigate("/settings"); // Navigate to settings page
     } catch (err) {
-      console.error("Authentication failed:", err);
       toast({
         duration: 1000,
         variant: "destructive",
@@ -61,95 +61,73 @@ const SignIn: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (isSuccess) {
-      toast({
-        duration: 1000,
-        variant: "default",
-        title: "Success",
-        description: "Login successful.",
-      });
-    }
-    if (isError && error) {
-      toast({
-        duration: 1000,
-        variant: "destructive",
-        title: "Error",
-        description: "Authentication failed.",
-      });
-    }
-  }, [isSuccess, isError, error, toast]);
-
   return (
-      <div className="w-screen h-screen flex flex-col lg:flex-row gap-5 lg:gap-0 justify-center items-center">
-        <Logo />
-        <div className="lg:basis-1/2 dark:bg-black dark:text-light flex flex-col justify-center lg:flex-row items-center h-screen">
-          <div className="lg:w-7/12 w-screen px-12 lg:mt-0 lg:px-0 mx-auto">
-            <MobileLogo />
-            <br />
-            <div className="text-2xl mb-4">Sign In</div>
-            <Formik
-                initialValues={initialValues}
-                validationSchema={signInSchema}
-                onSubmit={handleSubmit}
-            >
-              {({ values, handleBlur, handleChange, isSubmitting }) => (
-                  <Form className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                          className="border-black/20"
-                          type="email"
-                          name="email"
-                          id="email"
-                          value={values.email}
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          placeholder="john@example.com"
-                      />
-                      <ErrorMessage
-                          name="email"
-                          component="div"
-                          className="text-sm text-danger"
-                      />
-                    </div>
+    <div className="w-screen h-screen flex flex-col lg:flex-row gap-5 lg:gap-0 justify-center items-center">
+      <Logo />
+      <div className="lg:basis-1/2 dark:bg-black dark:text-light flex flex-col justify-center lg:flex-row items-center h-screen">
+        <div className="lg:w-7/12 w-screen px-12 lg:mt-0 lg:px-0 mx-auto">
+          <MobileLogo />
+          <br />
+          <div className="text-2xl mb-4">Sign In</div>
+          <Formik
+            initialValues={initialFormValues}
+            validationSchema={signInSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ values, handleBlur, handleChange, isSubmitting }) => (
+              <Form className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    className="border-black/20"
+                    type="email"
+                    name="email"
+                    id="email"
+                    value={values.email}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                  />
+                  <ErrorMessage
+                    name="email"
+                    component="div"
+                    className="text-sm text-danger"
+                  />
+                </div>
 
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="password">Password</Label>
-                      <InputPassword
-                          className="border-black/20"
-                          width="100%"
-                          name="password"
-                          id="password"
-                          value={values.password}
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          placeholder="****"
-                      />
-                      <ErrorMessage
-                          name="password"
-                          component="div"
-                          className="text-sm text-danger"
-                      />
-                    </div>
+                <div className=" flex flex-col gap-2">
+                  <Label htmlFor="password">Password</Label>
+                  <InputPassword
+                    className="border-black/20"
+                    name="password"
+                    id="password"
+                    value={values.password}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                  />
+                  <ErrorMessage
+                    name="password"
+                    component="div"
+                    className="text-sm text-danger"
+                  />
+                </div>
 
-                    <Button
-                        type="submit"
-                        variant="default"
-                        disabled={isSubmitting}
-                        className="w-full"
-                    >
-                      {isSubmitting && (
-                          <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                      Sign In
-                    </Button>
-                  </Form>
-              )}
-            </Formik>
-          </div>
+                <Button
+                  type="submit"
+                  variant="default"
+                  disabled={isSubmitting}
+                  className="w-full"
+                >
+                  {isSubmitting && (
+                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Sign In
+                </Button>
+              </Form>
+            )}
+          </Formik>
         </div>
       </div>
+    </div>
   );
 };
 
