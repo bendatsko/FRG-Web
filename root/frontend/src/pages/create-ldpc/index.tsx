@@ -62,10 +62,10 @@ const Create: React.FC = () => {
     const parsedData = {
         ...data,
         author: user.username,
-        DUT: 'Your DUT Info Here',
+        DUT: 'LDPC',
         username: user.username,
         accessible_to: [user.username],
-        status: 'Pending',
+        status: 'Queued',
         duration: 123
     };
 

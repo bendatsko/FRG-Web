@@ -1,6 +1,7 @@
-import {ColumnDef} from '@tanstack/react-table';
-import {Checkbox} from '@/components/ui/checkbox';
-import {Button} from '@/components/ui/button';
+import React, { useState } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -9,8 +10,19 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {MoreHorizontal} from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import axios from "axios";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import ShareModal from './shareModal';
+
 
 export const recentTestsColumns: ColumnDef<any>[] = [
     {
@@ -56,15 +68,34 @@ export const recentTestsColumns: ColumnDef<any>[] = [
     {
         accessorKey: 'actions',
         header: 'Action',
-        cell: ({row}) => {
+        cell: ({ row }) => {
             const handleDelete = async () => {
                 const confirmDelete = window.confirm("Are you sure you want to delete this test?");
                 if (confirmDelete) {
                     try {
                         await axios.delete(`http://localhost:3001/tests/${row.original.id}`);
+                        // Implement a way to refresh the table data after deletion
                     } catch (error) {
                         console.error('Error deleting test:', error);
                     }
+                }
+            };
+
+            const handleShare = async (newUser) => {
+                try {
+                    await axios.post(`http://localhost:3001/tests/${row.original.id}/share`, { username: newUser });
+                    // Implement a way to refresh the table data after sharing
+                } catch (error) {
+                    console.error('Error sharing test:', error);
+                }
+            };
+
+            const handleRemoveAccess = async (userToRemove) => {
+                try {
+                    await axios.post(`http://localhost:3001/tests/${row.original.id}/remove-access`, { username: userToRemove });
+                    // Implement a way to refresh the table data after removing access
+                } catch (error) {
+                    console.error('Error removing access:', error);
                 }
             };
 
@@ -81,7 +112,12 @@ export const recentTestsColumns: ColumnDef<any>[] = [
                         <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.getValue('id'))}>
                             Copy ID
                         </DropdownMenuItem>
-                        <DropdownMenuItem>Share</DropdownMenuItem>
+                        <ShareModal
+                            testId={row.original.id}
+                            accessibleTo={row.original.accessible_to}
+                            onShare={handleShare}
+                            onRemove={handleRemoveAccess}
+                        />
                         <DropdownMenuItem>View Details</DropdownMenuItem>
                         <DropdownMenuSeparator/>
                         <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>

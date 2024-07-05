@@ -416,6 +416,79 @@ app.delete('/tests/:id', (req, res) => {
 });
 
 
+
+
+
+// Share a test with a user
+app.post('/tests/:id/share', (req, res) => {
+    const { id } = req.params;
+    const { username } = req.body;
+
+    db.get(`SELECT accessible_to FROM tests WHERE id = ?`, [id], (err, row) => {
+        if (err) {
+            console.error('Error fetching test:', err);
+            return res.status(500).send("Internal server error");
+        }
+        if (!row) {
+            return res.status(404).send("Test not found");
+        }
+
+        let accessibleTo = JSON.parse(row.accessible_to);
+        if (!Array.isArray(accessibleTo)) {
+            accessibleTo = [];
+        }
+
+        if (!accessibleTo.includes(username)) {
+            accessibleTo.push(username);
+        }
+
+        db.run(`UPDATE tests SET accessible_to = ? WHERE id = ?`, 
+               [JSON.stringify(accessibleTo), id], (err) => {
+            if (err) {
+                console.error('Error updating test:', err);
+                return res.status(500).send("Failed to share test");
+            }
+            res.status(200).send("Test shared successfully");
+        });
+    });
+});
+
+// Remove a user's access to a test
+app.post('/tests/:id/remove-access', (req, res) => {
+    const { id } = req.params;
+    const { username } = req.body;
+
+    db.get(`SELECT accessible_to FROM tests WHERE id = ?`, [id], (err, row) => {
+        if (err) {
+            console.error('Error fetching test:', err);
+            return res.status(500).send("Internal server error");
+        }
+        if (!row) {
+            return res.status(404).send("Test not found");
+        }
+
+        let accessibleTo = JSON.parse(row.accessible_to);
+        if (!Array.isArray(accessibleTo)) {
+            accessibleTo = [];
+        }
+
+        accessibleTo = accessibleTo.filter(user => user !== username);
+
+        db.run(`UPDATE tests SET accessible_to = ? WHERE id = ?`, 
+               [JSON.stringify(accessibleTo), id], (err) => {
+            if (err) {
+                console.error('Error updating test:', err);
+                return res.status(500).send("Failed to remove access");
+            }
+            res.status(200).send("Access removed successfully");
+        });
+    });
+});
+
+
+
 app.listen(PORT, () => {
     console.log(`Rest API started. Running on port ${PORT}`);
 });
+
+
