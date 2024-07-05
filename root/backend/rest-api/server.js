@@ -88,12 +88,12 @@ db.serialize(() => {
 
 // Register -- added some things 7/4/24
 app.post('/register', (req, res) => {
-    const {email, password, username, bio} = req.body;
+    const {email, password, username, bio, role} = req.body;
     const hashedPassword = bcrypt.hashSync(password, 8);
     const uuid = uuidv4();
 
-    db.run(`INSERT INTO users (email, password, username, bio, uuid) VALUES (?, ?, ?, ?, ?)`, 
-           [email, hashedPassword, username, bio, uuid], function (err) {
+    db.run(`INSERT INTO users (email, password, username, bio, uuid, role) VALUES (?, ?, ?, ?, ?, ?)`, 
+           [email, hashedPassword, username, bio, uuid, role], function (err) {
         if (err) {
             console.error('Error during user registration', err);
             return res.status(500).send("User registration failed");
