@@ -52,6 +52,23 @@ db.serialize(() => {
         });
     });
 
+    db.run(`CREATE TABLE IF NOT EXISTS tests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        author TEXT NOT NULL,
+        testBench TEXT,
+        snrRange TEXT,
+        batchSize INTEGER,
+        user_id INTEGER,
+        accessible_to TEXT,
+        DUT TEXT,
+        status TEXT NOT NULL,
+        duration INTEGER NOT NULL
+    )`);
+    
+    
+    
+
     db.run(`CREATE TABLE IF NOT EXISTS notifications (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
@@ -60,6 +77,8 @@ db.serialize(() => {
         read BOOLEAN DEFAULT 0,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )`);
+
+
 });
 
 
@@ -329,24 +348,32 @@ app.put('/notifications/:id/read', (req, res) => {
 
 // Fetch tests
 app.get('/tests', (req, res) => {
-    db.all(`SELECT * FROM tests`, [], (err, rows) => {
+    const userId = req.query.userId;
+
+    if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+    }
+
+    db.all(`SELECT t.* FROM tests t, json_each(t.accessible_to) as je WHERE je.value = ?`, [userId], (err, rows) => {
         if (err) {
             console.error('Error fetching tests:', err);
-            return res.status(500).send("Internal server error");
+            return res.status(500).json({ error: "Internal server error" });
         }
         res.status(200).json(rows);
     });
+    
 });
 
 // Create test
 app.post('/tests', (req, res) => {
-    const {title, author, DUT, status, duration, user_id} = req.body;
+    console.log(req.body); // Add this line to log the incoming request body
+    const { title, author, testBench, snrRange, batchSize, user_id, accessible_to, DUT, status, duration } = req.body;
 
-    db.run(`INSERT INTO tests (title, author, DUT, status, duration, user_id) VALUES (?, ?, ?, ?, ?, ?)`,
-        [title, author, DUT, status, duration, user_id], function (err) {
+    db.run(`INSERT INTO tests (title, author, testBench, snrRange, batchSize, user_id, accessible_to, DUT, status, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [title, author, testBench, snrRange, batchSize, user_id, JSON.stringify(accessible_to), DUT, status, duration], function (err) {
             if (err) {
                 console.error('Error creating test', err);
-                return res.status(500).send("Test creation failed");
+                return res.status(500).send("Test creation failed: " + err.message);
             }
             res.status(200).send({
                 message: "Test created successfully",
@@ -354,6 +381,10 @@ app.post('/tests', (req, res) => {
             });
         });
 });
+
+
+
+
 
 // Edit test
 app.put('/tests/:id', (req, res) => {
