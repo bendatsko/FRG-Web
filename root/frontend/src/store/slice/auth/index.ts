@@ -3,12 +3,14 @@ import {getCookie, removeCookie, setCookie} from "typescript-cookie";
 
 // Define the user interface
 export interface User {
+    id: number; // Assuming ID is a number, adjust if it's a string
     email: string;
     username: string;
     role: string;
     bio: string;
     uuid: string;
 }
+
 
 // Define the initial state interface
 export interface InitialState {
@@ -60,12 +62,16 @@ export const {saveUserInfo, removeUserInfo} = authSlice.actions;
 export const token = (state: {
     auth: InitialState
 }) => state.auth.token;
-export const selectUser = (state: {
-    auth: InitialState
-}) => {
-    const userJson = getCookie("user") || state.auth.user; // Access user as a JSON string from cookies or state
-    return JSON.parse(userJson || "{}"); // Deserialize user from JSON string
+export const selectUser = (state: { auth: InitialState }) => {
+    try {
+        const userJson = getCookie("user") || state.auth.user; // Access user as a JSON string from cookies or state
+        return JSON.parse(userJson || "{}"); // Deserialize user from JSON string
+    } catch (e) {
+        console.error("Failed to parse user data:", e);
+        return {}; // Return an empty object if parsing fails
+    }
 };
+
 
 // Export the reducer
 export default authSlice.reducer;

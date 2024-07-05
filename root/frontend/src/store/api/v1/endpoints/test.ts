@@ -4,7 +4,7 @@ const testApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getTests: builder.query({
       query: (userId) => ({
-        url: `http://localhost:3001/tests?userId=${userId}`,
+        url: `http://localhost:3001/tests?username=${userId}`,
         method: "GET",
       }),
       providesTags: ["Test"],

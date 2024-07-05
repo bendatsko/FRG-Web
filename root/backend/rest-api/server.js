@@ -348,29 +348,30 @@ app.put('/notifications/:id/read', (req, res) => {
 
 // Fetch tests
 app.get('/tests', (req, res) => {
-    const userId = req.query.userId;
+    const username = req.query.username;
 
-    if (!userId) {
-        return res.status(400).json({ error: "User ID is required" });
+    if (!username) {
+        return res.status(400).json({ error: "Username is required" });
     }
 
-    db.all(`SELECT t.* FROM tests t, json_each(t.accessible_to) as je WHERE je.value = ?`, [userId], (err, rows) => {
+    db.all(`SELECT * FROM tests WHERE JSON_EXTRACT(accessible_to, '$') LIKE ?`, [`%${username}%`], (err, rows) => {
         if (err) {
             console.error('Error fetching tests:', err);
             return res.status(500).json({ error: "Internal server error" });
         }
         res.status(200).json(rows);
     });
-    
 });
 
 // Create test
 app.post('/tests', (req, res) => {
-    console.log(req.body); // Add this line to log the incoming request body
-    const { title, author, testBench, snrRange, batchSize, user_id, accessible_to, DUT, status, duration } = req.body;
+    console.log(req.body);
+    const { title, author, testBench, snrRange, batchSize, username, accessible_to, DUT, status, duration } = req.body;
 
-    db.run(`INSERT INTO tests (title, author, testBench, snrRange, batchSize, user_id, accessible_to, DUT, status, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [title, author, testBench, snrRange, batchSize, user_id, JSON.stringify(accessible_to), DUT, status, duration], function (err) {
+    db.run(`INSERT INTO tests (title, author, testBench, snrRange, batchSize, username, accessible_to, DUT, status, duration) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [title, author, testBench, snrRange, batchSize, username, JSON.stringify(accessible_to), DUT, status, duration], 
+        function (err) {
             if (err) {
                 console.error('Error creating test', err);
                 return res.status(500).send("Test creation failed: " + err.message);

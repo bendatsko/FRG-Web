@@ -10,6 +10,8 @@ import { toast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDispatch } from "react-redux";
 import { setBreadCrumb } from "@/store/slice/app";
+import { useSelector } from "react-redux";
+import { selectUser } from "@/store/slice/auth";
 
 const TestSettingsSchema = z.object({
   title: z.string().nonempty("Title is required"),
@@ -23,6 +25,8 @@ type TestSettingsFormValues = z.infer<typeof TestSettingsSchema>;
 const Create: React.FC = () => {
   const dispatch = useDispatch();
   const [userId, setUserId] = useState("");
+  const user = useSelector(selectUser);
+
 
   useEffect(() => {
     dispatch(
@@ -57,16 +61,13 @@ const Create: React.FC = () => {
   const onSubmit = async (data: TestSettingsFormValues) => {
     const parsedData = {
         ...data,
-        author: 'Author Name',
+        author: user.username,
         DUT: 'Your DUT Info Here',
-        user_id: userId,
-        accessible_to: [userId],
+        username: user.username,
+        accessible_to: [user.username],
         status: 'Pending',
         duration: 123
     };
-    
-    
-    
 
     try {
         const response = await fetch("http://localhost:3001/tests", {
@@ -77,15 +78,16 @@ const Create: React.FC = () => {
             body: JSON.stringify(parsedData),
         });
 
-        const result = await response.json();
-        if (response.ok) {
-            toast({
-                title: "Test created",
-                description: "Your LDPC chip test has been successfully created.",
-            });
-        } else {
-            throw new Error(result.message || "Failed to create test");
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to create test");
         }
+
+        const result = await response.json();
+        toast({
+            title: "Test created",
+            description: "Your LDPC chip test has been successfully created.",
+        });
     } catch (error) {
         toast({
             title: "Error",

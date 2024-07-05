@@ -6,12 +6,14 @@ import { Loading } from "@geist-ui/core";
 import { useDispatch, useSelector } from "react-redux";
 import { setBreadCrumb } from "@/store/slice/app";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { selectUser } from "@/store/slice/auth";
 
 const Dashboard = () => {
     const dispatch = useDispatch();
-    const userId = useSelector(state => state.auth.user?.id); // Assuming you have the user ID in your Redux store
+    const user = useSelector(selectUser);
+    console.log("User object:", user);
 
-    const { data, isLoading, error } = useGetTestsQuery(userId);
+    const { data, isLoading, error } = useGetTestsQuery(user.username);
 
     useEffect(() => {
         dispatch(
