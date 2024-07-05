@@ -1,6 +1,6 @@
 "use client";
 
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useForm} from "react-hook-form";
 import {z} from "zod";
@@ -17,6 +17,9 @@ import {
 } from "@/components/ui/select";
 import {Input} from "@/components/ui/input";
 import {toast} from "@/components/ui/use-toast";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {useDispatch} from "react-redux";
+import {setBreadCrumb} from "@/store/slice/app";
 
 // Validation schema
 const TestSettingsSchema = z.object({
@@ -33,6 +36,17 @@ type TestSettingsFormValues = z.infer<typeof TestSettingsSchema>;
 const Create: React.FC = () => {
     const [autoGenerateEnabled, setAutoGenerateEnabled] = useState(false);
 
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(
+          setBreadCrumb([
+            { title: "Dashboard", link: "/dashboard" },
+            { title: "New Test", link: "/dashboard" },
+            { title: "LDPC Chip", link: "/dashboard" },
+          ])
+        );
+      }, [dispatch]);
+      
     const form = useForm<TestSettingsFormValues>({
         resolver: zodResolver(TestSettingsSchema),
         defaultValues: {
@@ -88,11 +102,13 @@ const Create: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto p-6">
-            <div className="text-2xl font-semibold mb-4">Create LDPC Chip Test</div>
-            <div className="border-b border-black/20 dark:border-white/20 mb-6"/>
-
-            <div className=" ">
+        <div className="container mx-auto mb-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className>New Test</CardTitle>
+            <CardDescription>Complete the fields to create a new test suite for LDPC chip.</CardDescription>
+          </CardHeader>
+          <CardContent>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <FormField
@@ -186,7 +202,8 @@ const Create: React.FC = () => {
                         </div>
                     </form>
                 </Form>
-            </div>
+            </CardContent>
+            </Card>
         </div>
     );
 };

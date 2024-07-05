@@ -1,135 +1,249 @@
-import React, {useEffect, useState} from "react";
-import {useSelector} from "react-redux";
-import {selectUser} from "@/store/slice/auth"; // Ensure the path is correct
-import {Button} from "@/components/ui/button";
-import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
-import {Input} from "@/components/ui/input";
-import {zodResolver} from "@hookform/resolvers/zod";
-import {useForm} from "react-hook-form";
-import {z} from "zod";
-import {Dialog, DialogClose, DialogContent, DialogTrigger} from '@/components/ui/dialog';
-import {DialogTitle} from "@radix-ui/react-dialog";
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { selectUser } from "@/store/slice/auth";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+// import { Separator } from "@/components/ui/se";
+import { toast } from "@/components/ui/use-toast";
+import {setBreadCrumb} from "@/store/slice/app";
+import {useDispatch} from "react-redux";
 
 
-const TestSettingsSchema = z.object({
-    title: z.string().nonempty("Title is required"),
-    author: z.string().nonempty("Author is required"),
-    DUT: z.string().nonempty("DUT is required"),
-    status: z.string().nonempty("Status is required"),
-    duration: z.string().nonempty("Duration is required"),
-    user_id: z.string().nonempty("user_id is required"),
+
+
+
+
+
+  
+
+const SettingsSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Invalid email address"),
+  bio: z.string().max(160, "Bio must not exceed 160 characters").optional(),
 });
-type TestSettingsFormValues = z.infer<typeof TestSettingsSchema>;
 
+const PasswordResetSchema = z.object({
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
-const Settings: React.FC = () => {
-    const user = useSelector(selectUser);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const form = useForm<TestSettingsFormValues>({
-        resolver: zodResolver(TestSettingsSchema),
-        defaultValues: {
-            username: user.username,
-            email: user.email,
-            uuid: user.uuid,
-            bio: user.bio,
-            role: user.role,
-        },
-    });
+const Settings = () => {
+  const user = useSelector(selectUser);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const dispatch = useDispatch();
 
-    useEffect(() => {
-        console.log("User information:", user);
-    }, [user]);
+  useEffect(() => {
+    dispatch(
+      setBreadCrumb([
+        { title: "Dashboard", link: "/dashboard" },
+        { title: "Settings", link: "/settings" },
 
-    const onSubmit = async (data: TestSettingsFormValues) => {
-        console.log("Form data submitted:", data);
-    }
-
-
-    return (
-        <div className="container mx-auto p-6">
-            <div className="text-2xl font-semibold mb-4">Account Settings</div>
-            <div className="border-b border-black/20 dark:border-white/20 mb-6"/>
-
-            <div className=" ">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <FormField
-                            control={form.control}
-                            name="username"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel>Username</FormLabel>
-                                    <FormDescription>Your public-facing alias. Use your username to send and receive
-                                        tests.</FormDescription>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormDescription>Submit a support ticket to change this.</FormDescription>
-                                    <FormControl>
-                                        <Input placeholder={user.email} {...field} disabled/>
-                                    </FormControl>
-
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
-
-
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button type="primary" onClick={() => setIsDialogOpen(true)}>Change password</Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogTitle className="text-lg font-semibold">Change Your Password</DialogTitle>
-                                <form onSubmit={(e) => {
-                                    e.preventDefault();
-                                    const formData = new FormData(e.target);
-                                    const currentPassword = formData.get('currentPassword');
-                                    const newPassword = formData.get('newPassword');
-                                    const confirmPassword = formData.get('confirmPassword');
-                                    if (newPassword === confirmPassword) {
-                                        console.log("New Password Set:", newPassword);
-                                        setIsDialogOpen(false);  // Close the dialog
-                                    } else {
-                                        console.log("Passwords do not match.");
-                                    }
-                                }}>
-                                    <Input type="password" name="currentPassword" placeholder="Current Password"
-                                           required className="mb-2"/>
-                                    <Input type="password" name="newPassword" placeholder="New Password" required
-                                           className="mb-2"/>
-                                    <Input type="password" name="confirmPassword" placeholder="Confirm New Password"
-                                           required className="mb-6"/>
-                                    <Button type="submit">Save and Close</Button>
-                                    <DialogClose asChild>
-                                        <Button variant="ghost" className="mx-3">Cancel</Button>
-                                    </DialogClose>
-                                </form>
-                            </DialogContent>
-                            <FormDescription>UUID: {user.uuid} <br/>Role: {user.role}</FormDescription>
-
-                        </Dialog>
-
-
-                        <div className="flex justify-end">
-                            <Button type="submit">Save </Button>
-                        </div>
-                    </form>
-                </Form>
-            </div>
-        </div>
+      ])
     );
+  }, [dispatch]);
+
+
+  const form = useForm({
+    resolver: zodResolver(SettingsSchema),
+    defaultValues: {
+      username: user.username,
+      email: user.email,
+      bio: user.bio || "",
+    },
+  });
+
+  const resetForm = useForm({
+    resolver: zodResolver(PasswordResetSchema),
+    defaultValues: {
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  const onSubmit = async (data) => {
+    try {
+      const response = await fetch(`http://localhost:3001/users/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Settings updated",
+          description: "Your account settings have been updated successfully.",
+        });
+      } else {
+        throw new Error('Failed to update settings');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update settings. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const onResetPassword = async (data) => {
+    try {
+      const response = await fetch('http://localhost:3001/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, newPassword: data.newPassword }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Password reset",
+          description: "Your password has been reset successfully.",
+        });
+        setIsResetDialogOpen(false);
+        resetForm.reset();
+      } else {
+        throw new Error('Failed to reset password');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to reset password. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="container mx-auto mb-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className>Account Settings</CardTitle>
+          <CardDescription>Manage your account settings and set email preferences.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This is your public display name. It can be your real name or a pseudonym.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" />
+                    </FormControl>
+                    <FormDescription>
+                      You can manage verified email addresses in your email settings.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bio</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Write a short bio about yourself. Max 160 characters.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit">Save changes</Button>
+            </form>
+          </Form>
+        </CardContent>
+        {/* <Separator className="my-4" /> */}
+        <CardFooter className="flex justify-between">
+          <div>
+            <CardDescription>
+              User ID: {user.id}
+            </CardDescription>
+            <CardDescription>
+              Role: {user.role}
+            </CardDescription>
+          </div>
+          <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">Reset Password</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Reset Password</DialogTitle>
+                <DialogDescription>
+                  Enter your new password below. After resetting your password, you'll be logged out.
+                </DialogDescription>
+              </DialogHeader>
+              <Form {...resetForm}>
+                <form onSubmit={resetForm.handleSubmit(onResetPassword)} className="space-y-4">
+                  <FormField
+                    control={resetForm.control}
+                    name="newPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={resetForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <DialogFooter>
+                    <Button type="submit">Reset Password</Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </CardFooter>
+      </Card>
+    </div>
+  );
 };
 
 export default Settings;

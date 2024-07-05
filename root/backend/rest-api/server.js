@@ -8,8 +8,7 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3001;
 const SECRET_KEY = "your_secret_key";
-const {v4: uuidv4} = require('uuid');
-
+const { v4: uuidv4 } = require('uuid');
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -52,6 +51,15 @@ db.serialize(() => {
             });
         });
     });
+
+    db.run(`CREATE TABLE IF NOT EXISTS notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        message TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        read BOOLEAN DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    )`);
 });
 
 
@@ -59,12 +67,14 @@ db.serialize(() => {
 /*                              Authentication                                */
 /* -------------------------------------------------------------------------- */
 
-// Register
+// Register -- added some things 7/4/24
 app.post('/register', (req, res) => {
-    const {email, password} = req.body;
+    const {email, password, username, bio} = req.body;
     const hashedPassword = bcrypt.hashSync(password, 8);
+    const uuid = uuidv4();
 
-    db.run(`INSERT INTO users (email, password) VALUES (?, ?)`, [email, hashedPassword], function (err) {
+    db.run(`INSERT INTO users (email, password, username, bio, uuid) VALUES (?, ?, ?, ?, ?)`, 
+           [email, hashedPassword, username, bio, uuid], function (err) {
         if (err) {
             console.error('Error during user registration', err);
             return res.status(500).send("User registration failed");
@@ -107,13 +117,28 @@ app.post('/login', (req, res) => {
 });
 
 
+// // Password reset
+// app.post('/reset-password', (req, res) => {
+//     const {userId, newPassword} = req.body;
+//     const hashedPassword = bcrypt.hashSync(newPassword, 8);
+
+//     db.run(`UPDATE users SET password = ? WHERE id = ?`, [hashedPassword, userId], function (err) {
+//         if (err) {
+//             console.error('Error resetting password', err);
+//             return res.status(500).send("Password reset failed");
+//         }
+//         res.status(200).send("Password reset successfully");
+//     });
+// });
+
+
 /* -------------------------------------------------------------------------- */
 /*                              User endpoints                                */
 /* -------------------------------------------------------------------------- */
 
 // Fetch users
 app.get('/users', (req, res) => {
-    db.all(`SELECT email FROM users`, [], (err, rows) => {
+    db.all(`SELECT id, email, username, role, bio FROM users`, [], (err, rows) => {
         if (err) {
             console.error('Error fetching users:', err);
             return res.status(500).send("Internal server error");
@@ -121,6 +146,54 @@ app.get('/users', (req, res) => {
         res.status(200).json(rows);
     });
 });
+
+
+// Fetch user by id
+app.get('/users/:id', (req, res) => {
+    const { id } = req.params;
+    db.get(`SELECT id, username, email, uuid, role, bio FROM users WHERE id = ?`, [id], (err, user) => {
+        if (err) {
+            console.error('Error fetching user information', err);
+            return res.status(500).send("Internal server error");
+        }
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+        res.status(200).json(user);
+    });
+});
+
+
+// Update user
+app.put('/users/:id', (req, res) => {
+    const { id } = req.params;
+    const { username, email, role, bio } = req.body;
+
+    db.run(`UPDATE users SET username = ?, email = ?, role = ?, bio = ? WHERE id = ?`,
+        [username, email, role, bio, id], function (err) {
+            if (err) {
+                console.error('Error updating user information', err);
+                return res.status(500).send("User update failed");
+            }
+            res.status(200).send("User updated successfully");
+        });
+});
+
+
+
+// Delete user
+app.delete('/users/:id', (req, res) => {
+    const { id } = req.params;
+
+    db.run(`DELETE FROM users WHERE id = ?`, [id], function (err) {
+        if (err) {
+            console.error('Error deleting user', err);
+            return res.status(500).send("User deletion failed");
+        }
+        res.status(200).send("User deleted successfully");
+    });
+});
+
 
 // Fetch user by uuid
 app.get('/user/uuid/:uuid', (req, res) => {
@@ -141,13 +214,13 @@ app.get('/user/uuid/:uuid', (req, res) => {
     });
 });
 
-// Update user by uuid
-app.put('/user/:id', (req, res) => {
-    const {id} = req.params;
-    const {username, email, uuid, role, bio, currentPassword, newPassword} = req.body;
 
-    // Fetch current user
-    db.get(`SELECT * FROM users WHERE id = ?`, [id], (err, user) => {
+// Password reset (per user)
+app.post('/reset-password', (req, res) => {
+    const { userId, newPassword } = req.body;
+
+    // Fetch the user from the database to obtain the username
+    db.get(`SELECT * FROM users WHERE id = ?`, [userId], (err, user) => {
         if (err) {
             console.error('Error fetching user information', err);
             return res.status(500).send("Internal server error");
@@ -156,27 +229,95 @@ app.put('/user/:id', (req, res) => {
             return res.status(404).send("User not found");
         }
 
-        // Validate current password
-        const passwordIsValid = bcrypt.compareSync(currentPassword, user.password);
-        if (!passwordIsValid) {
-            return res.status(401).send("Invalid current password");
-        }
+        // Hash the new password
+        const hashedPassword = bcrypt.hashSync(newPassword, 8);
 
-        // Hash new password if provided
-        let hashedPassword = user.password;
-        if (newPassword) {
-            hashedPassword = bcrypt.hashSync(newPassword, 8);
-        }
+        // Update the user's password in the database
+        db.run(`UPDATE users SET password = ? WHERE id = ?`, [hashedPassword, userId], function (err) {
+            if (err) {
+                console.error('Error resetting password', err);
+                return res.status(500).send("Password reset failed");
+            }
 
-        // Update user information
-        db.run(`UPDATE users SET username = ?, email = ?, uuid = ?, password = ?, role = ?, bio = ? WHERE id = ?`,
-            [username, email, uuid, hashedPassword, role, bio, id], function (err) {
-                if (err) {
-                    console.error('Error updating user information', err);
-                    return res.status(500).send("User update failed");
-                }
-                res.status(200).send("User updated successfully");
-            });
+            // Log the username, raw new password, and encrypted password
+            console.log(`${user.username} changed password to: ${newPassword} (raw), ${hashedPassword} (encrypted)`);
+
+            res.status(200).send("Password reset successfully");
+        });
+    });
+});
+
+
+
+app.put('/users/:id', (req, res) => {
+    const { id } = req.params;
+    const { username, email, role, bio } = req.body;
+
+    db.run(`UPDATE users SET username = ?, email = ?, role = ?, bio = ? WHERE id = ?`,
+        [username, email, role, bio, id], (err) => {
+            if (err) {
+                console.error('Error updating user information', err);
+                return res.status(500).send("User update failed");
+            }
+            res.status(200).send("User updated successfully");
+        });
+});
+
+
+// No authorization required for fetching notifications for testing purposes.
+app.get('/notifications', (req, res) => {
+    const user_id = req.query.user_id;
+    db.all(`SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC`, [user_id], (err, rows) => {
+        if (err) {
+            console.error('Error fetching notifications:', err);
+            return res.status(500).send("Internal server error");
+        }
+        res.status(200).json(rows);
+    });
+});
+
+
+
+// Create a new notification
+app.post('/notifications', (req, res) => {
+    const { user_id, message } = req.body;
+
+    db.run(`INSERT INTO notifications (user_id, message) VALUES (?, ?)`, [user_id, message], function (err) {
+        if (err) {
+            console.error('Error creating notification', err);
+            return res.status(500).send("Notification creation failed");
+        }
+        res.status(200).send({
+            message: "Notification created successfully",
+            notificationId: this.lastID
+        });
+    });
+});
+
+// Clear all notifications for a user
+app.post('/notifications/clear', (req, res) => {
+    const user_id = req.body.user_id;  // Make sure you're receiving the correct user ID
+  
+    db.run(`DELETE FROM notifications WHERE user_id = ?`, [user_id], function (err) {
+      if (err) {
+        console.error('Error clearing notifications', err);
+        return res.status(500).send("Failed to clear notifications");
+      }
+      res.status(200).send("Notifications cleared successfully");
+    });
+  });
+  
+
+// Mark a notification as read
+app.put('/notifications/:id/read', (req, res) => {
+    const { id } = req.params;
+
+    db.run(`UPDATE notifications SET read = 1 WHERE id = ?`, [id], function (err) {
+        if (err) {
+            console.error('Error marking notification as read', err);
+            return res.status(500).send("Failed to mark notification as read");
+        }
+        res.status(200).send("Notification marked as read successfully");
     });
 });
 

@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -10,17 +11,16 @@ import {
     useReactTable,
     VisibilityState,
 } from "@tanstack/react-table";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import React, {useState} from "react";
-import {useTheme} from "@/services/providers/theme-provider"; // Adjust the import path as needed
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useTheme } from "@/services/providers/theme-provider";
 import {
     Dialog,
     DialogClose,
@@ -31,8 +31,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import {Label} from "@/components/ui/label";
-
+import { Label } from "@/components/ui/label";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -40,13 +39,23 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function DataTable<TData, TValue>({
-                                             columns,
-                                             data,
-                                         }: DataTableProps<TData, TValue>) {
+    columns,
+    data,
+}: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-    const [rowSelection, setRowSelection] = useState({});
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+    const [rowSelection, setRowSelection] = useState({});
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('');
+    const [bio, setBio] = useState('');
+    const [role, setRole] = useState('');
+
+    const [resetUserId, setResetUserId] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+
     const table = useReactTable({
         data,
         columns,
@@ -66,9 +75,6 @@ export function DataTable<TData, TValue>({
         },
     });
 
-    const [email, setEmail] = useState('');
-    useTheme(); // Access the current theme
-
     const handleNewUser = async () => {
         try {
             const response = await fetch('http://localhost:3001/register', {
@@ -76,11 +82,17 @@ export function DataTable<TData, TValue>({
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({email, password: 'password123'}),
+                body: JSON.stringify({ email, password, username, bio, role }),
             });
 
             if (response.ok) {
                 console.log('User created successfully');
+                // Reset form fields
+                setEmail('');
+                setPassword('');
+                setUsername('');
+                setBio('');
+                setRole('');
             } else {
                 console.error('Error creating user');
             }
@@ -89,15 +101,38 @@ export function DataTable<TData, TValue>({
         }
     };
 
+    const handleResetPassword = async () => {
+        try {
+            const response = await fetch('http://localhost:3001/reset-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userId: resetUserId, newPassword }),
+            });
+    
+            if (response.ok) {
+                console.log('Password reset successfully');
+                // Reset form fields
+                setResetUserId('');
+                setNewPassword('');
+            } else {
+                throw new Error('Error resetting password');
+            }
+        } catch (error) {
+            console.error('Error resetting password:', error);
+        }
+    };
+    
 
     return (
         <>
             <div className="flex items-center py-4">
                 <Input
-                    placeholder="Filter name..."
-                    value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+                    placeholder="Filter email..."
+                    value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
-                        table.getColumn("name")?.setFilterValue(event.target.value)
+                        table.getColumn("email")?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
                 />
@@ -105,7 +140,7 @@ export function DataTable<TData, TValue>({
                     <DialogTrigger asChild>
                         <Button className="ml-4">New User</Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px] ">
+                    <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>New User</DialogTitle>
                             <DialogDescription>
@@ -128,45 +163,110 @@ export function DataTable<TData, TValue>({
                                     Password
                                 </Label>
                                 <Input
-                                    id="email"
+                                    id="password"
+                                    type="password"
                                     placeholder="password123"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     className="col-span-3"
                                 />
-                                <Label htmlFor="password" className="text-right">
+                                <Label htmlFor="username" className="text-right">
                                     Username
                                 </Label>
                                 <Input
-                                    id="email"
-                                    placeholder="doej"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    id="username"
+                                    placeholder="johndoe"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
                                     className="col-span-3"
                                 />
-                                <Label htmlFor="password" className="text-right">
+                                <Label htmlFor="bio" className="text-right">
+                                    Bio
+                                </Label>
+                                <Input
+                                    id="bio"
+                                    placeholder="A short bio..."
+                                    value={bio}
+                                    onChange={(e) => setBio(e.target.value)}
+                                    className="col-span-3"
+                                />
+                                <Label htmlFor="role" className="text-right">
                                     Role
                                 </Label>
                                 <Input
-                                    id="email"
+                                    id="role"
                                     placeholder="User OR Developer"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    value={role}
+                                    onChange={(e) => setRole(e.target.value)}
                                     className="col-span-3"
                                 />
                             </div>
-
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>
-
-                                <Button variant="outline" onClick={() => setEmail('')}>
+                                <Button variant="outline" onClick={() => {
+                                    setEmail('');
+                                    setPassword('');
+                                    setUsername('');
+                                    setBio('');
+                                    setRole('');
+                                }}>
                                     Cancel
                                 </Button>
                             </DialogClose>
-
                             <Button type="submit" onClick={handleNewUser}>
                                 Submit
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button className="ml-4">Reset Password</Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Reset User Password</DialogTitle>
+                            <DialogDescription>
+                                Reset a user's password by entering their ID and a new password.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="resetUserId" className="text-right">
+                                    User ID
+                                </Label>
+                                <Input
+                                    id="resetUserId"
+                                    placeholder="User ID"
+                                    value={resetUserId}
+                                    onChange={(e) => setResetUserId(e.target.value)}
+                                    className="col-span-3"
+                                />
+                                <Label htmlFor="newPassword" className="text-right">
+                                    New Password
+                                </Label>
+                                <Input
+                                    id="newPassword"
+                                    type="password"
+                                    placeholder="New password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="col-span-3"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button variant="outline" onClick={() => {
+                                    setResetUserId('');
+                                    setNewPassword('');
+                                }}>
+                                    Cancel
+                                </Button>
+                            </DialogClose>
+                            <Button type="submit" onClick={handleResetPassword}>
+                                Reset Password
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -202,7 +302,7 @@ export function DataTable<TData, TValue>({
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className=" dark:border-foreground ">
+                            <TableRow key={headerGroup.id} className="dark:border-foreground">
                                 {headerGroup.headers.map((header) => {
                                     return (
                                         <TableHead key={header.id}>
@@ -224,7 +324,7 @@ export function DataTable<TData, TValue>({
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    className=" dark:border-foreground "
+                                    className="dark:border-foreground"
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>

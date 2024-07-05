@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import { AuthGuard, TopHeader, SideBar } from "@/components";
 import { useSelector } from "react-redux";
+import { Footer } from "../components/ui/footer";
 
 const MainLayout: React.FC = () => {
   const isSideBarOpen = useSelector((state: any) => state.app.isSideBarOpen);
@@ -20,7 +21,10 @@ const MainLayout: React.FC = () => {
           <div className=" mt-6 ">
             <Outlet />
           </div>
+          <Footer />
+
         </main>
+
       </div>
     </AuthGuard>
   );

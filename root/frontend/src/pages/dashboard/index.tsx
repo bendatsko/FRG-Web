@@ -1,14 +1,25 @@
+import React, { useState, useEffect } from 'react';
 import {recentTestsColumns} from "./components/recent-tests-columns";
 import {DataTable} from "./components/recent-tests-table.tsx";
 import {useGetTestsQuery} from "@/store/api/v1/endpoints/test.ts";
-import {useDispatch} from "react-redux";
 import {Loading} from "@geist-ui/core";
-
+import {useDispatch} from "react-redux";
+import {setBreadCrumb} from "@/store/slice/app";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Dashboard = () => {
-    const dispatch = useDispatch();
-    // dispatch(setBreadCrumb([{ title: "Dashboard", link: "/dashboard" }]));
     const {data, isLoading} = useGetTestsQuery({});
+
+
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(
+          setBreadCrumb([
+            { title: "Dashboard", link: "/dashboard" },
+          ])
+        );
+      }, [dispatch]);
+
 
     if (isLoading) {
         return (
@@ -20,14 +31,16 @@ const Dashboard = () => {
         );
     } else {
         return (
-            <div className="container mx-auto p-6">
-                <div className="text-2xl font-semibold mb-4">My Tests</div>
-
-                <div className="border-b border-black/20 dark:border-white/20 mb-6"/>
-
-                <div className=" ">
-                    <DataTable columns={recentTestsColumns} data={data}/>
-                </div>
+            <div className="container mx-auto mb-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className>My Tests</CardTitle>
+                <CardDescription>Manage the tests you have created and those that others have shared with you.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DataTable columns={recentTestsColumns} data={data}/>
+              </CardContent>
+            </Card>
             </div>
         );
     }

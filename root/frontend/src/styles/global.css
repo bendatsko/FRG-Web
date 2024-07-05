@@ -41,3 +41,20 @@
         /*@apply bg-slate-200 dark:bg-slate-800;*/
     }
 }
+
+.button-relative {
+    position: relative; /* This will contain the Badge correctly */
+  }
+
+  .badge {
+    position: absolute;
+    top: -5px; 
+    right: -5px; 
+    background-color: blue;
+    color: white;
+    font-size: 10px; 
+    padding: 2px 5px; 
+    border-radius: 10px; 
+    font-weight: bold;
+  }
+  
