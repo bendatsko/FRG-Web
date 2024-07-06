@@ -1,6 +1,5 @@
 import React from "react";
-import {DAQROCLogo} from "@/components/common/logo-d.tsx";
-
+import {DAQROCLogo} from "@/components/common/DaqrocSquareIcon.tsx";
 
 const MobileLogo: React.FC = () => {
     return (

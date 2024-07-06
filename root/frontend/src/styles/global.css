@@ -1,19 +1,19 @@
-@import url("https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Geist+Sans:wght@100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 
 @layer base {
     :root {
         --primary: #5396fb;
         --secondary: #8fd8fc;
         --danger: #ff204e;
-        --background: #000;
+        --background: black;
         --foreground: #1F1F1F;
         --dark: #000000;
         --light: rgba(255, 255, 255, 0.94);
+        --font-sans: 'Geist Sans', sans-serif;
     }
 
     input:-webkit-autofill,
@@ -27,6 +27,8 @@
 @layer utilities {
     body {
         @apply font-sans text-dark bg-light dark:text-light dark:bg-background;
+        margin: 0;
+        padding: 0;
     }
 
     .toast-top-left {
@@ -44,17 +46,16 @@
 
 .button-relative {
     position: relative; /* This will contain the Badge correctly */
-  }
+}
 
-  .badge {
+.badge {
     position: absolute;
-    top: -5px; 
-    right: -5px; 
+    top: -5px;
+    right: -5px;
     background-color: blue;
     color: white;
-    font-size: 10px; 
-    padding: 2px 5px; 
-    border-radius: 10px; 
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 10px;
     font-weight: bold;
-  }
-  
+}

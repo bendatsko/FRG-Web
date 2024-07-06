@@ -1,33 +1,33 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
-import { AuthGuard, TopHeader, SideBar } from "@/components";
-import { useSelector } from "react-redux";
-import { Footer } from "../components/ui/footer";
+import {Outlet} from "react-router-dom";
+import {AuthGuard, SideBar, TopHeader} from "@/components";
+import {useSelector} from "react-redux";
+import {Footer} from "../components/ui/footer";
 
 const MainLayout: React.FC = () => {
-  const isSideBarOpen = useSelector((state: any) => state.app.isSideBarOpen);
-  return (
-    <AuthGuard>
-      <div className="flex">
-        <div className=" hidden lg:block">
-          <SideBar />
-        </div>
-        <main
-          className={
-            " w-full lg:px-5 px-2 " + (isSideBarOpen ? "lg:ms-60" : "lg:ms-14")
-          }
-        >
-          <TopHeader />
-          <div className=" mt-6 ">
-            <Outlet />
-          </div>
-          <Footer />
+    const isSideBarOpen = useSelector((state: any) => state.app.isSideBarOpen);
+    return (
+        <AuthGuard>
+            <div className="flex">
+                <div className=" hidden lg:block">
+                    <SideBar/>
+                </div>
+                <main
+                    className={
+                        " w-full   " + (isSideBarOpen ? "lg:ms-60" : "lg:ms-14")
+                    }
+                >
+                    <TopHeader/>
+                    <div className=" mt-6 ">
+                        <Outlet/>
+                    </div>
+                    <Footer/>
 
-        </main>
+                </main>
 
-      </div>
-    </AuthGuard>
-  );
+            </div>
+        </AuthGuard>
+    );
 };
 
 export default MainLayout;
