@@ -6,6 +6,10 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const {v4: uuidv4} = require('uuid');
 
+
+const {SerialPort} = require('serialport');
+const {ReadlineParser} = require('@serialport/parser-readline');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 const SECRET_KEY = "your_secret_key";
@@ -13,9 +17,92 @@ const SECRET_KEY = "your_secret_key";
 app.use(bodyParser.json());
 app.use(cors());
 
+// Global queue for tests
+const testQueue = [];
+let isProcessingQueue = false;
+
+// Serial port setup
+const port = new SerialPort({
+    path: '/dev/cu.usbmodem106098201', // Update this to match your Teensy's port
+    baudRate: 9600
+});
+const parser = port.pipe(new ReadlineParser({delimiter: '\n'}));
+const USE_TEENSY = true; // Set this to true when you're ready to use the actual Teensy
+port.on('error', (err) => {
+    console.error('Serial port error:', err.message);
+});
+
 /* -------------------------------------------------------------------------- */
 /*                              Database connect                              */
+
 /* -------------------------------------------------------------------------- */
+
+
+async function updateTestStatus(testId, status) {
+    return new Promise((resolve, reject) => {
+        db.run('UPDATE tests SET status = ? WHERE id = ?', [status, testId], (err) => {
+            if (err) reject(err);
+            else resolve();
+        });
+    });
+}
+
+
+// Function to process the test queue
+async function processTestQueue() {
+    if (isProcessingQueue || testQueue.length === 0) return;
+
+    isProcessingQueue = true;
+    const test = testQueue.shift();
+
+    try {
+        console.log(`Processing test ID: ${test.id}`);
+        await updateTestStatus(test.id, 'Running');
+        const results = await runTestOnTeensy(test);
+        await updateTestWithResults(test.id, results);
+        console.log(`Test ID ${test.id} completed successfully`);
+    } catch (error) {
+        console.error(`Error processing test ID ${test.id}:`, error);
+        await updateTestStatus(test.id, 'Failed');
+    } finally {
+        isProcessingQueue = false;
+        processTestQueue(); // Process next test in queue
+    }
+}
+
+// Function to process the test queue
+async function processTestQueue() {
+    if (isProcessingQueue || testQueue.length === 0) return;
+
+    isProcessingQueue = true;
+    const test = testQueue.shift();
+
+    try {
+        console.log(`Processing test ID: ${test.id}`);
+        await updateTestStatus(test.id, 'Running');
+        const results = await runTestOnTeensy(test);
+        await updateTestWithResults(test.id, results);
+        console.log(`Test ID ${test.id} completed successfully`);
+    } catch (error) {
+        console.error(`Error processing test ID ${test.id}:`, error);
+        await updateTestStatus(test.id, 'Failed');
+    } finally {
+        isProcessingQueue = false;
+        processTestQueue(); // Process next test in queue
+    }
+}
+
+// Function to update test with results
+async function updateTestWithResults(testId, results) {
+    return new Promise((resolve, reject) => {
+        db.run('UPDATE tests SET results = ?, status = ? WHERE id = ?',
+            [JSON.stringify(results), 'Completed', testId],
+            (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+    });
+}
 
 // Connect to SQLite database
 const db = new sqlite3.Database('../data.db', (err) => {
@@ -363,23 +450,77 @@ app.get('/tests', (req, res) => {
 });
 
 // Create test
-app.post('/tests', (req, res) => {
+app.post('/tests', async (req, res) => {
     const {title, author, testBench, snrRange, batchSize, username, accessible_to, DUT, status, duration} = req.body;
 
-    db.run(`INSERT INTO tests (title, author, testBench, snrRange, batchSize, username, accessible_to, DUT, status, duration) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [title, author, testBench, snrRange, batchSize, username, JSON.stringify(accessible_to), DUT, status, duration],
-        function (err) {
-            if (err) {
-                console.error('Error creating test', err);
-                return res.status(500).send("Test creation failed: " + err.message);
-            }
-            res.status(200).send({
-                message: "Test created successfully",
-                testId: this.lastID
-            });
+    try {
+        const testId = await new Promise((resolve, reject) => {
+            db.run(`INSERT INTO tests (title, author, testBench, snrRange, batchSize, username, accessible_to, DUT, status, duration) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [title, author, testBench, snrRange, batchSize, username, JSON.stringify(accessible_to), DUT, 'Queued', duration],
+                function (err) {
+                    if (err) reject(err);
+                    else resolve(this.lastID);
+                });
         });
+
+        console.log(`Test created with ID: ${testId}`);
+
+        // Add test to queue
+        testQueue.push({id: testId, snrRange, batchSize});
+        processTestQueue(); // Try to process queue (will only proceed if no test is running)
+
+        res.status(200).send({
+            message: "Test created and queued successfully",
+            testId: testId
+        });
+    } catch (error) {
+        console.error('Error creating test:', error);
+        res.status(500).send("Test creation failed: " + error.message);
+    }
 });
+
+
+// Function to run test on Teensy
+function runTestOnTeensy(testParams) {
+    return new Promise((resolve, reject) => {
+        let results = [];
+        let isTestCompleted = false;
+
+        console.log('Sending test parameters to Teensy:', JSON.stringify(testParams));
+        port.write(`RUN_TEST ${JSON.stringify(testParams)}\n`, (err) => {
+            if (err) {
+                console.error('Error writing to serial port:', err);
+                reject(err);
+            }
+        });
+
+        const dataHandler = (data) => {
+            console.log('Received data from Teensy:', data);
+            try {
+                const parsedData = JSON.parse(data);
+                if (parsedData.status === "completed") {
+                    isTestCompleted = true;
+                    parser.removeListener('data', dataHandler);
+                    resolve(results);
+                } else {
+                    results.push(parsedData);
+                }
+            } catch (err) {
+                console.error('Error parsing result:', err);
+            }
+        };
+
+        parser.on('data', dataHandler);
+
+        setTimeout(() => {
+            if (!isTestCompleted) {
+                parser.removeListener('data', dataHandler);
+                reject(new Error('Timeout waiting for test results'));
+            }
+        }, 60000); // Increase timeout to 60 seconds or adjust as needed
+    });
+}
 
 // Edit test
 app.put('/tests/:id', (req, res) => {
