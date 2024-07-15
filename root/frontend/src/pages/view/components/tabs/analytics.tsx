@@ -1,104 +1,97 @@
+import React, {useState} from "react";
 import {Card, CardContent, CardHeader} from "@/components/ui/card";
-import React from "react";
-import {Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, XAxis, YAxis,} from "recharts";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 
-const data = [
-    {
-        name: "Jan",
-        total: Math.floor(Math.random() * 5000) + 1000,
-    },
-    {
-        name: "Feb",
-        total: Math.floor(Math.random() * 5000) + 1000,
-    },
-    {
-        name: "Mar",
-        total: Math.floor(Math.random() * 5000) + 1000,
-    },
-    {
-        name: "Apr",
-        total: Math.floor(Math.random() * 5000) + 1000,
-    },
-    {
-        name: "May",
-        total: Math.floor(Math.random() * 5000) + 1000,
-    },
-    {
-        name: "Jun",
-        total: Math.floor(Math.random() * 5000) + 1000,
-    },
-    {
-        name: "Jul",
-        total: Math.floor(Math.random() * 5000) + 1000,
-    },
-    {
-        name: "Aug",
-        total: Math.floor(Math.random() * 5000) + 1000,
-    },
-    {
-        name: "Sep",
-        total: Math.floor(Math.random() * 5000) + 1000,
-    },
-    {
-        name: "Oct",
-        total: Math.floor(Math.random() * 5000) + 1000,
-    },
-    {
-        name: "Nov",
-        total: Math.floor(Math.random() * 5000) + 1000,
-    },
-    {
-        name: "Dec",
-        total: Math.floor(Math.random() * 5000) + 1000,
-    },
+// This is dummy data. Replace with actual data from your test results.
+const dummyData = [
+    {snr: -5, ber: 0.1, fer: 0.2},
+    {snr: -2, ber: 0.05, fer: 0.1},
+    {snr: 0, ber: 0.02, fer: 0.05},
+    {snr: 2, ber: 0.01, fer: 0.02},
+    {snr: 5, ber: 0.005, fer: 0.01},
 ];
 
-const TotalIncome: React.FC = () => {
-    return (
-        <div>
-            <div className=" text-2xl font-semibold">Analytics</div>
-            <div className=" text-black/50 dark:text-white/50 mt-2 ">
-                Access and manage your personal information, including personal details,
-                preferences, and settings.
-            </div>
+interface AnalyticsProps {
+    testResults: typeof dummyData;
+}
 
-            <Card className=" my-4 dark:text-light dark:border-foreground ">
+const Analytics: React.FC<AnalyticsProps> = ({testResults}) => {
+    const [chartType, setChartType] = useState<'ber' | 'fer'>('ber');
+
+    return (
+        <div className="space-y-4">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Test Analytics</h2>
+
+            <Card>
                 <CardHeader>
-                    <div className="  ">
-                        Overview
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-xl font-semibold">Performance Curves</h3>
+                        <Select onValueChange={(value: 'ber' | 'fer') => setChartType(value)}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select chart type"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ber">Bit Error Rate (BER)</SelectItem>
+                                <SelectItem value="fer">Frame Error Rate (FER)</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={data}>
+                    <ResponsiveContainer width="100%" height={400}>
+                        <LineChart data={testResults}>
                             <CartesianGrid strokeDasharray="3 3"/>
-                            <XAxis
-                                dataKey="name"
-                                stroke="#888888"
-                                fontSize={12}
-                                tickLine={false}
-                                axisLine={false}
-                            />
+                            <XAxis dataKey="snr"
+                                   label={{value: 'SNR (dB)', position: 'insideBottomRight', offset: -10}}/>
                             <YAxis
-                                stroke="#888888"
-                                fontSize={12}
-                                tickLine={false}
-                                axisLine={false}
-                                tickFormatter={(value) => `$${value}`}
+                                label={{value: chartType.toUpperCase(), angle: -90, position: 'insideLeft'}}
+                                scale="log"
+                                domain={['auto', 'auto']}
                             />
+                            <Tooltip/>
                             <Legend/>
-                            <Bar
-                                dataKey="total"
-                                fill="currentColor"
-                                radius={[4, 4, 0, 0]}
-                                className="dark:fill-light "
-                            />
-                        </BarChart>
+                            <Line type="monotone" dataKey={chartType} stroke="#8884d8" activeDot={{r: 8}}/>
+                        </LineChart>
                     </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <h3 className="text-xl font-semibold">Summary Statistics</h3>
+                </CardHeader>
+                <CardContent>
+                    <table className="w-full">
+                        <thead>
+                        <tr>
+                            <th className="text-left">Metric</th>
+                            <th className="text-left">Value</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Average BER</td>
+                            <td>{(testResults.reduce((sum, result) => sum + result.ber, 0) / testResults.length).toExponential(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>Average FER</td>
+                            <td>{(testResults.reduce((sum, result) => sum + result.fer, 0) / testResults.length).toExponential(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>Best SNR</td>
+                            <td>{Math.max(...testResults.map(result => result.snr))} dB</td>
+                        </tr>
+                        <tr>
+                            <td>Worst SNR</td>
+                            <td>{Math.min(...testResults.map(result => result.snr))} dB</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </CardContent>
             </Card>
         </div>
     );
 };
 
-export default TotalIncome;
+export default Analytics;

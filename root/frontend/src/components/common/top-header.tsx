@@ -74,8 +74,7 @@ const TopHeader: React.FC = () => {
 
 
     return (
-        <div className="pl-2 w-full h-14 flex justify-between items-center pr-2"
-             style={{backgroundColor: 'rgba(10, 10, 10, 1)', borderBottom: '2px solid rgba(36, 36, 36, 1)'}}>
+        <div className="pl-2 w-full h-14 flex justify-between items-center pr-2">
 
             <div className="flex gap-2 items-center">
                 <Button

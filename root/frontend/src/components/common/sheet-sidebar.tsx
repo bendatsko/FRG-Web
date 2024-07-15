@@ -48,18 +48,13 @@ const SheetSideBar: React.FC = () => {
     }, []);
 
     return (
-        <Card className=" h-full w-60 fixed top-0 start-0 rounded-none overflow-y-auto  " style={{
-            backgroundColor: 'rgb(0,0,0)',
-            borderRight: '2px solid rgba(36, 36, 36, 1)'
-        }}>
+        <Card className=" h-full w-60 fixed top-0 start-0 rounded-none overflow-y-auto  ">
             <CardContent className=" shadow-none m-0 p-0 focus-visible:outline-none">
                 <div
                     className="w-full overflow-y-auto rounded-none shadow-none  dark:border-foreground ">
                     <div className="w-full h-14 flex justify-between items-center"
                          style={{
                              marginTop: '-1px',
-                             backgroundColor: 'rgba(10, 10, 10, 1)',
-                             borderBottom: '2px solid rgba(36, 36, 36, 1)'
 
                          }}>
                         <div className="w-full px-11 h-14 flex items-center gap-1 lg:text-lg">

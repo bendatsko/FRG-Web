@@ -50,17 +50,12 @@ const Dashboard = () => {
 
     // Display the dashboard
     return (<div className=" w-full container mx-auto mb-4">
-        <Card className="w-full bg-gray-900 border-gray-800">
-            <CardHeader style={{
-                borderBottom: '1px solid rgba(36, 36, 36, 1)'
-            }}>
+        <Card className="w-full  dark:border-white/20">
+            <CardHeader>
                 <CardTitle className="text-4xl font-bold">DAQROC Test Manager</CardTitle>
                 <CardDescription className="text-gray-400 mt-2">
                     A test management platform for digitally assisted quantum-inspired relaxed oscillator
                     computing (DAQROC) at Flynn Research Group, University of Michigan.
-                    <br/><br/>
-                    For technical details, visit the documentation. For support, please email
-                    daqroc-admin@umich.edu.
                 </CardDescription>
             </CardHeader>
             <CardContent>

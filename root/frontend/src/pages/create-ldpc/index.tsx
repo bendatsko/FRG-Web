@@ -66,11 +66,11 @@ const Create: React.FC = () => {
         const parsedData = {
             ...data,
             author: '',
-            DUT: 'LDPC',             // Device Under Test
-            username: user.username, // User who created the test
-            accessible_to: [user.username], // User who can access the test
-            status: 'Queued',               // Initial status of the test
-            duration: getFormattedStartTimestamp(), // Duration of the test
+            DUT: 'LDPC',            
+            username: user.username, 
+            accessible_to: [user.username],
+            status: 'Queued',              
+            duration: getFormattedStartTimestamp(), 
         };
 
         // Send the data to the backend
