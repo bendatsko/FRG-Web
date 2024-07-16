@@ -48,7 +48,6 @@ async function updateTestStatus(testId, status) {
 }
 
 
-// Function to process the test queue
 async function processTestQueue() {
     if (isProcessingQueue || testQueue.length === 0) return;
 
@@ -61,28 +60,7 @@ async function processTestQueue() {
         const results = await runTestOnTeensy(test);
         await updateTestWithResults(test.id, results);
         console.log(`Test ID ${test.id} completed successfully`);
-    } catch (error) {
-        console.error(`Error processing test ID ${test.id}:`, error);
-        await updateTestStatus(test.id, 'Failed');
-    } finally {
-        isProcessingQueue = false;
-        processTestQueue(); // Process next test in queue
-    }
-}
-
-// Function to process the test queue
-async function processTestQueue() {
-    if (isProcessingQueue || testQueue.length === 0) return;
-
-    isProcessingQueue = true;
-    const test = testQueue.shift();
-
-    try {
-        console.log(`Processing test ID: ${test.id}`);
-        await updateTestStatus(test.id, 'Running');
-        const results = await runTestOnTeensy(test);
-        await updateTestWithResults(test.id, results);
-        console.log(`Test ID ${test.id} completed successfully`);
+        await updateTestStatus(test.id, 'Completed');
     } catch (error) {
         console.error(`Error processing test ID ${test.id}:`, error);
         await updateTestStatus(test.id, 'Failed');
@@ -485,6 +463,7 @@ app.post('/tests', async (req, res) => {
 function runTestOnTeensy(testParams) {
     return new Promise((resolve, reject) => {
         let results = [];
+        let isTestStarted = false;
         let isTestCompleted = false;
 
         console.log('Sending test parameters to Teensy:', JSON.stringify(testParams));
@@ -492,6 +471,8 @@ function runTestOnTeensy(testParams) {
             if (err) {
                 console.error('Error writing to serial port:', err);
                 reject(err);
+            } else {
+                console.log('Test parameters sent successfully');
             }
         });
 
@@ -499,15 +480,21 @@ function runTestOnTeensy(testParams) {
             console.log('Received data from Teensy:', data);
             try {
                 const parsedData = JSON.parse(data);
-                if (parsedData.status === "completed") {
+                if (parsedData.status === "started") {
+                    isTestStarted = true;
+                    console.log(`Test ${testParams.id} started`);
+                } else if (parsedData.status === "completed") {
                     isTestCompleted = true;
                     parser.removeListener('data', dataHandler);
+                    console.log(`Test ${testParams.id} completed`);
                     resolve(results);
-                } else {
+                } else if (parsedData.count) {
                     results.push(parsedData);
+                } else if (parsedData.error) {
+                    console.error('Error from Teensy:', parsedData.error);
                 }
             } catch (err) {
-                console.error('Error parsing result:', err);
+                console.error('Error parsing result:', err, 'Raw data:', data);
             }
         };
 
@@ -516,9 +503,13 @@ function runTestOnTeensy(testParams) {
         setTimeout(() => {
             if (!isTestCompleted) {
                 parser.removeListener('data', dataHandler);
-                reject(new Error('Timeout waiting for test results'));
+                if (!isTestStarted) {
+                    reject(new Error('Test failed to start'));
+                } else {
+                    reject(new Error('Test timeout: did not complete in time'));
+                }
             }
-        }, 60000); // Increase timeout to 60 seconds or adjust as needed
+        }, 30000); // 30 second timeout
     });
 }
 

@@ -1,91 +1,74 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
-bool testMode = false;
+bool initialSetupDone = false;
 
 void setup() {
   Serial.begin(9600);
-  randomSeed(analogRead(0));
-}
-
-void runNormalTest(int testId, String snrRange, int batchSize) {
-  int snrStart, snrStep, snrStop;
-  sscanf(snrRange.c_str(), "%d:%d:%d", &snrStart, &snrStep, &snrStop);
-
-  for (int snr = snrStart; snr <= snrStop; snr += snrStep) {
-    for (int batch = 0; batch < batchSize; batch++) {
-      float ber = random(0, 100) / 1000.0;
-      float fer = random(0, 200) / 1000.0;
-      
-      DynamicJsonDocument resultDoc(256);
-      resultDoc["testId"] = testId;
-      resultDoc["snr"] = snr;
-      resultDoc["ber"] = ber;
-      resultDoc["fer"] = fer;
-
-      String resultJson;
-      serializeJson(resultDoc, resultJson);
-      Serial.println(resultJson);
-
-      delay(100);
-    }
+  // Wait for serial port to connect, or timeout after 5 seconds
+  unsigned long startTime = millis();
+  while (!Serial && millis() - startTime < 5000) {
+    ; // wait for serial port to connect
   }
 }
 
-void runTestMode(int testId, String snrRange, int batchSize) {
-  int snrStart, snrStep, snrStop;
-  sscanf(snrRange.c_str(), "%d:%d:%d", &snrStart, &snrStep, &snrStop);
+void runSimpleTest(int testId) {
+  Serial.println("{\"status\":\"started\",\"testId\":" + String(testId) + "}");
+  Serial.flush();
+  
+  for (int i = 1; i <= 10; i++) {
+    DynamicJsonDocument resultDoc(64);
+    resultDoc["testId"] = testId;
+    resultDoc["count"] = i;
 
-  for (int snr = snrStart; snr <= snrStop; snr += snrStep) {
-    for (int batch = 0; batch < batchSize; batch++) {
-      float ber = 0.01 * snr; // Example: BER increases linearly with SNR
-      float fer = 0.02 * snr; // Example: FER increases linearly with SNR
-      
-      DynamicJsonDocument resultDoc(256);
-      resultDoc["testId"] = testId;
-      resultDoc["snr"] = snr;
-      resultDoc["ber"] = ber;
-      resultDoc["fer"] = fer;
+    String resultJson;
+    serializeJson(resultDoc, resultJson);
+    Serial.println(resultJson);
+    Serial.flush();
 
-      String resultJson;
-      serializeJson(resultDoc, resultJson);
-      Serial.println(resultJson);
-
-      delay(100);
-    }
+    delay(1000);
   }
+
+  Serial.println("{\"status\":\"completed\",\"testId\":" + String(testId) + "}");
+  Serial.flush();
 }
 
 void loop() {
+  if (!initialSetupDone) {
+    Serial.println("Teensy is ready for testing!");
+    Serial.println("Firmware version: 1.0");
+    Serial.flush();
+    initialSetupDone = true;
+  }
+
+  // Visual indicator that Teensy is waiting for input
+  static unsigned long lastBlink = 0;
+  if (millis() - lastBlink > 1000) {
+    Serial.print(".");
+    Serial.flush();
+    lastBlink = millis();
+  }
+
   if (Serial.available()) {
     String command = Serial.readStringUntil('\n');
+    command.trim();
     
-    if (command == "TEST_MODE_ON") {
-      testMode = true;
-      Serial.println("Test mode activated");
-    } else if (command == "TEST_MODE_OFF") {
-      testMode = false;
-      Serial.println("Test mode deactivated");
-    } else if (command.startsWith("RUN_TEST")) {
-      DynamicJsonDocument doc(1024);
-      DeserializationError error = deserializeJson(doc, command.substring(9));
-
-      if (error) {
-        Serial.println("Failed to parse test parameters");
-        return;
-      }
-
-      int testId = doc["id"];
-      String snrRange = doc["snrRange"].as<String>();
-      int batchSize = doc["batchSize"].as<int>();
-
-      if (testMode) {
-        runTestMode(testId, snrRange, batchSize);
+    Serial.println("\nReceived command: " + command);
+    Serial.flush();
+    
+    if (command.startsWith("TEST")) {
+      int testId = command.substring(4).toInt();
+      if (testId > 0) {
+        Serial.println("Running test with ID: " + String(testId));
+        Serial.flush();
+        runSimpleTest(testId);
       } else {
-        runNormalTest(testId, snrRange, batchSize);
+        Serial.println("Invalid test ID");
+        Serial.flush();
       }
-
-      Serial.println("{\"status\":\"completed\",\"testId\":" + String(testId) + "}");
+    } else {
+      Serial.println("Unknown command. Use 'TEST<id>' to run a test.");
+      Serial.flush();
     }
   }
 }

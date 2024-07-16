@@ -38,6 +38,13 @@ const testApi = api.injectEndpoints({
                 responseHandler: (response) => response.blob(),
             }),
         }),
+        deleteTest: builder.mutation({
+            query: (id) => ({
+                url: `http://localhost:3001/tests/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["Test"],
+        }),
     }),
 });
 
@@ -46,5 +53,6 @@ export const {
     useGetTestByIdQuery,
     useUpdateThresholdMutation,
     useRerunTestMutation,
-    useLazyDownloadResultsQuery
+    useLazyDownloadResultsQuery,
+    useDeleteTestMutation
 } = testApi;
