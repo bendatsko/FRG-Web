@@ -5,6 +5,13 @@ const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const {v4: uuidv4} = require('uuid');
+const fs = require('fs');
+const fsp = fs.promises;  // Use this for promise-based functions
+const path = require('path');
+
+
+
+const TESTS_FOLDER = path.join(__dirname, 'tests');
 
 
 const {SerialPort} = require('serialport');
@@ -23,7 +30,7 @@ let isProcessingQueue = false;
 
 // Serial port setup
 const port = new SerialPort({
-    path: '/dev/cu.usbmodem106098201', // Update this to match your Teensy's port
+    path: '/dev/ttyACM0', // Update this to match your Teensy's port
     baudRate: 9600
 });
 const parser = port.pipe(new ReadlineParser({delimiter: '\n'}));
@@ -55,10 +62,43 @@ async function processTestQueue() {
     const test = testQueue.shift();
 
     try {
-        console.log(`Processing test ID: ${test.id}`);
+        console.log(`Processing test:`, JSON.stringify(test, null, 2));
+
+        // Validate test object
+        if (!test || !test.id) {
+            throw new Error(`Invalid test object: missing id`);
+        }
+        if (!test.username) {
+            console.warn(`Warning: username is missing for test ${test.id}`);
+            // You might want to fetch the username from the database here
+            // For now, we'll use a placeholder
+            test.username = 'unknown_user';
+        }
+
         await updateTestStatus(test.id, 'Running');
-        const results = await runTestOnTeensy(test);
-        await updateTestWithResults(test.id, results);
+
+        // Save test configuration
+        const configPath = await saveTestConfig(test.username, test.id, {
+            snrRange: test.snrRange,
+            batchSize: test.batchSize,
+            // Add other test parameters here
+        });
+
+        // Create results stream
+        const resultsStream = await createResultsStream(test.username, test.id);
+
+        // Write CSV header
+        resultsStream.write('iteration,snr,ber,fer\n');
+
+        // Run test on Teensy
+        const results = await runTestOnTeensy(test, resultsStream);
+
+        // Close the results stream
+        resultsStream.end();
+
+        // Update test with results file path
+        await updateTestWithResults(test.id, resultsStream.path);
+
         console.log(`Test ID ${test.id} completed successfully`);
         await updateTestStatus(test.id, 'Completed');
     } catch (error) {
@@ -70,11 +110,12 @@ async function processTestQueue() {
     }
 }
 
-// Function to update test with results
-async function updateTestWithResults(testId, results) {
+
+// Function to update test with results file path
+async function updateTestWithResults(testId, resultsFilePath) {
     return new Promise((resolve, reject) => {
-        db.run('UPDATE tests SET results = ?, status = ? WHERE id = ?',
-            [JSON.stringify(results), 'Completed', testId],
+        db.run('UPDATE tests SET results_file = ?, status = ? WHERE id = ?',
+            [resultsFilePath, 'Completed', testId],
             (err) => {
                 if (err) reject(err);
                 else resolve();
@@ -190,11 +231,53 @@ db.serialize(async () => {
             FOREIGN KEY (user_id) REFERENCES users(id)
         )`);
 
+
+                // Add results_file column to tests table
+                const resultsFileExists = await columnExists('tests', 'results_file');
+                if (!resultsFileExists) {
+                    await safeDbRun("ALTER TABLE tests ADD COLUMN results_file TEXT");
+                    console.log("Added results_file column to tests table");
+                }
+
+                
+
         console.log('Database schema updated successfully');
     } catch (error) {
         console.error('Error updating database schema:', error);
     }
 });
+
+
+// Updated helper functions
+async function ensureUserFolder(username) {
+    if (!username) {
+        throw new Error('Username is required to create user folder');
+    }
+    const userFolder = path.join(TESTS_FOLDER, username);
+    await fsp.mkdir(userFolder, { recursive: true });
+    return userFolder;
+}
+
+
+async function saveTestConfig(username, testId, config) {
+    if (!username || !testId) {
+        throw new Error('Username and testId are required to save test configuration');
+    }
+    const userFolder = await ensureUserFolder(username);
+    const configPath = path.join(userFolder, `config_${testId}.json`);
+    await fsp.writeFile(configPath, JSON.stringify(config, null, 2)); // Ensure using fsp.writeFile
+    return configPath;
+}
+
+async function createResultsStream(username, testId) {
+    if (!username || !testId) {
+        throw new Error('Username and testId are required to create results stream');
+    }
+    const userFolder = await ensureUserFolder(username);
+    const resultsPath = path.join(userFolder, `results_${testId}.csv`);
+    return fs.createWriteStream(resultsPath);
+}
+
 
 /* -------------------------------------------------------------------------- */
 /*                              Authentication                                */
@@ -427,7 +510,6 @@ app.get('/tests', (req, res) => {
     });
 });
 
-// Create test
 app.post('/tests', async (req, res) => {
     const {title, author, testBench, snrRange, batchSize, username, accessible_to, DUT, status, duration} = req.body;
 
@@ -444,8 +526,10 @@ app.post('/tests', async (req, res) => {
 
         console.log(`Test created with ID: ${testId}`);
 
-        // Add test to queue
-        testQueue.push({id: testId, snrRange, batchSize});
+        // Add test to queue with all necessary information
+        testQueue.push({id: testId, snrRange, batchSize, username});
+        console.log(`Added to queue: ${JSON.stringify({id: testId, snrRange, batchSize, username})}`);
+        
         processTestQueue(); // Try to process queue (will only proceed if no test is running)
 
         res.status(200).send({
@@ -459,15 +543,15 @@ app.post('/tests', async (req, res) => {
 });
 
 
-// Function to run test on Teensy
-function runTestOnTeensy(testParams) {
+function runTestOnTeensy(testParams, resultsStream) {
     return new Promise((resolve, reject) => {
-        let results = [];
-        let isTestStarted = false;
-        let isTestCompleted = false;
+        if (!testParams || !testParams.id || !testParams.snrRange || !testParams.batchSize) {
+            reject(new Error(`Invalid test parameters: ${JSON.stringify(testParams)}`));
+            return;
+        }
 
-        console.log('Sending test parameters to Teensy:', JSON.stringify(testParams));
-        port.write(`RUN_TEST ${JSON.stringify(testParams)}\n`, (err) => {
+        console.log('Sending test parameters to Teensy:', testParams);
+        port.write(`TEST${testParams.id} ${testParams.snrRange} ${testParams.batchSize}\n`, (err) => {
             if (err) {
                 console.error('Error writing to serial port:', err);
                 reject(err);
@@ -478,38 +562,34 @@ function runTestOnTeensy(testParams) {
 
         const dataHandler = (data) => {
             console.log('Received data from Teensy:', data);
-            try {
-                const parsedData = JSON.parse(data);
-                if (parsedData.status === "started") {
-                    isTestStarted = true;
-                    console.log(`Test ${testParams.id} started`);
-                } else if (parsedData.status === "completed") {
-                    isTestCompleted = true;
-                    parser.removeListener('data', dataHandler);
-                    console.log(`Test ${testParams.id} completed`);
-                    resolve(results);
-                } else if (parsedData.count) {
-                    results.push(parsedData);
-                } else if (parsedData.error) {
-                    console.error('Error from Teensy:', parsedData.error);
+            
+            if (data.trim().startsWith('{') && data.trim().endsWith('}')) {
+                try {
+                    const parsedData = JSON.parse(data);
+                    if (parsedData.status === "started") {
+                        console.log(`Test ${testParams.id} started`);
+                    } else if (parsedData.status === "completed") {
+                        parser.removeListener('data', dataHandler);
+                        console.log(`Test ${testParams.id} completed`);
+                        resolve();
+                    } else if (parsedData.iteration) {
+                        // Write result to CSV file
+                        resultsStream.write(`${parsedData.iteration},${parsedData.snr},${parsedData.ber},${parsedData.fer}\n`);
+                    }
+                } catch (err) {
+                    console.error('Error parsing JSON:', err, 'Raw data:', data);
                 }
-            } catch (err) {
-                console.error('Error parsing result:', err, 'Raw data:', data);
+            } else {
+                console.log('Non-JSON data from Teensy:', data);
             }
         };
 
         parser.on('data', dataHandler);
 
         setTimeout(() => {
-            if (!isTestCompleted) {
-                parser.removeListener('data', dataHandler);
-                if (!isTestStarted) {
-                    reject(new Error('Test failed to start'));
-                } else {
-                    reject(new Error('Test timeout: did not complete in time'));
-                }
-            }
-        }, 30000); // 30 second timeout
+            parser.removeListener('data', dataHandler);
+            reject(new Error('Test timeout: did not complete in time'));
+        }, 30000 * 60); // 30 minute timeout for long-running tests
     });
 }
 
@@ -660,7 +740,7 @@ app.post('/tests/:id/rerun', (req, res) => {
 // Download results
 app.get('/tests/:id/download', (req, res) => {
     const {id} = req.params;
-    db.get(`SELECT title, results FROM tests WHERE id = ?`, [id], (err, row) => {
+    db.get(`SELECT title, results_file FROM tests WHERE id = ?`, [id], (err, row) => {
         if (err) {
             console.error('Error fetching test results:', err);
             return res.status(500).json({error: "Failed to fetch test results"});
@@ -668,14 +748,13 @@ app.get('/tests/:id/download', (req, res) => {
         if (!row) {
             return res.status(404).json({error: "Test not found"});
         }
-        const results = JSON.parse(row.results);
-        let csv = 'SNR,BER,FER\n';
-        results.forEach(r => {
-            csv += `${r.snr},${r.ber},${r.fer}\n`;
-        });
+        if (!row.results_file) {
+            return res.status(404).json({error: "Test results file not found"});
+        }
+
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', `attachment; filename=${row.title.replace(/\s+/g, '_')}_results.csv`);
-        res.status(200).send(csv);
+        res.sendFile(row.results_file);
     });
 });
 
