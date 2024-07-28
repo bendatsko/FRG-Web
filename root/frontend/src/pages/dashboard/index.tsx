@@ -1,39 +1,110 @@
-import React, {useEffect} from 'react';
-import {useDispatch, useSelector} from "react-redux";
-import {Loading} from "@geist-ui/core";
-import {recentTestsColumns} from "./components/recent-tests-columns";
-import {DataTable} from "./components/recent-tests-table";
-import {useDeleteTestMutation, useGetTestsQuery} from "@/store/api/v1/endpoints/test";
-import {setBreadCrumb} from "@/store/slice/app";
-import {selectUser} from "@/store/slice/auth";
-import {User} from "../../store/slice/auth";
-import {Button} from "@/components/ui/button";
-import {Plus} from "lucide-react";
-import {useNavigate} from "react-router-dom";
+import React, { useEffect, useState, useCallback  } from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import { Loading } from "@geist-ui/core";
+import { recentTestsColumns } from "./components/recent-tests-columns";
+import { DataTable } from "./components/recent-tests-table";
+import { useGetTestsQuery } from "@/store/api/v1/endpoints/test";
+import { setBreadCrumb } from "@/store/slice/app";
+import { selectUser } from "@/store/slice/auth";
+import { User } from "../../store/slice/auth";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard: React.FC = () => {
     const user = useSelector(selectUser) as User;
-    const {data, isLoading, error} = useGetTestsQuery(user.username);
-    const [deleteTest] = useDeleteTestMutation();
+    const { data, isLoading, error, refetch } = useGetTestsQuery(user.username);
+    const [testsData, setTestsData] = useState([]);
     const navigate = useNavigate();
-
     const dispatch = useDispatch();
+    const [socket, setSocket] = useState<WebSocket | null>(null);
     useEffect(() => {
         dispatch(setBreadCrumb([{title: "Dashboard", link: "/dashboard"}]));
     }, [dispatch]);
 
-    const handleDeleteSelected = async (selectedRows: any[]) => {
-        const confirmDelete = window.confirm(`Are you sure you want to delete ${selectedRows.length} selected test(s)?`);
-        if (!confirmDelete) return;
-
-        try {
-            for (const row of selectedRows) {
-                await deleteTest(row.id).unwrap();
-            }
-        } catch (error) {
-            console.error('Error deleting tests:', error);
+    useEffect(() => {
+        if (data) {
+            setTestsData(data);
         }
+    }, [data]);
+
+    // Refetch data when component mounts
+    useEffect(() => {
+        refetch();
+    }, [refetch]);
+
+    // Refetch data when window regains focus
+    useEffect(() => {
+        const handleFocus = () => {
+            refetch();
+        };
+        window.addEventListener('focus', handleFocus);
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+        };
+    }, [refetch]);
+
+
+    const connectWebSocket = useCallback(() => {
+        const ws = new WebSocket('ws://localhost:3001');
+        
+        ws.onopen = () => {
+            console.log('WebSocket connected');
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'TEST_COMPLETED') {
+                console.log("Test completed message received:", data);
+                refetch();  // This should update the tests data if the backend sends updated information
+            }
+        };
+        
+
+        ws.onclose = () => {
+            console.log('WebSocket disconnected. Attempting to reconnect...');
+            setTimeout(connectWebSocket, 5000);  // Attempt to reconnect after 5 seconds
+        };
+
+        setSocket(ws);
+    }, [refetch]);
+
+    useEffect(() => {
+        connectWebSocket();
+
+        return () => {
+            if (socket) {
+                socket.close();
+            }
+        };
+    }, [connectWebSocket]);
+
+    const handleDeleteSelected = async (selectedRows) => {
+        const confirmDelete = window.confirm(`Are you sure you want to delete ${selectedRows.length} tests?`);
+        if (!confirmDelete) return;
+    
+        const idsToDelete = selectedRows.map(row => row.id); // Collecting IDs to delete
+        try {
+            const response = await fetch('http://localhost:3001/api/tests/batch-delete', {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ids: idsToDelete })
+            });
+            
+            if (!response.ok) throw new Error('Failed to delete tests.');
+            
+            const result = await response.json();
+            console.log(result);  // Log the server response
+            
+            // Update your UI based on the successful deletion
+            setTestsData(prevData => prevData.filter(row => !idsToDelete.includes(row.id)));
+            
+          } catch (error) {
+            console.error('Error deleting tests:', error);
+            alert('Failed to delete tests: ' + error.message);
+          }
     };
+    
 
     if (isLoading) {
         return (
@@ -64,12 +135,10 @@ const Dashboard: React.FC = () => {
             </div>
             <DataTable
                 columns={recentTestsColumns}
-                data={data || []}
+                data={testsData}
                 onDeleteSelected={handleDeleteSelected}
             />
-            <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-                © 2024 University of Michigan. All rights reserved.
-            </div>
+
         </div>
     );
 };

@@ -6,23 +6,35 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const {v4: uuidv4} = require('uuid');
 const fs = require('fs');
-const fsp = fs.promises;  // Use this for promise-based functions
+const fsp = fs.promises;
 const path = require('path');
-
-
-
-const TESTS_FOLDER = path.join(__dirname, 'tests');
-
+const http = require('http');
+const WebSocket = require('ws');
 
 const {SerialPort} = require('serialport');
 const {ReadlineParser} = require('@serialport/parser-readline');
 
 const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
 const PORT = process.env.PORT || 3001;
 const SECRET_KEY = "your_secret_key";
 
+// Define TESTS_FOLDER
+const TESTS_FOLDER = path.join(__dirname, 'tests');
+
+// Ensure the tests folder exists
+if (!fs.existsSync(TESTS_FOLDER)) {
+    fs.mkdirSync(TESTS_FOLDER, { recursive: true });
+}
+
 app.use(bodyParser.json());
 app.use(cors());
+
+// Read chip configuration
+const chipsConfig = JSON.parse(fs.readFileSync('../test-runner/chips_config.json', 'utf8'));
+const chips = chipsConfig.chips;
 
 // Global queue for tests
 const testQueue = [];
@@ -30,14 +42,54 @@ let isProcessingQueue = false;
 
 // Serial port setup
 const port = new SerialPort({
-    path: '/dev/ttyACM0', // Update this to match your Teensy's port
-    baudRate: 9600
+    path: 'COM8', // Update this to match your Teensy's port
+    baudRate: 115200
 });
 const parser = port.pipe(new ReadlineParser({delimiter: '\n'}));
 const USE_TEENSY = true; // Set this to true when you're ready to use the actual Teensy
+
 port.on('error', (err) => {
     console.error('Serial port error:', err.message);
 });
+
+// WebSocket connection handling
+wss.on('connection', (ws) => {
+  console.log('New WebSocket connection');
+  
+  ws.on('message', (message) => {
+    console.log('Received:', message);
+  });
+});
+
+
+function calculateDuration(creationDateString, endTimeString) {
+    // Assuming the dates are stored in ISO 8601 format (e.g., "2024-07-28T22:16:08.172Z")
+    const startDate = new Date(creationDateString);
+    const endDate = new Date(endTimeString);
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.error("Invalid dates in calculateDuration", { creationDateString, endTimeString });
+        return 'N/A'; // This will be a flag for error in date processing
+    }
+
+    return Math.floor((endDate - startDate) / 1000); // Duration in seconds
+}
+
+function formatDateTime(isoString) {
+    const date = new Date(isoString);
+    return date.toLocaleString('en-US', { 
+        year: '2-digit', 
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: true 
+    });
+}
+
+
+
 
 /* -------------------------------------------------------------------------- */
 /*                              Database connect                              */
@@ -53,16 +105,96 @@ async function updateTestStatus(testId, status) {
         });
     });
 }
+async function updateTestTimes(testId, startTime, endTime) {
+    const duration = calculateDuration(startTime, endTime);
+    const sql = `UPDATE tests SET start_time = ?, end_time = ?, duration = ? WHERE id = ?`;
+    return new Promise((resolve, reject) => {
+        db.run(sql, [startTime, endTime, duration, testId], function(err) {
+            if (err) reject(err);
+            else resolve();
+        });
+    });
+}
 
 
-async function processTestQueue() {
+
+
+// Function to send server status to Teensy
+function sendStatusToTeensy(status) {
+    if (USE_TEENSY) {
+        port.write(`SERVER_${status}\n`, (err) => {
+            if (err) {
+                console.error('Error writing to serial port:', err);
+            } else {
+                console.log(`Sent ${status} status to Teensy`);
+            }
+        });
+    }
+}
+
+
+// Function to send chip status to Teensy
+function sendChipStatusToTeensy(chipId, status) {
+    if (USE_TEENSY) {
+        port.write(`CHIP_STATUS ${chipId} ${status}\n`, (err) => {
+            if (err) {
+                console.error('Error writing to serial port:', err);
+            } else {
+                console.log(`Sent ${status} status for chip ${chipId} to Teensy`);
+            }
+        });
+    }
+}
+
+
+// Periodically check and send server status to Teensy
+setInterval(() => {
+    sendStatusToTeensy('ONLINE');
+}, 5000);
+
+// Handle incoming data from Teensy
+parser.on('data', (data) => {
+    console.log('Received data from Teensy:', data);
+    try {
+      const jsonData = JSON.parse(data);
+      switch (jsonData.type) {
+        case 'heartbeat':
+          console.log('Received heartbeat from Teensy');
+          break;
+        case 'status_check':
+          console.log('Received status check request from Teensy');
+          sendStatusToTeensy('ONLINE');
+          break;
+        case 'chip_status':
+          if (jsonData.chips) {
+            jsonData.chips.forEach(chip => {
+              const dbChip = chips.find(c => c.id === chip.id);
+              if (dbChip) {
+                dbChip.status = chip.status;
+              }
+            });
+          }
+          break;
+        default:
+          console.log('Received message from Teensy:', jsonData);
+      }
+    } catch (error) {
+      // Handle non-JSON data
+      console.log('Received non-JSON data from Teensy:', data);
+    }
+  });
+  
+
+
+  async function processTestQueue() {
     if (isProcessingQueue || testQueue.length === 0) return;
 
     isProcessingQueue = true;
     const test = testQueue.shift();
-
+    const startTime = new Date().toISOString(); // Use ISO string format
     try {
         console.log(`Processing test:`, JSON.stringify(test, null, 2));
+        await updateTestStatus(test.id, 'Running');
 
         // Validate test object
         if (!test || !test.id) {
@@ -75,7 +207,6 @@ async function processTestQueue() {
             test.username = 'unknown_user';
         }
 
-        await updateTestStatus(test.id, 'Running');
 
         // Save test configuration
         const configPath = await saveTestConfig(test.username, test.id, {
@@ -99,8 +230,23 @@ async function processTestQueue() {
         // Update test with results file path
         await updateTestWithResults(test.id, resultsStream.path);
 
-        console.log(`Test ID ${test.id} completed successfully`);
+
+        const endTime = new Date().toISOString(); // Use ISO string format
+        const duration = calculateDuration(startTime, endTime);
+        
+
+
+        await updateTestTimes(test.id, startTime, endTime);
         await updateTestStatus(test.id, 'Completed');
+        
+        console.log(`Test ID ${test.id} started at ${formatDateTime(startTime)} and ended at ${endTime}. Duration: ${duration}`);        // Update the database or perform other actions
+
+        // Broadcast test completion to all connected clients
+        wss.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({ type: 'TEST_COMPLETED', testId: test.id, duration }));
+            }
+        });
     } catch (error) {
         console.error(`Error processing test ID ${test.id}:`, error);
         await updateTestStatus(test.id, 'Failed');
@@ -111,18 +257,21 @@ async function processTestQueue() {
 }
 
 
-// Function to update test with results file path
 async function updateTestWithResults(testId, resultsFilePath) {
-    return new Promise((resolve, reject) => {
-        db.run('UPDATE tests SET results_file = ?, status = ? WHERE id = ?',
-            [resultsFilePath, 'Completed', testId],
-            (err) => {
-                if (err) reject(err);
-                else resolve();
-            });
-    });
+    try {
+        await testCompletionHandler(testId);
+        return new Promise((resolve, reject) => {
+            db.run('UPDATE tests SET results_file = ?, status = ? WHERE id = ?',
+                [resultsFilePath, 'Completed', testId],
+                (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+        });
+    } catch (error) {
+        console.error(`Error updating test results for test ${testId}:`, error);
+    }
 }
-
 // Connect to SQLite database
 const db = new sqlite3.Database('../data.db', (err) => {
     if (err) {
@@ -145,6 +294,60 @@ function safeDbRun(sql, params = []) {
         });
     });
 }
+const getFormattedStartTimestamp = () => {
+    const now = new Date();
+    return now.toISOString(); // This format is universally recognized
+};
+
+
+const getTestFromDatabase = (testId) => {
+    return new Promise((resolve, reject) => {
+        db.get(`SELECT * FROM tests WHERE id = ?`, [testId], (err, row) => {
+            if (err) {
+                reject(err);
+            } else if (!row) {
+                reject(new Error('Test not found'));
+            } else {
+                resolve(row);
+            }
+        });
+    });
+};
+
+
+const updateTestInDatabase = (testId, updates) => {
+    const { status, duration } = updates;
+    return new Promise((resolve, reject) => {
+        db.run(`UPDATE tests SET status = ?, duration = ? WHERE id = ?`,
+            [status, duration, testId],
+            function(err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(this.changes);
+                }
+            }
+        );
+    });
+};
+
+
+
+
+const testCompletionHandler = async (testId) => {
+    try {
+        const test = await getTestFromDatabase(testId);
+        if (!test.start_time || !test.end_time) {
+            console.error(`Missing start_time or end_time for test ${testId}`);
+            return;
+        }
+        const duration = calculateDuration(test.start_time, test.end_time);
+        await updateTestInDatabase(testId, { status: 'Completed', duration });
+    } catch (error) {
+        console.error(`Error completing test ${testId}:`, error);
+    }
+};
+
 
 // Function to check if a column exists in a table
 function columnExists(table, column) {
@@ -167,85 +370,39 @@ function columnExists(table, column) {
     });
 }
 
-// SERIALIZE DATABASE
-db.serialize(async () => {
-    try {
-        // Check if uuid column exists in users table
-        const uuidExists = await columnExists('users', 'uuid');
-        if (!uuidExists) {
-            await safeDbRun("ALTER TABLE users ADD COLUMN uuid TEXT");
-            console.log("Added uuid column to users table");
-        }
-
-        // Update users without UUID
-        db.each("SELECT id FROM users WHERE uuid IS NULL OR uuid = ''", async (err, row) => {
-            if (err) {
-                console.error("Error fetching users without uuid:", err);
-                return;
-            }
-
-            const newUuid = uuidv4();
-            try {
-                await safeDbRun("UPDATE users SET uuid = ? WHERE id = ?", [newUuid, row.id]);
-                console.log(`User with id ${row.id} updated with uuid ${newUuid}`);
-            } catch (err) {
-                console.error("Error updating user with uuid:", err);
-            }
-        });
-
-        // Create tests table if it doesn't exist
-        await safeDbRun(`CREATE TABLE IF NOT EXISTS tests (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            author TEXT NOT NULL,
-            testBench TEXT,
-            snrRange TEXT,
-            batchSize INTEGER,
-            user_id INTEGER,
-            accessible_to TEXT,
-            DUT TEXT,
-            status TEXT NOT NULL,
-            duration INTEGER NOT NULL
-        )`);
-
-        // Check if threshold and results columns exist in tests table
-        const thresholdExists = await columnExists('tests', 'threshold');
-        const resultsExists = await columnExists('tests', 'results');
-
-        if (!thresholdExists) {
-            await safeDbRun("ALTER TABLE tests ADD COLUMN threshold REAL DEFAULT 0.5");
-            console.log("Added threshold column to tests table");
-        }
-        if (!resultsExists) {
-            await safeDbRun("ALTER TABLE tests ADD COLUMN results TEXT DEFAULT '[]'");
-            console.log("Added results column to tests table");
-        }
-
-        // Create notifications table if it doesn't exist
-        await safeDbRun(`CREATE TABLE IF NOT EXISTS notifications (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            message TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            read BOOLEAN DEFAULT 0,
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        )`);
-
-
-                // Add results_file column to tests table
-                const resultsFileExists = await columnExists('tests', 'results_file');
-                if (!resultsFileExists) {
-                    await safeDbRun("ALTER TABLE tests ADD COLUMN results_file TEXT");
-                    console.log("Added results_file column to tests table");
+db.serialize(() => {
+    db.run(`DROP TABLE IF EXISTS tests`, function(err) {
+        if (err) {
+            console.error("Error dropping tests table", err);
+        } else {
+            console.log("Dropped 'tests' table if it existed.");
+            db.run(`CREATE TABLE IF NOT EXISTS tests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                author TEXT NOT NULL,
+                testBench TEXT,
+                snrRange TEXT,
+                batchSize INTEGER,
+                user_id INTEGER,
+                username TEXT,
+                accessible_to TEXT,
+                DUT TEXT,
+                status TEXT NOT NULL,
+                duration INTEGER,
+                start_time TEXT,
+                results_file TEXT,
+                end_time TEXT
+            )`, function(err) {
+                if (err) {
+                    console.error("Error creating 'tests' table", err);
+                } else {
+                    console.log("Successfully recreated the 'tests' table.");
                 }
-
-                
-
-        console.log('Database schema updated successfully');
-    } catch (error) {
-        console.error('Error updating database schema:', error);
-    }
+            });
+        }
+    });
 });
+
 
 
 // Updated helper functions
@@ -362,6 +519,19 @@ app.get('/users/:id', (req, res) => {
     });
 });
 
+
+// This could be a simplified version of your existing processTestQueue or a separate function triggered by a specific message from Teensy
+async function markTestAsCompleted(testId, startTime) {
+    const endTime = new Date();  // Capture end time
+
+    // Update the database with end time and set status to 'Completed'
+    await updateTestTimes(testId, startTime, endTime);
+    await updateTestStatus(testId, 'Completed');
+
+    console.log(`Test ID ${testId} completed. Duration: ${calculateDuration(new Date(startTime), endTime)}`);
+}
+
+
 // Update user
 app.put('/users/:id', (req, res) => {
     const {id} = req.params;
@@ -389,6 +559,28 @@ app.delete('/users/:id', (req, res) => {
         res.status(200).send("User deleted successfully");
     });
 });
+
+app.delete('/api/tests/batch-delete', (req, res) => {
+    const { ids } = req.body; // Expecting an array of test IDs to delete
+
+    if (!ids || !ids.length) {
+        return res.status(400).send("No test IDs provided");
+    }
+
+    const placeholders = ids.map(() => '?').join(','); // Create placeholders for query
+    const sql = `DELETE FROM tests WHERE id IN (${placeholders})`;
+
+    db.run(sql, ids, function(err) {
+        if (err) {
+            console.error('Error deleting tests', err);
+            return res.status(500).send("Failed to delete tests");
+        }
+        res.status(200).send({ message: "Tests deleted successfully", count: this.changes });
+    });
+});
+
+
+
 
 // Fetch user by uuid
 app.get('/user/uuid/:uuid', (req, res) => {
@@ -510,32 +702,59 @@ app.get('/tests', (req, res) => {
     });
 });
 
+// Run test on specific chip
 app.post('/tests', async (req, res) => {
     const {title, author, testBench, snrRange, batchSize, username, accessible_to, DUT, status, duration} = req.body;
 
     try {
-        const testId = await new Promise((resolve, reject) => {
-            db.run(`INSERT INTO tests (title, author, testBench, snrRange, batchSize, username, accessible_to, DUT, status, duration) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [title, author, testBench, snrRange, batchSize, username, JSON.stringify(accessible_to), DUT, 'Queued', duration],
-                function (err) {
-                    if (err) reject(err);
-                    else resolve(this.lastID);
+        const startTime = new Date();
+        db.run(`INSERT INTO tests (
+            title, 
+            author, 
+            testBench, 
+            snrRange, 
+            batchSize, 
+            username, 
+            accessible_to, 
+            DUT, 
+            status, 
+            start_time, 
+            end_time, 
+            duration
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Queued', ?, NULL, NULL)`, [
+            title, 
+            author, 
+            testBench, 
+            snrRange, 
+            batchSize, 
+            username,  // Make sure this value is passed
+            JSON.stringify(accessible_to), 
+            DUT, 
+            formatDateTime(new Date().toISOString())
+        ], function(err) {
+            if (err) {
+                console.error('Error creating test:', err);
+                res.status(500).send("Test creation failed: " + err.message);
+            } else {
+                const testId = this.lastID;
+                testQueue.push({
+                    id: testId, 
+                    snrRange, 
+                    batchSize, 
+                    username,  // Passed in testQueue object
+                    chipId: testBench, 
+                    startTime: new Date()
                 });
+                processTestQueue(); // Try to process queue
+                res.status(200).send({
+                    message: "Test created and queued successfully",
+                    testId: testId
+                });
+            }
         });
-
-        console.log(`Test created with ID: ${testId}`);
-
-        // Add test to queue with all necessary information
-        testQueue.push({id: testId, snrRange, batchSize, username});
-        console.log(`Added to queue: ${JSON.stringify({id: testId, snrRange, batchSize, username})}`);
         
-        processTestQueue(); // Try to process queue (will only proceed if no test is running)
 
-        res.status(200).send({
-            message: "Test created and queued successfully",
-            testId: testId
-        });
+        
     } catch (error) {
         console.error('Error creating test:', error);
         res.status(500).send("Test creation failed: " + error.message);
@@ -543,15 +762,17 @@ app.post('/tests', async (req, res) => {
 });
 
 
-function runTestOnTeensy(testParams, resultsStream) {
+
+
+function runTestOnTeensy(testParams) {
     return new Promise((resolve, reject) => {
-        if (!testParams || !testParams.id || !testParams.snrRange || !testParams.batchSize) {
+        if (!testParams || !testParams.id || !testParams.snrRange || !testParams.batchSize || !testParams.chipId) {
             reject(new Error(`Invalid test parameters: ${JSON.stringify(testParams)}`));
             return;
         }
 
         console.log('Sending test parameters to Teensy:', testParams);
-        port.write(`TEST${testParams.id} ${testParams.snrRange} ${testParams.batchSize}\n`, (err) => {
+        port.write(`TEST${testParams.id} ${testParams.chipId} ${testParams.snrRange} ${testParams.batchSize}\n`, (err) => {
             if (err) {
                 console.error('Error writing to serial port:', err);
                 reject(err);
@@ -563,24 +784,20 @@ function runTestOnTeensy(testParams, resultsStream) {
         const dataHandler = (data) => {
             console.log('Received data from Teensy:', data);
             
-            if (data.trim().startsWith('{') && data.trim().endsWith('}')) {
-                try {
-                    const parsedData = JSON.parse(data);
-                    if (parsedData.status === "started") {
-                        console.log(`Test ${testParams.id} started`);
-                    } else if (parsedData.status === "completed") {
-                        parser.removeListener('data', dataHandler);
-                        console.log(`Test ${testParams.id} completed`);
-                        resolve();
-                    } else if (parsedData.iteration) {
-                        // Write result to CSV file
-                        resultsStream.write(`${parsedData.iteration},${parsedData.snr},${parsedData.ber},${parsedData.fer}\n`);
-                    }
-                } catch (err) {
-                    console.error('Error parsing JSON:', err, 'Raw data:', data);
+            try {
+                const parsedData = JSON.parse(data);
+                if (parsedData.status === "started") {
+                    console.log(`Test ${testParams.id} started on chip ${testParams.chipId}`);
+                } else if (parsedData.status === "completed") {
+                    parser.removeListener('data', dataHandler);
+                    console.log(`Test ${testParams.id} completed on chip ${testParams.chipId}`);
+                    resolve();
+                } else if (parsedData.testId === testParams.id) {
+                    // Process test results
+                    // You may want to save these results to a database or file
                 }
-            } else {
-                console.log('Non-JSON data from Teensy:', data);
+            } catch (err) {
+                console.error('Error parsing JSON:', err, 'Raw data:', data);
             }
         };
 
@@ -592,6 +809,7 @@ function runTestOnTeensy(testParams, resultsStream) {
         }, 30000 * 60); // 30 minute timeout for long-running tests
     });
 }
+
 
 // Edit test
 app.put('/tests/:id', (req, res) => {
@@ -670,6 +888,8 @@ app.post('/tests/:id/share', (req, res) => {
             });
     });
 });
+
+
 
 // Remove a user's access to a test
 app.post('/tests/:id/remove-access', (req, res) => {
@@ -758,7 +978,21 @@ app.get('/tests/:id/download', (req, res) => {
     });
 });
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Rest API started. Running on port ${PORT}`);
+// Fetch chip statuses
+app.get('/chips', (req, res) => {
+    res.json(chips);
+});
+
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'OK' });
+});
+
+
+  
+
+server.listen(PORT, () => {
+    console.log(`Rest API and WebSocket server started. Running on port ${PORT}`);
+    sendStatusToTeensy('ONLINE'); // Send initial status when server starts
 });

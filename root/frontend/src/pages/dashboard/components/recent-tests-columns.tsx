@@ -13,6 +13,7 @@ import {
 import {ArrowUpDown, Eye, MoreHorizontal, Share2, Trash} from 'lucide-react';
 import {Badge} from '@/components/ui/badge';
 import {Link} from "react-router-dom";
+import StatusBadge from "@/components/ui/statusbadge"
 
 export const recentTestsColumns: ColumnDef<any>[] = [
     {
@@ -62,29 +63,17 @@ export const recentTestsColumns: ColumnDef<any>[] = [
     {
         accessorKey: 'status',
         header: 'Status',
-        cell: ({row}) => {
-            const status = row.getValue('status')
-            return (
-                <Badge variant={status === 'Failed' ? 'destructive' : status === 'Queued' ? 'secondary' : 'default'}>
-                    {status}
-                </Badge>
-            )
-        },
+        cell: ({row}) => <StatusBadge status={row.getValue('status')} />,
+    },
+    {
+        accessorKey: 'start_time',
+        header: 'Start Time',
+        cell: ({row}) => <div>{row.getValue('start_time')}</div>,
     },
     {
         accessorKey: 'duration',
-        header: ({column}) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Duration
-                    <ArrowUpDown className="ml-2 h-4 w-4"/>
-                </Button>
-            )
-        },
-        cell: ({row}) => <div>{row.getValue('duration')}</div>,
+        header: 'Duration (sec.)',
+        cell: ({ row }) => <div>{row.getValue('duration') || 'N/A'}</div>,
     },
     {
         id: 'actions',

@@ -48,14 +48,31 @@
     position: relative; /* This will contain the Badge correctly */
 }
 
-.badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: blue;
+.table-badge {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Ensure the badge text aligns nicely with other text in the table */
+    padding: 5px 10px;
     color: white;
-    font-size: 10px;
-    padding: 2px 5px;
-    border-radius: 10px;
-    font-weight: bold;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    margin-right: 8px; /* Space between badge and any text or element after it */
+}
+
+/* Add specific background colors for each status directly in the class to avoid conflicts */
+.table-badge.running {
+    animation: fade 2s infinite;
+    background-color: #ffc107; /* Initial color for the animation */
+}
+
+.table-badge.completed {
+    background-color: #4caf50;
+}
+
+.table-badge.failed {
+    background-color: #f44336;
+}
+
+.table-badge.queued {
+    background-color: #ffeb3b;
 }

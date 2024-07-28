@@ -22,31 +22,58 @@ interface DataTableProps<TData, TValue> {
     onDeleteSelected: (selectedRows: TData[]) => void;
 }
 
+const handleDeleteSelected = async (selectedRows) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete ${selectedRows.length} tests?`);
+    if (!confirmDelete) return;
+
+    const idsToDelete = selectedRows.map(row => row.id); // Get IDs of selected rows
+    try {
+        const response = await fetch('/api/tests/batch-delete', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: idsToDelete })
+        });
+
+        if (!response.ok) throw new Error('Failed to delete tests.');
+
+        const updatedData = data.filter(row => !idsToDelete.includes(row.id));
+        setData(updatedData); // Update your state to reflect the deletion
+        setRowSelection({}); // Reset selection state
+    } catch (error) {
+        console.error('Error deleting tests:', error);
+        alert('Failed to delete tests: ' + error.message);
+    }
+};
+
+
 export function DataTable<TData, TValue>({
                                              columns,
                                              data,
                                              onDeleteSelected,
                                          }: DataTableProps<TData, TValue>) {
-    const [sorting, setSorting] = useState<SortingState>([]);
+                                            const [sorting, setSorting] = useState<SortingState>([
+                                                { id: 'creationDate', desc: true } 
+                                            ]);
+                                            
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [rowSelection, setRowSelection] = useState({});
 
     const table = useReactTable({
         data,
         columns,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        onSortingChange: setSorting,
-        getSortedRowModel: getSortedRowModel(),
-        onColumnFiltersChange: setColumnFilters,
-        getFilteredRowModel: getFilteredRowModel(),
-        onRowSelectionChange: setRowSelection,
         state: {
             sorting,
             columnFilters,
             rowSelection,
         },
+        onSortingChange: setSorting,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        onRowSelectionChange: setRowSelection,
     });
+    
 
     return (
         <div className="space-y-4">
