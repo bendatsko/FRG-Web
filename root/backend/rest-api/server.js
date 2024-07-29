@@ -239,7 +239,7 @@ parser.on('data', (data) => {
         await updateTestTimes(test.id, startTime, endTime);
         await updateTestStatus(test.id, 'Completed');
         
-        console.log(`Test ID ${test.id} started at ${formatDateTime(startTime)} and ended at ${endTime}. Duration: ${duration}`);        // Update the database or perform other actions
+        console.log(`Test ID ${test.id} started at ${formatDateTime(startTime)} and ended at ${formatDateTime(endTime)}. Duration: ${duration}`);
 
         // Broadcast test completion to all connected clients
         wss.clients.forEach((client) => {
@@ -259,10 +259,25 @@ parser.on('data', (data) => {
 
 async function updateTestWithResults(testId, resultsFilePath) {
     try {
-        await testCompletionHandler(testId);
+        const endTime = new Date().toISOString();
+        
+        // Fetch the test from the database
+        const test = await new Promise((resolve, reject) => {
+            db.get('SELECT * FROM tests WHERE id = ?', [testId], (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+
+        if (!test) {
+            throw new Error(`Test with ID ${testId} not found`);
+        }
+
+        const duration = calculateDuration(test.start_time, endTime);
+        
         return new Promise((resolve, reject) => {
-            db.run('UPDATE tests SET results_file = ?, status = ? WHERE id = ?',
-                [resultsFilePath, 'Completed', testId],
+            db.run('UPDATE tests SET results_file = ?, status = ?, end_time = ?, duration = ? WHERE id = ?',
+                [resultsFilePath, 'Completed', endTime, duration, testId],
                 (err) => {
                     if (err) reject(err);
                     else resolve();
@@ -270,6 +285,7 @@ async function updateTestWithResults(testId, resultsFilePath) {
         });
     } catch (error) {
         console.error(`Error updating test results for test ${testId}:`, error);
+        throw error;
     }
 }
 // Connect to SQLite database
@@ -371,11 +387,6 @@ function columnExists(table, column) {
 }
 
 db.serialize(() => {
-    db.run(`DROP TABLE IF EXISTS tests`, function(err) {
-        if (err) {
-            console.error("Error dropping tests table", err);
-        } else {
-            console.log("Dropped 'tests' table if it existed.");
             db.run(`CREATE TABLE IF NOT EXISTS tests (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
@@ -399,8 +410,6 @@ db.serialize(() => {
                     console.log("Successfully recreated the 'tests' table.");
                 }
             });
-        }
-    });
 });
 
 
@@ -727,10 +736,10 @@ app.post('/tests', async (req, res) => {
             testBench, 
             snrRange, 
             batchSize, 
-            username,  // Make sure this value is passed
+            username, 
             JSON.stringify(accessible_to), 
             DUT, 
-            formatDateTime(new Date().toISOString())
+            new Date().toISOString()
         ], function(err) {
             if (err) {
                 console.error('Error creating test:', err);
