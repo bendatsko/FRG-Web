@@ -45,7 +45,7 @@ const PresetSelector: React.FC<{
 }> = ({presets, onSelect, onSave}) => (
     <div className="flex items-center space-x-2 mb-6">
         <Select onValueChange={(value) => onSelect(presets.find(p => p.id === value)!)}>
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-full max-w-xs">
                 <SelectValue placeholder="Select a preset"/>
             </SelectTrigger>
             <SelectContent>
@@ -54,7 +54,6 @@ const PresetSelector: React.FC<{
                 ))}
             </SelectContent>
         </Select>
-
     </div>
 );
 
@@ -141,7 +140,7 @@ const Create: React.FC = () => {
                 throw new Error(errorData.message || "Failed to create test");
             }
 
-            toast({title: "Success", description: "Test created successfully.", variant: "positive"});
+            toast({title: "Success", description: "Test created successfully.", variant: "default"});
             navigate('/dashboard');
         } catch (error) {
             toast({title: "Error", description: error.message, variant: "negative"});
@@ -172,21 +171,22 @@ const Create: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto ml-10 mr-10 py-8">
-            <div className="">
-                <h1 className="text-3xl font-bold mb-2">Create Test</h1>
-                <p className="text-muted-foreground mb-2">Configure test parameters for LDPC Decoder ASIC.</p>
+        <div className=" w-full px-8 py-8 max-w-3xl">
+            <div className="space-y-6 w-full">
+                <div>
+                    <h1 className="text-3xl font-bold">Create Test</h1>
+                    <p className="text-muted-foreground mt-2">Configure test parameters for LDPC Decoder ASIC.</p>
+                </div>
 
                 <ServerStatus status={serverStatus}/>
 
-
-                <p className="text-muted-foreground mb-2 font-semibold text-sm">Load Preset</p>
-
-                <PresetSelector presets={presets} onSelect={onPresetSelect} onSave={onPresetSave}/>
-
+                <div>
+                    <p className="text-muted-foreground font-semibold text-sm mb-2">Load Preset</p>
+                    <PresetSelector presets={presets} onSelect={onPresetSelect} onSave={onPresetSave}/>
+                </div>
 
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <FormField
                             control={form.control}
                             name="title"
@@ -214,8 +214,7 @@ const Create: React.FC = () => {
                                         </FormControl>
                                         <SelectContent>
                                             {['ldpc1', 'ldpc2', 'ldpc3'].map((bench) => (
-                                                <SelectItem key={bench}
-                                                            value={bench}>{bench.toUpperCase()}</SelectItem>
+                                                <SelectItem key={bench} value={bench}>{bench.toUpperCase()}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -260,7 +259,6 @@ const Create: React.FC = () => {
                         </div>
                     </form>
                 </Form>
-
             </div>
         </div>
     );

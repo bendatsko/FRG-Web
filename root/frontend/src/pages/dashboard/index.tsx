@@ -8,16 +8,18 @@ import {setBreadCrumb} from "@/store/slice/app";
 import {selectUser} from "@/store/slice/auth";
 import {User} from "../../store/slice/auth";
 import {Button} from "@/components/ui/button";
-import {Plus} from "lucide-react";
+import {Plus, RefreshCw} from "lucide-react";
 import {useNavigate} from "react-router-dom";
 
 const Dashboard: React.FC = () => {
     const user = useSelector(selectUser) as User;
     const {data, isLoading, error, refetch} = useGetTestsQuery(user.username);
     const [testsData, setTestsData] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [socket, setSocket] = useState<WebSocket | null>(null);
+
     useEffect(() => {
         dispatch(setBreadCrumb([{title: "Dashboard", link: "/dashboard"}]));
     }, [dispatch]);
@@ -28,12 +30,10 @@ const Dashboard: React.FC = () => {
         }
     }, [data]);
 
-    // Refetch data when component mounts
     useEffect(() => {
         refetch();
     }, [refetch]);
 
-    // Refetch data when window regains focus
     useEffect(() => {
         const handleFocus = () => {
             refetch();
@@ -43,7 +43,6 @@ const Dashboard: React.FC = () => {
             window.removeEventListener('focus', handleFocus);
         };
     }, [refetch]);
-
 
     const connectWebSocket = useCallback(() => {
         const ws = new WebSocket('ws://10.1.10.248:3001');
@@ -71,7 +70,6 @@ const Dashboard: React.FC = () => {
 
     useEffect(() => {
         connectWebSocket();
-
         return () => {
             if (socket) {
                 socket.close();
@@ -116,29 +114,61 @@ const Dashboard: React.FC = () => {
 
     if (error) {
         return (
-            <div className="p-4">
-                <h3 className="text-lg font-semibold text-red-600">Error</h3>
+            <div className="p-4 text-red-600 dark:text-red-400">
+                <h3 className="text-lg font-semibold">Error</h3>
                 <p className="mt-2">An error occurred while fetching the tests.</p>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{error.toString()}</p>
+                <p className="mt-1 text-sm opacity-75">{error.toString()}</p>
             </div>
         );
     }
 
-    return (
-        <div className="p-4 space-y-4">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold">My Tests</h1>
-                <Button onClick={() => navigate('/create-ldpc')}>
-                    <Plus className="mr-2 h-4 w-4"/>
-                    New Test
-                </Button>
-            </div>
-            <DataTable
-                columns={recentTestsColumns}
-                data={testsData}
-                onDeleteSelected={handleDeleteSelected}
-            />
+    const filteredTests = testsData.filter(test =>
+        test.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
+    return (
+        <div className="container mx-auto p-6 space-y-8 bg-white dark:bg-black text-black dark:text-white">
+            <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-bold">Dashboard</h1>
+                <div className="flex space-x-2">
+                    <Button onClick={() => refetch()} variant="outline"
+                            className="bg-white dark:bg-black border-black/10 dark:border-white/10">
+                        <RefreshCw className="mr-2 h-4 w-4"/>
+                        Refresh
+                    </Button>
+                    <Button onClick={() => navigate('/create-ldpc')}
+                            className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90">
+                        <Plus className="mr-2 h-4 w-4"/>
+                        New Test
+                    </Button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                    {title: "Total Tests", value: testsData.length},
+                    {title: "Running Tests", value: testsData.filter(test => test.status === 'Running').length},
+                    {title: "Completed Tests", value: testsData.filter(test => test.status === 'Completed').length}
+                ].map((item, index) => (
+                    <div key={index} className="p-6 rounded-lg bg-black/5 dark:bg-white/5">
+                        <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                        <p className="text-3xl font-bold">{item.value}</p>
+                    </div>
+                ))}
+            </div>
+
+            <div className="rounded-lg border-b border-black/10 dark:bg-white/5 shadow-none overflow-hidden">
+                <div className="p-6 border-b border-black/10 dark:border-white/10">
+                    <h2 className="text-xl font-semibold mb-4">Recent Tests</h2>
+
+                    <DataTable
+                        columns={recentTestsColumns}
+                        data={filteredTests}
+                        onDeleteSelected={handleDeleteSelected}
+                    />
+                </div>
+
+            </div>
         </div>
     );
 };

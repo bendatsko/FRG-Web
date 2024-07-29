@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect} from 'react';
 import {columns} from "./components/columns";
 import {DataTable} from "./components/data-table";
 import {useGetUsersQuery} from "@/store/api/v1/endpoints/user";
 import {useDispatch} from "react-redux";
 import {setBreadCrumb} from "@/store/slice/app";
 import {Loading} from "@geist-ui/core";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 
 const Users = () => {
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(
-          setBreadCrumb([
-            { title: "Admin", link: "/dashboard" },
-            { title: "Access Control", link: "/dashboard" },
-          ])
+            setBreadCrumb([
+                {title: "Admin", link: "/dashboard"},
+                {title: "Access Control", link: "/dashboard"},
+            ])
         );
-      }, [dispatch]);
+    }, [dispatch]);
 
     const {data, isLoading} = useGetUsersQuery({});
     if (isLoading) {
@@ -29,20 +29,20 @@ const Users = () => {
         );
     } else {
         return (
-            <div className="container mx-auto mb-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className>Access Control</CardTitle>
-                <CardDescription>Userbase management tools.</CardDescription>
-              </CardHeader>
-              <CardContent>
-              <DataTable columns={columns} data={data}/>
-              </CardContent>
-              </Card>
+            <div className="container mx-auto mb-4 border-none">
+                <Card className="border-0 shadow-none">
+                    <CardHeader>
+                        <CardTitle className>Access Control</CardTitle>
+                        <CardDescription>Userbase management tools.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <DataTable columns={columns} data={data}/>
+                    </CardContent>
+                </Card>
 
-</div>
+            </div>
 
-  
+
         );
     }
 };

@@ -14,7 +14,7 @@ const MainLayout: React.FC = () => {
                 </div>
                 <main
                     className={
-                        " w-full   " + (isSideBarOpen ? "lg:ms-60" : "lg:ms-14")
+                        " w-full   " + (isSideBarOpen ? "lg:ms-50" : "lg:ms-14")
                     }
                 >
                     <TopHeader/>

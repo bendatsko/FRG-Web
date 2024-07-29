@@ -1,97 +1,43 @@
 import React from "react";
-import {Card} from "@/components/ui/card";
+import {Link, useLocation} from "react-router-dom";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {Button} from "@/components/ui/button";
+import {ScrollArea} from "@/components/ui/scroll-area";
+import {DAQROCLogo} from "@/components/common/DaqrocSquareIcon.tsx";
 import menusList from "@/services/data/menus";
-import {useLocation} from "react-router";
-import {DAQROCLogo} from "./DaqrocSquareIcon.tsx";
-
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {Tooltip, TooltipContent, TooltipTrigger,} from "@/components/ui/tooltip";
-import {Link} from "react-router-dom";
 
 const IconSidebar: React.FC = () => {
     const {pathname} = useLocation();
 
     return (
-        <Card
-            className="hidden z-[2000] w-14 h-screen fixed top-0 start-0 lg:flex border-e-2 dark:border-foreground justify-center overflow-y-auto rounded-none ">
-            <div className=" flex flex-col items-center dark:text-light ">
-                <div className=" py-5 w-full top-0 sticky ">
-                    <div className=" px-4 flex items-center gap-2 text-lg ">
-                        <DAQROCLogo/>
-                    </div>
-                </div>
-
-                {menusList?.map((menu: any, index) => (
-                    <React.Fragment key={index}>
-                        {menu.children ? (
-                            <Tooltip delayDuration={100}>
-                                <TooltipTrigger>
-                                    <DropdownMenu key={index}>
-                                        <DropdownMenuTrigger
-                                            asChild
-                                            className=" focus-visible:outline-none "
-                                        >
-                                            <div
-                                                className={
-                                                    "nav-link hover:nav-active w-full " +
-                                                    (pathname === menu.link && "nav-active")
-                                                }
-                                            >
-                                                {menu.icon && menu.icon}
-                                            </div>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent
-                                            side="right"
-                                            className="w-[200px] z-[2500] "
-                                        >
-                                            <DropdownMenuLabel>{menu.title}</DropdownMenuLabel>
-                                            <DropdownMenuSeparator/>
-                                            <DropdownMenuGroup>
-                                                {menu?.children.map((child: any) => (
-                                                    <Link to={child.link}>
-                                                        <DropdownMenuItem className=" cursor-pointer z-[3000] ">
-                                                            {child.title}
-                                                        </DropdownMenuItem>
-                                                    </Link>
-                                                ))}
-                                            </DropdownMenuGroup>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </TooltipTrigger>
-                                <TooltipContent className=" sticky z-50 " side="right">
-                                    {menu.title}
-                                </TooltipContent>
-                            </Tooltip>
-                        ) : (
-                            <Tooltip delayDuration={100}>
-                                <TooltipTrigger asChild>
-                                    <Link
-                                        className={
-                                            "nav-link hover:nav-active " +
-                                            (pathname == menu.link && "nav-active")
-                                        }
-                                        to={menu.link}
-                                    >
-                                        {menu.icon && menu.icon}
-                                    </Link>
-                                </TooltipTrigger>
-                                <TooltipContent className=" sticky z-50 " side="right">
-                                    {menu.title}
-                                </TooltipContent>
-                            </Tooltip>
-                        )}
-                    </React.Fragment>
-                ))}
+        <div className="w-16 h-screen fixed top-0 left-0 border-r dark:border-gray-800 flex flex-col">
+            <div className="h-16 flex items-center justify-center border-b dark:border-gray-800">
+                <DAQROCLogo className="h-8 w-8"/>
             </div>
-        </Card>
+            <ScrollArea className="flex-grow">
+                <div className="py-4 space-y-2">
+                    {menusList.map((menu: any, index) => (
+                        <Tooltip key={index} delayDuration={300}>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    asChild
+                                    className={`w-16 h-16 ${pathname === menu.link ? "bg-accent" : ""}`}
+                                >
+                                    <Link to={menu.link}>
+                                        {menu.icon}
+                                    </Link>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right">
+                                <p>{menu.title}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    ))}
+                </div>
+            </ScrollArea>
+        </div>
     );
 };
 

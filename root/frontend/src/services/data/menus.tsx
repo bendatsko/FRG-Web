@@ -1,5 +1,4 @@
 import {FileSettings, Home, Plus, Settings2} from "tabler-icons-react";
-import {HiChip} from "react-icons/hi";
 
 interface MenuItem {
     title: string;
@@ -19,14 +18,9 @@ const menus: MenuItem[] = [
     {
         icon: <Plus size={20} strokeWidth={2}/>,
         title: "Create",
-        children: [
-            {
-                title: "LDPC Chip Test",
-                link: "/create-ldpc",
-                icon: <HiChip size={18}/>,
-            },
-        ],
         isOpen: false,
+        link: "/create-ldpc",
+
     },
     // {
     //   icon: <ListIcon size={18} strokeWidth={2} />,
@@ -42,7 +36,7 @@ const menus: MenuItem[] = [
     },
     {
         icon: <FileSettings size={18} strokeWidth={2}/>,
-        title: "Administrator",
+        title: "Admin",
         link: "/administrator",
         isOpen: false,
     },

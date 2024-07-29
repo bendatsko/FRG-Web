@@ -17,9 +17,12 @@ import {
     DialogTrigger
 } from '@/components/ui/dialog';
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
-// import { Separator } from "@/components/ui/se";
+import {Separator} from "@/components/ui/separator";
 import {toast} from "@/components/ui/use-toast";
 import {setBreadCrumb} from "@/store/slice/app";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {Label} from "@/components/ui/label";
 
 
 const SettingsSchema = z.object({
@@ -46,11 +49,9 @@ const Settings = () => {
             setBreadCrumb([
                 {title: "Dashboard", link: "/dashboard"},
                 {title: "Settings", link: "/settings"},
-
             ])
         );
     }, [dispatch]);
-
 
     const form = useForm({
         resolver: zodResolver(SettingsSchema),
@@ -122,125 +123,164 @@ const Settings = () => {
     };
 
     return (
-        <div className="container mx-auto mb-4">
-            <Card>
-                <CardHeader>
-                    <CardTitle className>Account Settings</CardTitle>
-                    <CardDescription>Manage your account settings and set email preferences.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            <FormField
-                                control={form.control}
-                                name="username"
-                                render={({field}) => (
-                                    <FormItem>
-                                        <FormLabel>Username</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormDescription>
-                                            This is your public display name. It can be your real name or a pseudonym.
-                                        </FormDescription>
-                                        <FormMessage/>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({field}) => (
-                                    <FormItem>
-                                        <FormLabel>Email</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} type="email"/>
-                                        </FormControl>
-                                        <FormDescription>
-                                            You can manage verified email addresses in your email settings.
-                                        </FormDescription>
-                                        <FormMessage/>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="bio"
-                                render={({field}) => (
-                                    <FormItem>
-                                        <FormLabel>Bio</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormDescription>
-                                            Write a short bio about yourself. Max 160 characters.
-                                        </FormDescription>
-                                        <FormMessage/>
-                                    </FormItem>
-                                )}
-                            />
-                            <Button type="submit">Save changes</Button>
-                        </form>
-                    </Form>
-                </CardContent>
-                {/* <Separator className="my-4" /> */}
-                <CardFooter className="flex justify-between">
-                    <div>
-                        <CardDescription>
-                            User ID: {user.id}
-                        </CardDescription>
-                        <CardDescription>
-                            Role: {user.role}
-                        </CardDescription>
-                    </div>
-                    <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline">Reset Password</Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Reset Password</DialogTitle>
-                                <DialogDescription>
-                                    Enter your new password below. After resetting your password, you'll be logged out.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <Form {...resetForm}>
-                                <form onSubmit={resetForm.handleSubmit(onResetPassword)} className="space-y-4">
+        <div className="container mx-auto py-10">
+            <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
+            <Tabs defaultValue="general" className="space-y-4">
+                <TabsList>
+                    <TabsTrigger value="general">General</TabsTrigger>
+                    <TabsTrigger value="security">Security</TabsTrigger>
+                </TabsList>
+                <TabsContent value="general">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>General Settings</CardTitle>
+                            <CardDescription>Manage your account information and preferences.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center space-x-4 mb-6">
+                                <Avatar className="h-20 w-20">
+                                    <AvatarImage src={user.avatarUrl} alt={user.username}/>
+                                    <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <h2 className="text-2xl font-semibold">{user.username}</h2>
+                                    <p className="text-sm text-gray-500">{user.email}</p>
+                                </div>
+                            </div>
+                            <Form {...form}>
+                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                     <FormField
-                                        control={resetForm.control}
-                                        name="newPassword"
+                                        control={form.control}
+                                        name="username"
                                         render={({field}) => (
                                             <FormItem>
-                                                <FormLabel>New Password</FormLabel>
+                                                <FormLabel>Username</FormLabel>
                                                 <FormControl>
-                                                    <Input {...field} type="password"/>
+                                                    <Input {...field} />
                                                 </FormControl>
+                                                <FormDescription>
+                                                    This is your public display name.
+                                                </FormDescription>
                                                 <FormMessage/>
                                             </FormItem>
                                         )}
                                     />
                                     <FormField
-                                        control={resetForm.control}
-                                        name="confirmPassword"
+                                        control={form.control}
+                                        name="email"
                                         render={({field}) => (
                                             <FormItem>
-                                                <FormLabel>Confirm New Password</FormLabel>
+                                                <FormLabel>Email</FormLabel>
                                                 <FormControl>
-                                                    <Input {...field} type="password"/>
+                                                    <Input {...field} type="email"/>
                                                 </FormControl>
+                                                <FormDescription>
+                                                    Your primary email address.
+                                                </FormDescription>
                                                 <FormMessage/>
                                             </FormItem>
                                         )}
                                     />
-                                    <DialogFooter>
-                                        <Button type="submit">Reset Password</Button>
-                                    </DialogFooter>
+                                    <FormField
+                                        control={form.control}
+                                        name="bio"
+                                        render={({field}) => (
+                                            <FormItem>
+                                                <FormLabel>Bio</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Write a short bio about yourself. Max 160 characters.
+                                                </FormDescription>
+                                                <FormMessage/>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <Button type="submit">Save changes</Button>
                                 </form>
                             </Form>
-                        </DialogContent>
-                    </Dialog>
-                </CardFooter>
-            </Card>
+                        </CardContent>
+                        <Separator className="my-4"/>
+                        <CardFooter>
+                            <div className="flex justify-between items-center w-full">
+                                <div>
+                                    <Label className="text-sm font-medium">User ID</Label>
+                                    <p className="text-sm text-gray-500">{user.id}</p>
+                                </div>
+                                <div>
+                                    <Label className="text-sm font-medium">Role</Label>
+                                    <p className="text-sm text-gray-500">{user.role}</p>
+                                </div>
+                            </div>
+                        </CardFooter>
+                    </Card>
+                </TabsContent>
+                <TabsContent value="security">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Security Settings</CardTitle>
+                            <CardDescription>Manage your account security and password.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <div>
+                                    <Label className="text-sm font-medium">Password</Label>
+                                    <p className="text-sm text-gray-500">Last changed: 3 months ago</p>
+                                </div>
+                                <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline">Reset Password</Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Reset Password</DialogTitle>
+                                            <DialogDescription>
+                                                Enter your new password below. After resetting your password, you'll be
+                                                logged out.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <Form {...resetForm}>
+                                            <form onSubmit={resetForm.handleSubmit(onResetPassword)}
+                                                  className="space-y-4">
+                                                <FormField
+                                                    control={resetForm.control}
+                                                    name="newPassword"
+                                                    render={({field}) => (
+                                                        <FormItem>
+                                                            <FormLabel>New Password</FormLabel>
+                                                            <FormControl>
+                                                                <Input {...field} type="password"/>
+                                                            </FormControl>
+                                                            <FormMessage/>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={resetForm.control}
+                                                    name="confirmPassword"
+                                                    render={({field}) => (
+                                                        <FormItem>
+                                                            <FormLabel>Confirm New Password</FormLabel>
+                                                            <FormControl>
+                                                                <Input {...field} type="password"/>
+                                                            </FormControl>
+                                                            <FormMessage/>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <DialogFooter>
+                                                    <Button type="submit">Reset Password</Button>
+                                                </DialogFooter>
+                                            </form>
+                                        </Form>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 };

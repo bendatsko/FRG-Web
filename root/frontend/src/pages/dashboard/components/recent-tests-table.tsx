@@ -14,7 +14,7 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight} from "lucide-react";
+import {ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Trash2} from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -30,8 +30,8 @@ const handleDeleteSelected = async (selectedRows) => {
     try {
         const response = await fetch('/api/tests/batch-delete', {
             method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ids: idsToDelete })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ids: idsToDelete})
         });
 
         if (!response.ok) throw new Error('Failed to delete tests.');
@@ -51,10 +51,10 @@ export function DataTable<TData, TValue>({
                                              data,
                                              onDeleteSelected,
                                          }: DataTableProps<TData, TValue>) {
-                                            const [sorting, setSorting] = useState<SortingState>([
-                                                { id: 'creationDate', desc: true } 
-                                            ]);
-                                            
+    const [sorting, setSorting] = useState<SortingState>([
+        {id: 'creationDate', desc: true}
+    ]);
+
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [rowSelection, setRowSelection] = useState({});
 
@@ -73,7 +73,7 @@ export function DataTable<TData, TValue>({
         getFilteredRowModel: getFilteredRowModel(),
         onRowSelectionChange: setRowSelection,
     });
-    
+
 
     return (
         <div className="space-y-4">
@@ -91,17 +91,21 @@ export function DataTable<TData, TValue>({
                     disabled={table.getFilteredSelectedRowModel().rows.length === 0}
                     variant="destructive"
                 >
+                    <Trash2 className="mr-2 h-4 w-4"/>
+
                     Delete Selected
                 </Button>
+
+
             </div>
-            <div className="rounded-md border border-gray-200 dark:border-gray-700">
+            <div className="rounded-md border border-black/10 dark:border-white/10 ">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="bg-gray-50 dark:bg-gray-800">
+                            <TableRow key={headerGroup.id} className="">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead key={header.id}
-                                               className="font-semibold text-gray-900 dark:text-gray-100">
+                                               className="font-semibold text-black-900 dark:text-white dark:border-white/10 ">
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(
@@ -119,7 +123,7 @@ export function DataTable<TData, TValue>({
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    className="border-t border-gray-200 dark:border-gray-700"
+                                    className="border-t border-gray-200 dark:border-white/10"
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
