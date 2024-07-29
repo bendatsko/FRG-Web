@@ -1,8 +1,8 @@
 // columns.tsx
 import React from 'react';
-import { ColumnDef } from "@tanstack/react-table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import {ColumnDef} from "@tanstack/react-table";
+import {Checkbox} from "@/components/ui/checkbox";
+import {Button} from "@/components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,10 +11,17 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import {MoreHorizontal} from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from "@/components/ui/dialog";
+import {Label} from "@/components/ui/label";
+import {Input} from "@/components/ui/input";
 
 type User = {
     id: string;
@@ -70,7 +77,7 @@ export const columns: ColumnDef<User>[] = [
     {
         id: "actions",
         enableHiding: false,
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const user = row.original;
             const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
             const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
@@ -80,7 +87,7 @@ export const columns: ColumnDef<User>[] = [
 
             const handleDeleteUser = async () => {
                 try {
-                    const response = await fetch(`http://localhost:3001/users/${user.id}`, {
+                    const response = await fetch(`http://10.1.10.248:3001/users/${user.id}`, {
                         method: 'DELETE',
                     });
                     if (response.ok) {
@@ -97,7 +104,7 @@ export const columns: ColumnDef<User>[] = [
 
             const handleEditUser = async () => {
                 try {
-                    const response = await fetch(`http://localhost:3001/users/${user.id}`, {
+                    const response = await fetch(`http://10.1.10.248:3001/users/${user.id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -118,12 +125,12 @@ export const columns: ColumnDef<User>[] = [
 
             const handleResetPassword = async () => {
                 try {
-                    const response = await fetch(`http://localhost:3001/reset-password`, {
+                    const response = await fetch(`http://10.1.10.248:3001/reset-password`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ userId: user.id, newPassword }),
+                        body: JSON.stringify({userId: user.id, newPassword}),
                     });
                     if (response.ok) {
                         console.log('Password reset successfully');
@@ -143,7 +150,7 @@ export const columns: ColumnDef<User>[] = [
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
                                 <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
+                                <MoreHorizontal className="h-4 w-4"/>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -153,9 +160,11 @@ export const columns: ColumnDef<User>[] = [
                             >
                                 Copy email address
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>Modify profile</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>Delete profile</DropdownMenuItem>
+                            <DropdownMenuSeparator/>
+                            <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>Modify
+                                profile</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>Delete
+                                profile</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
 
@@ -248,7 +257,8 @@ export const columns: ColumnDef<User>[] = [
                                 </div>
                             </div>
                             <DialogFooter>
-                                <Button variant="outline" onClick={() => setIsResetPasswordDialogOpen(false)}>Cancel</Button>
+                                <Button variant="outline"
+                                        onClick={() => setIsResetPasswordDialogOpen(false)}>Cancel</Button>
                                 <Button onClick={handleResetPassword}>Reset Password</Button>
                             </DialogFooter>
                         </DialogContent>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -11,16 +11,15 @@ import {
     useReactTable,
     VisibilityState,
 } from "@tanstack/react-table";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useTheme } from "@/services/providers/theme-provider";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
 import {
     Dialog,
     DialogClose,
@@ -31,7 +30,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+import {Label} from "@/components/ui/label";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -39,9 +38,9 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function DataTable<TData, TValue>({
-    columns,
-    data,
-}: DataTableProps<TData, TValue>) {
+                                             columns,
+                                             data,
+                                         }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -77,12 +76,12 @@ export function DataTable<TData, TValue>({
 
     const handleNewUser = async () => {
         try {
-            const response = await fetch('http://localhost:3001/register', {
+            const response = await fetch('http://10.1.10.248:3001/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password, username, bio, role }),
+                body: JSON.stringify({email, password, username, bio, role}),
             });
 
             if (response.ok) {
@@ -103,14 +102,14 @@ export function DataTable<TData, TValue>({
 
     const handleResetPassword = async () => {
         try {
-            const response = await fetch('http://localhost:3001/reset-password', {
+            const response = await fetch('http://10.1.10.248:3001/reset-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ userId: resetUserId, newPassword }),
+                body: JSON.stringify({userId: resetUserId, newPassword}),
             });
-    
+
             if (response.ok) {
                 console.log('Password reset successfully');
                 // Reset form fields
@@ -123,7 +122,7 @@ export function DataTable<TData, TValue>({
             console.error('Error resetting password:', error);
         }
     };
-    
+
 
     return (
         <>

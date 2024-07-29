@@ -1,19 +1,19 @@
-import React, { useEffect, useState, useCallback  } from 'react';
-import { useDispatch, useSelector } from "react-redux";
-import { Loading } from "@geist-ui/core";
-import { recentTestsColumns } from "./components/recent-tests-columns";
-import { DataTable } from "./components/recent-tests-table";
-import { useGetTestsQuery } from "@/store/api/v1/endpoints/test";
-import { setBreadCrumb } from "@/store/slice/app";
-import { selectUser } from "@/store/slice/auth";
-import { User } from "../../store/slice/auth";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import React, {useCallback, useEffect, useState} from 'react';
+import {useDispatch, useSelector} from "react-redux";
+import {Loading} from "@geist-ui/core";
+import {recentTestsColumns} from "./components/recent-tests-columns";
+import {DataTable} from "./components/recent-tests-table";
+import {useGetTestsQuery} from "@/store/api/v1/endpoints/test";
+import {setBreadCrumb} from "@/store/slice/app";
+import {selectUser} from "@/store/slice/auth";
+import {User} from "../../store/slice/auth";
+import {Button} from "@/components/ui/button";
+import {Plus} from "lucide-react";
+import {useNavigate} from "react-router-dom";
 
 const Dashboard: React.FC = () => {
     const user = useSelector(selectUser) as User;
-    const { data, isLoading, error, refetch } = useGetTestsQuery(user.username);
+    const {data, isLoading, error, refetch} = useGetTestsQuery(user.username);
     const [testsData, setTestsData] = useState([]);
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -46,8 +46,8 @@ const Dashboard: React.FC = () => {
 
 
     const connectWebSocket = useCallback(() => {
-        const ws = new WebSocket('ws://localhost:3001');
-        
+        const ws = new WebSocket('ws://10.1.10.248:3001');
+
         ws.onopen = () => {
             console.log('WebSocket connected');
         };
@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
                 refetch();  // This should update the tests data if the backend sends updated information
             }
         };
-        
+
 
         ws.onclose = () => {
             console.log('WebSocket disconnected. Attempting to reconnect...');
@@ -82,29 +82,29 @@ const Dashboard: React.FC = () => {
     const handleDeleteSelected = async (selectedRows) => {
         const confirmDelete = window.confirm(`Are you sure you want to delete ${selectedRows.length} tests?`);
         if (!confirmDelete) return;
-    
+
         const idsToDelete = selectedRows.map(row => row.id); // Collecting IDs to delete
         try {
-            const response = await fetch('http://localhost:3001/api/tests/batch-delete', {
-              method: 'DELETE',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ ids: idsToDelete })
+            const response = await fetch('http://10.1.10.248:3001/api/tests/batch-delete', {
+                method: 'DELETE',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ids: idsToDelete})
             });
-            
+
             if (!response.ok) throw new Error('Failed to delete tests.');
-            
+
             const result = await response.json();
             console.log(result);  // Log the server response
-            
+
             // Update your UI based on the successful deletion
             setTestsData(prevData => prevData.filter(row => !idsToDelete.includes(row.id)));
-            
-          } catch (error) {
+
+        } catch (error) {
             console.error('Error deleting tests:', error);
             alert('Failed to delete tests: ' + error.message);
-          }
+        }
     };
-    
+
 
     if (isLoading) {
         return (

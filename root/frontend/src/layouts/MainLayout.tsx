@@ -18,9 +18,7 @@ const MainLayout: React.FC = () => {
                     }
                 >
                     <TopHeader/>
-                    <div className=" mt-6 ">
-                        <Outlet/>
-                    </div>
+                    <Outlet/>
                     <Footer/>
 
                 </main>
