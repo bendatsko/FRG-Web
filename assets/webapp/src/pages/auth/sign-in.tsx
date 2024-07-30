@@ -1,0 +1,153 @@
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ErrorMessage, Form, Formik } from 'formik';
+import { signInSchema } from '@/services/schemas';
+import { useSignInMutation } from '@/store/api/v1/endpoints/auth';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
+import { useDispatch } from 'react-redux';
+import { saveUserInfo } from '@/store/slice/auth';
+import { InputPassword } from '@/components';
+import { SignInType } from '@/types';
+import { DAQROCLogo } from "@/components/common/DaqrocSquareIcon.tsx";
+
+const Logo: React.FC = () => (
+  <div className="flex justify-center mb-8">
+    <DAQROCLogo className="text-black dark:text-white" height="4rem" width="4rem" />
+  </div>
+);
+
+const initialFormValues: SignInType = {
+  email: '',
+  password: '',
+};
+
+const SignIn: React.FC = () => {
+  const [signIn] = useSignInMutation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const dispatch = useDispatch();
+
+  const handleSubmit = async (values: SignInType, actions: any) => {
+    try {
+      const result = await signIn(values).unwrap();
+      const userInfo = {
+        email: result.user.email,
+        username: result.user.username,
+        role: result.user.role,
+        uuid: result.user.uuid,
+        bio: result.user.bio,
+      };
+
+      dispatch(saveUserInfo({ token: result.access_token, user: userInfo }));
+      actions.resetForm();
+      navigate('/settings');
+    } catch (err) {
+      toast({
+        duration: 1000,
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Authentication failed.',
+      });
+    }
+  };
+
+  return (
+    <div className="w-screen h-screen flex items-center justify-center bg-white dark:bg-[#0a0a0a] text-black dark:text-white">
+      <div
+        className="w-full max-w-md p-8 rounded-lg bg-white dark:bg-[#141414] shadow-md dark:shadow-xl border border-gray-200 dark:border-[#282828]"
+      >
+        <Logo />
+        <h1 className="text-3xl font-bold mb-6 text-center text-black dark:text-white">Sign In</h1>
+        <Formik
+          initialValues={initialFormValues}
+          validationSchema={signInSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ values, handleBlur, handleChange, isSubmitting }) => (
+            <Form className="space-y-6">
+              <FormField
+                label="Email Address"
+                name="email"
+                type="email"
+                value={values.email}
+                onBlur={handleBlur}
+                onChange={handleChange}
+              />
+              <FormField
+                label="Password"
+                name="password"
+                type="password"
+                value={values.password}
+                onBlur={handleBlur}
+                onChange={handleChange}
+              />
+              <SubmitButton isSubmitting={isSubmitting} />
+            </Form>
+          )}
+        </Formik>
+      </div>
+    </div>
+  );
+};
+
+const FormField: React.FC<{
+  label: string;
+  name: string;
+  type: string;
+  value: string;
+  onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}> = ({ label, name, type, value, onBlur, onChange }) => (
+  <div className="space-y-2">
+    <Label htmlFor={name} className="text-sm font-medium text-gray-700 dark:text-white/70">
+      {label}
+    </Label>
+    {type === 'password' ? (
+      <InputPassword
+        className="w-full bg-gray-50  border-gray-300 dark:border-[#282828] text-black dark:text-white rounded-md focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        name={name}
+        id={name}
+        value={value}
+        onBlur={onBlur}
+        onChange={onChange}
+      />
+    ) : (
+      <Input
+        className="w-full bg-gray-50  border-gray-300 dark:border-[#282828] text-black dark:text-white rounded-md focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        type={type}
+        name={name}
+        id={name}
+        value={value}
+        onBlur={onBlur}
+        onChange={onChange}
+      />
+    )}
+    <ErrorMessage
+      name={name}
+      component="div"
+      className="text-sm text-red-500 dark:text-red-400"
+    />
+  </div>
+);
+
+const SubmitButton: React.FC<{ isSubmitting: boolean }> = ({ isSubmitting }) => (
+  <Button
+    type="submit"
+    variant="default"
+    disabled={isSubmitting}
+    className="w-full bg-blue-600 text-white hover:bg-blue-700 dark:bg-white dark:text-black dark:hover:bg-white/90 transition-colors duration-200"
+  >
+    {isSubmitting ? (
+      <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+      </svg>
+    ) : null}
+    Sign In
+  </Button>
+);
+
+export default SignIn;
