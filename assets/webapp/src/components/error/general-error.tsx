@@ -1,10 +1,15 @@
 import { ErrorLottie } from "@/components";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import {Navigate} from "react-router";
+import React from "react";
 
 const GeneralError = () => {
+
   return (
     <div className="h-svh">
+      <Navigate to={"/auth/sign-in"} />
+
       <div className="m-auto flex h-full w-full flex-col items-center justify-center ">
         <div className=" w-[300px] ">
           <ErrorLottie />

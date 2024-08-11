@@ -4,21 +4,21 @@ const userApi = api.injectEndpoints({
     endpoints: (builder) => ({
         getUsers: builder.query({
             query: () => ({
-                url: "http://10.1.10.248:3001/users",
+                url: "http://localhost:3001/users",
                 method: "GET",
             }),
             providesTags: ["User"],
         }),
         getUser: builder.query({
             query: (id) => ({
-                url: `http://10.1.10.248/users/${id}`,
+                url: `http://localhost/users/${id}`,
                 method: "GET",
             }),
             providesTags: ["User"],
         }),
         addUser: builder.mutation({
             query: (newUser) => ({
-                url: 'http://10.1.10.248/register',
+                url: 'http://localhost/register',
                 method: 'POST',
                 body: newUser,
             }),
@@ -26,7 +26,7 @@ const userApi = api.injectEndpoints({
         }),
         updateUser: builder.mutation({
             query: ({id, ...patch}) => ({
-                url: `http://10.1.10.248/users/${id}`,
+                url: `http://localhost/users/${id}`,
                 method: 'PUT',
                 body: patch,
             }),
@@ -34,14 +34,14 @@ const userApi = api.injectEndpoints({
         }),
         deleteUser: builder.mutation({
             query: (id) => ({
-                url: `http://10.1.10.248/users/${id}`,
+                url: `http://localhost/users/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: ["User"],
         }),
         resetPassword: builder.mutation({
             query: ({userId, newPassword}) => ({
-                url: 'http://10.1.10.248/reset-password',
+                url: 'http://localhost/reset-password',
                 method: 'POST',
                 body: {userId, newPassword},
             }),

@@ -104,7 +104,7 @@ export const columns: ColumnDef<User>[] = [
 
             const handleEditUser = async () => {
                 try {
-                    const response = await fetch(`http://10.1.10.248:3001/users/${user.id}`, {
+                    const response = await fetch(`http://localhost:3001/users/${user.id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ export const columns: ColumnDef<User>[] = [
 
             const handleResetPassword = async () => {
                 try {
-                    const response = await fetch(`http://10.1.10.248:3001/reset-password`, {
+                    const response = await fetch(`http://localhost:3001/reset-password`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

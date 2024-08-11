@@ -77,7 +77,7 @@ export const recentTestsColumns: ColumnDef<any>[] = [
     },
     {
         id: 'actions',
-        cell: ({row}) => {
+        cell: ({ row, table, handleDelete }) => {
             const test = row.original
 
             return (
@@ -104,7 +104,7 @@ export const recentTestsColumns: ColumnDef<any>[] = [
                             <Share2 className="mr-2 h-4 w-4"/>
                             Share
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleDelete}>
                             <Trash className="mr-2 h-4 w-4"/>
                             Delete
                         </DropdownMenuItem>

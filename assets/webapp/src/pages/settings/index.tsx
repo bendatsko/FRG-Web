@@ -70,7 +70,7 @@ const Settings = () => {
 
     const onSubmit = async (data) => {
         try {
-            const response = await fetch(`http://10.1.10.248:3001/users/${user.id}`, {
+            const response = await fetch(`http://localhost:3001/users/${user.id}`, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data),
@@ -95,7 +95,7 @@ const Settings = () => {
 
     const onResetPassword = async (data) => {
         try {
-            const response = await fetch('http://10.1.10.248:3001/reset-password', {
+            const response = await fetch('http://localhost:3001/reset-password', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({userId: user.id, newPassword: data.newPassword}),

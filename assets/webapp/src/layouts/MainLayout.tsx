@@ -7,6 +7,7 @@ import {Footer} from "../components/ui/footer";
 const MainLayout: React.FC = () => {
     const isSideBarOpen = useSelector((state: any) => state.app.isSideBarOpen);
     return (
+
         <AuthGuard>
             <div className="flex">
                 <div className=" hidden lg:block">

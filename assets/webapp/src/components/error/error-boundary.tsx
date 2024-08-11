@@ -7,7 +7,9 @@ const ErrorBoundaryComponent: React.FC = () => {
 
   if (isRouteErrorResponse(error)) {
     if (error.status === 404) {
-      return <PageNotFoundError/>
+      // return <PageNotFoundError/>
+      return <Navigate to={"/auth/sign-in"} />;
+
     }
 
     if (error.status === 401) {

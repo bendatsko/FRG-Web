@@ -45,7 +45,7 @@ const Dashboard: React.FC = () => {
     }, [refetch]);
 
     const connectWebSocket = useCallback(() => {
-        const ws = new WebSocket('ws://10.1.10.248:3001');
+        const ws = new WebSocket('ws://localhost:3001');
 
         ws.onopen = () => {
             console.log('WebSocket connected');
@@ -83,7 +83,7 @@ const Dashboard: React.FC = () => {
 
         const idsToDelete = selectedRows.map(row => row.id); // Collecting IDs to delete
         try {
-            const response = await fetch('http://10.1.10.248:3001/api/tests/batch-delete', {
+            const response = await fetch('http://localhost:3001/api/tests/batch-delete', {
                 method: 'DELETE',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ids: idsToDelete})

@@ -100,7 +100,7 @@ const Create: React.FC = () => {
 
     const checkServerHealth = async () => {
         try {
-            const response = await fetch('http://10.1.10.248:3001/health', {method: 'GET'});
+            const response = await fetch('http://localhost:3001/health', {method: 'GET'});
             const data = await response.json();
             setServerStatus(data.status === "OK" ? 'online' : 'offline');
         } catch (error) {
@@ -129,7 +129,7 @@ const Create: React.FC = () => {
         };
 
         try {
-            const response = await fetch("http://10.1.10.248:3001/tests", {
+            const response = await fetch("http://localhost:3001/tests", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(fullData),

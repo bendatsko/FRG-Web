@@ -1,20 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
-import { LogOut, Menu, Settings, Github, Plus } from "lucide-react";
-import { toggleSideBarOpen } from "@/store/slice/app";
-import { removeUserInfo, selectUser } from "@/store/slice/auth";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React, {useEffect, useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {Link, useNavigate} from "react-router-dom";
+import {LogOut, Menu, Settings, Github, Plus} from "lucide-react";
+import {toggleSideBarOpen} from "@/store/slice/app";
+import {removeUserInfo, selectUser} from "@/store/slice/auth";
+import {Button} from "@/components/ui/button";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BreadCrumb, MobileSideBar, ToggleMode } from "@/components";
+import {BreadCrumb, MobileSideBar, ToggleMode} from "@/components";
 
 const TopHeader: React.FC = () => {
     const dispatch = useDispatch();
@@ -26,8 +21,8 @@ const TopHeader: React.FC = () => {
         navigate("/auth/sign-in");
     };
 
-    return (
-        <header className="w-full h-16 flex justify-between items-center px-4 border-b dark:border-white/20 bg-outline dark:bg-[#0a0a0a] bg-[#FFFFF] border border-sm dark:border-[#282828]">
+    return (<header
+            className="w-full h-16 flex justify-between items-center px-4 border-b dark:border-white/20 bg-outline dark:bg-[#0a0a0a] bg-[#FFFFF] border border-sm dark:border-[#282828]">
             <div className="flex items-center space-x-4">
                 <Button
                     variant="ghost"
@@ -41,22 +36,22 @@ const TopHeader: React.FC = () => {
                 {/* <BreadCrumb/> */}
             </div>
             <div className="flex items-center space-x-3 ">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs font-semibold h-9 " onClick={() => navigate('/create-ldpc')}
-                >
-                    Create
-                    <Plus className="ml-1 h-3 w-3" />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-sm h-9"
-                >
-                    Docs
-                </Button>
-       
+                {/*<Button*/}
+                {/*    variant="outline"*/}
+                {/*    size="sm"*/}
+                {/*    className="text-xs font-semibold h-9 " onClick={() => navigate('/create-ldpc')}*/}
+                {/*>*/}
+                {/*    Create*/}
+                {/*    <Plus className="ml-1 h-3 w-3"/>*/}
+                {/*</Button>*/}
+                {/*<Button*/}
+                {/*    variant="outline"*/}
+                {/*    size="sm"*/}
+                {/*    className="text-sm h-9"*/}
+                {/*>*/}
+                {/*    Docs*/}
+                {/*</Button>*/}
+
                 <ToggleMode/>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -88,8 +83,7 @@ const TopHeader: React.FC = () => {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-        </header>
-    );
+        </header>);
 };
 
 export default TopHeader;
