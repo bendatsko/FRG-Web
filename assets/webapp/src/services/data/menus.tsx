@@ -1,11 +1,15 @@
-import {FileSettings, Home, Plus, Settings2} from "tabler-icons-react";
+// File: @/services/data/menus.ts
+
+import React from 'react';
+import { FileSettings, Home, Plus, Settings2 } from "tabler-icons-react";
 
 interface MenuItem {
     title: string;
     link?: string;
     icon?: JSX.Element;
     children?: MenuItem[];
-    isOpen?: boolean; // New property to track open/closed state
+    isOpen?: boolean;
+    requiredRole?: string[];
 }
 
 const menus: MenuItem[] = [
@@ -20,14 +24,7 @@ const menus: MenuItem[] = [
         title: "Create",
         isOpen: false,
         link: "/create-ldpc",
-
     },
-    // {
-    //   icon: <ListIcon size={18} strokeWidth={2} />,
-    //   title: "My Tests",
-    //   link: "/products",
-    //   isOpen: false,
-    // },
     {
         icon: <Settings2 size={18} strokeWidth={2}/>,
         title: "Settings",
@@ -39,6 +36,7 @@ const menus: MenuItem[] = [
         title: "Admin",
         link: "/administrator",
         isOpen: false,
+        requiredRole: ['Developer'],
     },
 ];
 

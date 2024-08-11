@@ -1,59 +1,146 @@
-import React, {useState} from "react";
-import {useLocation, useNavigate} from "react-router-dom";
-import {Collapsible} from "@/components/ui/collapsible";
-import {Button} from "@/components/ui/button";
-import {ScrollArea} from "@/components/ui/scroll-area";
-import {DAQROCLogo} from "@/components/common/DaqrocSquareIcon.tsx";
-import menusList from "@/services/data/menus";
-import {MenuItemType} from "@/types";
+import React, { useState, useCallback } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { DAQROCLogo } from "@/components/common/DaqrocSquareIcon";
+import {ChevronDown, ChevronUp, LogOut} from "lucide-react";
+import menus from "@/services/data/menus";
+import { selectUser } from "@/store/slice/auth";
+import { MenuItemType } from "@/types";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@radix-ui/react-dropdown-menu";
+import {Avatar} from "@geist-ui/core";
+import {AvatarFallback, AvatarImage} from "@radix-ui/react-avatar";
+import {ToggleMode} from "@/components";
+
+const MenuItem: React.FC<{
+    menu: MenuItemType;
+    isActive: boolean;
+    onClick: () => void;
+}> = React.memo(({ menu, isActive, onClick }) => (
+    <Button
+        variant="ghost"
+        className={`w-full justify-start py-2 px-3 text-sm ${isActive ? "bg-accent" : ""}`}
+        onClick={onClick}
+    >
+        {menu.icon}
+        <span className="ml-3 font-medium">{menu.title}</span>
+    </Button>
+));
+
+const CollapsibleMenuItem: React.FC<{
+    menu: MenuItemType;
+    isOpen: boolean;
+    onToggle: () => void;
+    onItemClick: (item: MenuItemType) => void;
+    activePathname: string;
+}> = React.memo(({ menu, isOpen, onToggle, onItemClick, activePathname }) => (
+    <Collapsible open={isOpen} onOpenChange={onToggle}>
+        <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="w-full justify-between py-2 px-3 text-sm">
+                <span className="flex items-center">
+                    {menu.icon}
+                    <span className="ml-3 font-medium">{menu.title}</span>
+                </span>
+                {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pl-6">
+            {menu.children?.map((child) => (
+                <MenuItem
+                    key={child.link}
+                    menu={child}
+                    isActive={activePathname === child.link}
+                    onClick={() => onItemClick(child)}
+                />
+            ))}
+        </CollapsibleContent>
+    </Collapsible>
+));
+
+const Header: React.FC<{ onLogoClick: () => void }> = React.memo(({ onLogoClick }) => (
+    <div className="h-16 flex items-center px-4 border-b">
+        <div className="flex items-center space-x-2 w-full">
+            <DAQROCLogo className="h-8 w-8 cursor-pointer" onClick={onLogoClick} />
+            <div className="flex flex-col">
+                <span className="font-bold text-xl">daqroc</span>
+                <span className="text-xs text-gray-500">v4.0</span>
+            </div>
+        </div>
+    </div>
+));
 
 const SheetSideBar: React.FC = () => {
-    const [menus, setMenus] = useState<MenuItemType[]>(menusList);
+    const [openMenus, setOpenMenus] = useState<Set<number>>(new Set());
     const navigate = useNavigate();
-    const {pathname} = useLocation();
+    const { pathname } = useLocation();
+    const user = useSelector(selectUser);
 
-    const handleOpenDropDownSideBar = (index: number) => {
-        const updatedMenus = [...menus];
-        updatedMenus[index].isOpen = !updatedMenus[index].isOpen;
-        setMenus(updatedMenus);
+    const filteredMenus = menus.filter(menu =>
+        !menu.requiredRole || menu.requiredRole.includes(user.role)
+    );
+
+
+
+    const handleLogout = () => {
+        dispatch(removeUserInfo());
+        navigate("/auth/sign-in");
     };
 
-    const handleNavigate = (menu: MenuItemType) => {
+
+    const handleOpenDropDownSideBar = useCallback((index: number) => {
+        setOpenMenus((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(index)) {
+                newSet.delete(index);
+            } else {
+                newSet.add(index);
+            }
+            return newSet;
+        });
+    }, []);
+
+    const handleNavigate = useCallback((menu: MenuItemType) => {
         navigate(menu.link);
-    };
+    }, [navigate]);
 
     return (
-        <div className="flex flex-col w-48 h-full border-r bg-outline dark:bg-[#0a0a0a] bg-[#FFFFF] border border-sm dark:border-[#282828]">
-            <div className="h-16 flex items-center px-4 border-b dark:border-white/20">
-                <div className="flex items-center justify-center">
-                    <DAQROCLogo className="h-8 w-8 mt-1" onClick={() => navigate('/')}/>
-                    <span className="font-bold items-center text-3xl">DAQROC</span>
-                </div>
-            </div>
+        <div className="flex flex-col h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
+            <Header onLogoClick={() => navigate('/')}/>
             <ScrollArea className="flex-grow">
                 <nav className="p-2 space-y-1">
-                    {menus.map((menu, index) => (
-                        <React.Fragment key={index}>
-                            {menu.children ? (
-                                <Collapsible className="">
-
-                                </Collapsible>
-                            ) : (
-                                <Button
-                                    variant="ghost"
-                                    className={`w-full justify-start py-2 px-3 text-sm ${pathname === menu.link ? "bg-accent" : ""}`}
-                                    onClick={() => handleNavigate(menu)}
-                                >
-                                    {menu.icon}
-                                    <span className="ml-3 font-medium">{menu.title}</span>
-                                </Button>
-                            )}
-                        </React.Fragment>
+                    {filteredMenus.map((menu, index) => (
+                        menu.children ? (
+                            <CollapsibleMenuItem
+                                key={index}
+                                menu={menu}
+                                isOpen={openMenus.has(index)}
+                                onToggle={() => handleOpenDropDownSideBar(index)}
+                                onItemClick={handleNavigate}
+                                activePathname={pathname}
+                            />
+                        ) : (
+                            <MenuItem
+                                key={menu.link}
+                                menu={menu}
+                                isActive={pathname === menu.link}
+                                onClick={() => handleNavigate(menu)}
+                            />
+                        )
                     ))}
                 </nav>
             </ScrollArea>
+            {/*<div className="p-4 border-t border-gray-200 dark:border-gray-800">*/}
+            {/*    <div className="flex items-center justify-between">*/}
+            {/*        */}
+            {/*        <ToggleMode/>*/}
+            {/*    </div>*/}
+            {/*</div>*/}
         </div>
     );
 };
 
 export default SheetSideBar;
+
+

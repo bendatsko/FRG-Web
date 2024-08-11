@@ -12,6 +12,11 @@ import {toast} from "@/components/ui/use-toast";
 import {AlertCircle, CheckCircle, Loader2} from "lucide-react";
 import {useNavigate} from "react-router-dom";
 import {setBreadCrumb} from "@/store/slice/app";
+const baseUrl = import.meta.env.VITE_API_URL;
+
+
+
+
 
 const NewTestSchema = z.object({
     title: z.string().nonempty("Title is required"),
@@ -100,7 +105,7 @@ const Create: React.FC = () => {
 
     const checkServerHealth = async () => {
         try {
-            const response = await fetch('http://localhost:3001/health', {method: 'GET'});
+            const response = await fetch(`${baseUrl}/health`, { method: 'GET' });
             const data = await response.json();
             setServerStatus(data.status === "OK" ? 'online' : 'offline');
         } catch (error) {
@@ -129,7 +134,7 @@ const Create: React.FC = () => {
         };
 
         try {
-            const response = await fetch("http://localhost:3001/tests", {
+            const response = await fetch(`${baseUrl}/tests`, {  // Correct usage of backticks and variable
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(fullData),
@@ -146,6 +151,7 @@ const Create: React.FC = () => {
             toast({title: "Error", description: error.message, variant: "negative"});
         }
     };
+
 
     const onPresetSelect = (preset: Preset) => {
         Object.entries(preset.config).forEach(([key, value]) => {

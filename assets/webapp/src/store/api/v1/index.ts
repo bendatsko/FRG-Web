@@ -4,7 +4,7 @@ import {token} from "@/store/slice/auth";
 export const api = createApi({
     reducerPath: "api",
     baseQuery: fetchBaseQuery({
-        // baseUrl: "http://localhost:3001",
+        // baseUrl: "http://localhost:",
         prepareHeaders: (headers) => {
 
             headers.set("Content-Type", "application/json");

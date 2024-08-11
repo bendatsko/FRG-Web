@@ -3,18 +3,18 @@ import {useTheme} from "@/services/providers/theme-provider.tsx"; // Path to you
 interface DAQROCLogoProps extends React.SVGProps<SVGSVGElement> {
     height?: string;
     width?: string;
-    overrideColor?: string; // Optional prop to directly set the color
+    overrideColor?: string;
 }
 
 export const DAQROCLogo: React.FC<DAQROCLogoProps> = ({
                                                           height = "30px",
                                                           width = "30px",
-                                                          overrideColor, // Destructure the overrideColor from props
+                                                          overrideColor,
                                                           ...props
                                                       }) => {
-    const {theme} = useTheme(); // Assuming useTheme returns the current theme
-    const themeColor = theme === "light" ? "black" : "white"; // Determine color based on theme
-    const logoColor = overrideColor || themeColor; // Use overrideColor if provided, otherwise use themeColor
+    const {theme} = useTheme();
+    const themeColor = theme === "light" ? "black" : "white";
+    const logoColor = overrideColor || themeColor;
 
     return (
         <svg

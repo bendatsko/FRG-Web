@@ -1,24 +1,27 @@
-import {api} from "..";
+import { api } from "..";
+
+// Fetch the base URL from environment variables
+const baseUrl = import.meta.env.VITE_API_URL; // Ensure this matches the variable name set in your .env file
 
 const testApi = api.injectEndpoints({
     endpoints: (builder) => ({
         getTests: builder.query({
             query: (userId) => ({
-                url: `http://localhost:3001/tests?username=${userId}`,
+                url: `${baseUrl}/tests?username=${userId}`, // Changed to use baseUrl
                 method: "GET",
             }),
             providesTags: ["Test"],
         }),
         getTestById: builder.query({
             query: (id) => ({
-                url: `http://localhost:3001/tests/${id}`,
+                url: `${baseUrl}/tests/${id}`, // Changed to use baseUrl
                 method: "GET",
             }),
             providesTags: (result, error, id) => [{type: "Test", id}],
         }),
         updateThreshold: builder.mutation({
             query: ({id, threshold}) => ({
-                url: `http://localhost:3001/tests/${id}/threshold`,
+                url: `${baseUrl}/tests/${id}/threshold`, // Changed to use baseUrl
                 method: "PUT",
                 body: {threshold},
             }),
@@ -26,21 +29,21 @@ const testApi = api.injectEndpoints({
         }),
         rerunTest: builder.mutation({
             query: (id) => ({
-                url: `http://localhost:3001/tests/${id}/rerun`,
+                url: `${baseUrl}/tests/${id}/rerun`, // Changed to use baseUrl
                 method: "POST",
             }),
             invalidatesTags: (result, error, id) => [{type: "Test", id}],
         }),
         downloadResults: builder.query({
             query: (id) => ({
-                url: `http://localhost:3001/tests/${id}/download`,
+                url: `${baseUrl}/tests/${id}/download`, // Changed to use baseUrl
                 method: "GET",
                 responseHandler: (response) => response.blob(),
             }),
         }),
         deleteTest: builder.mutation({
             query: (id) => ({
-                url: `http://localhost:3001/tests/${id}`,
+                url: `${baseUrl}/tests/${id}`, // Changed to use baseUrl
                 method: "DELETE",
             }),
             invalidatesTags: ["Test"],

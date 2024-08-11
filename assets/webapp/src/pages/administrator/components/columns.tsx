@@ -30,6 +30,7 @@ type User = {
     role: string;
     bio: string;
 };
+const baseUrl = import.meta.env.VITE_API_URL;
 
 export const columns: ColumnDef<User>[] = [
     {
@@ -87,7 +88,7 @@ export const columns: ColumnDef<User>[] = [
 
             const handleDeleteUser = async () => {
                 try {
-                    const response = await fetch(`http://localhost:3001/users/${user.id}`, {
+                    const response = await fetch(`${baseUrl}/users/${user.id}`, {
                         method: 'DELETE',
                     });
                     if (response.ok) {
@@ -104,7 +105,7 @@ export const columns: ColumnDef<User>[] = [
 
             const handleEditUser = async () => {
                 try {
-                    const response = await fetch(`http://localhost:3001/users/${user.id}`, {
+                    const response = await fetch(`${baseUrl}/users/${user.id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -125,7 +126,7 @@ export const columns: ColumnDef<User>[] = [
 
             const handleResetPassword = async () => {
                 try {
-                    const response = await fetch(`http://localhost:3001/reset-password`, {
+                    const response = await fetch(`${baseUrl}/reset-password`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

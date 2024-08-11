@@ -31,6 +31,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Label} from "@/components/ui/label";
+const baseUrl = import.meta.env.VITE_API_URL;
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -76,7 +77,7 @@ export function DataTable<TData, TValue>({
 
     const handleNewUser = async () => {
         try {
-            const response = await fetch('http://localhost:3001/register', {
+            const response = await fetch(`${baseUrl}/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -102,7 +103,7 @@ export function DataTable<TData, TValue>({
 
     const handleResetPassword = async () => {
         try {
-            const response = await fetch('http://localhost:3001/reset-password', {
+            const response = await fetch('${baseUrl}:/reset-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

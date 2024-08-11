@@ -22,7 +22,7 @@ const TopHeader: React.FC = () => {
     };
 
     return (<header
-            className="w-full h-16 flex justify-between items-center px-4 border-b dark:border-white/20 bg-outline dark:bg-[#0a0a0a] bg-[#FFFFF] border border-sm dark:border-[#282828]">
+            className="w-full h-16 flex justify-between items-center px-4 dark:bg-[#0a0a0a] bg-[#FFFFF]">
             <div className="flex items-center space-x-4">
                 <Button
                     variant="ghost"

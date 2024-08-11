@@ -1,24 +1,29 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
-import {Loading} from "@geist-ui/core";
-import {recentTestsColumns} from "./components/recent-tests-columns";
-import {DataTable} from "./components/recent-tests-table";
-import {useGetTestsQuery} from "@/store/api/v1/endpoints/test";
-import {setBreadCrumb} from "@/store/slice/app";
-import {selectUser} from "@/store/slice/auth";
-import {User} from "../../store/slice/auth";
-import {Button} from "@/components/ui/button";
-import {Plus, RefreshCw} from "lucide-react";
-import {useNavigate} from "react-router-dom";
+import React, { useCallback, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import { Loading } from "@geist-ui/core";
+import { recentTestsColumns } from "./components/recent-tests-columns";
+import { DataTable } from "./components/recent-tests-table";
+import { useGetTestsQuery } from "@/store/api/v1/endpoints/test";
+import { setBreadCrumb } from "@/store/slice/app";
+import { selectUser } from "@/store/slice/auth";
+import { User } from "../../store/slice/auth";
+import { Button } from "@/components/ui/button";
+import { Plus, RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+const baseUrl = import.meta.env.VITE_API_URL;
+
 
 const Dashboard: React.FC = () => {
     const user = useSelector(selectUser) as User;
-    const {data, isLoading, error, refetch} = useGetTestsQuery(user.username);
+    const { data, isLoading, error, refetch } = useGetTestsQuery(user.username);
     const [testsData, setTestsData] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [socket, setSocket] = useState<WebSocket | null>(null);
+
 
     useEffect(() => {
         dispatch(setBreadCrumb([{title: "Dashboard", link: "/dashboard"}]));
@@ -45,7 +50,8 @@ const Dashboard: React.FC = () => {
     }, [refetch]);
 
     const connectWebSocket = useCallback(() => {
-        const ws = new WebSocket('ws://localhost:3001');
+        const websocketUrl = `ws://rkim.us:3001/`; // Corrected URL construction
+        const ws = new WebSocket(websocketUrl);
 
         ws.onopen = () => {
             console.log('WebSocket connected');
@@ -83,7 +89,7 @@ const Dashboard: React.FC = () => {
 
         const idsToDelete = selectedRows.map(row => row.id); // Collecting IDs to delete
         try {
-            const response = await fetch('http://localhost:3001/api/tests/batch-delete', {
+            const response = await fetch(`${baseUrl}/api/tests/batch-delete`, {
                 method: 'DELETE',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ids: idsToDelete})
@@ -107,18 +113,21 @@ const Dashboard: React.FC = () => {
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <Loading/>
+                <Loading />
             </div>
         );
     }
-
     if (error) {
         return (
-            <div className="p-4 text-red-600 dark:text-red-400">
-                <h3 className="text-lg font-semibold">Error</h3>
-                <p className="mt-2">An error occurred while fetching the tests.</p>
-                <p className="mt-1 text-sm opacity-75">{error.toString()}</p>
-            </div>
+            <Card className="m-6">
+                <CardHeader>
+                    <CardTitle className="text-red-600 dark:text-red-400">Error</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="mt-2">An error occurred while fetching the tests.</p>
+                    <p className="mt-1 text-sm opacity-75">{error.toString()}</p>
+                </CardContent>
+            </Card>
         );
     }
 
@@ -127,47 +136,58 @@ const Dashboard: React.FC = () => {
     );
 
     return (
-        <div className="container mx-auto p-6 space-y-8 bg-white dark:bg-black text-black dark:text-white">
-            <div className="flex justify-between items-center">
-                {/* <h1 className="text-3xl font-bold">Dashboard</h1> */}
+        <div className="container mx-auto p-6 space-y-6">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold">Dashboard</h1>
                 <div className="flex space-x-2">
-                    {/* <Button onClick={() => refetch()} variant="outline"
-                            className="bg-white dark:bg-black border-black/10 dark:border-white/10">
-                        <RefreshCw className="mr-2 h-4 w-4"/>
+                    <Button onClick={() => refetch()} variant="outline">
+                        <RefreshCw className="mr-2 h-4 w-4" />
                         Refresh
-                    </Button> */}
-                    {/* <Button onClick={() => navigate('/create-ldpc')}
-                            className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90">
-                        <Plus className="mr-2 h-4 w-4"/>
+                    </Button>
+                    <Button onClick={() => navigate('/create-ldpc')}>
+                        <Plus className="mr-2 h-4 w-4" />
                         New Test
-                    </Button> */}
+                    </Button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    {title: "Total Tests", value: testsData.length},
-                    {title: "Running Tests", value: testsData.filter(test => test.status === 'Running').length},
-                    {title: "Completed Tests", value: testsData.filter(test => test.status === 'Completed').length}
+                    { title: "Total Tests", value: testsData.length },
+                    { title: "Running Tests", value: testsData.filter(test => test.status === 'Running').length },
+                    { title: "Completed Tests", value: testsData.filter(test => test.status === 'Completed').length }
                 ].map((item, index) => (
-                    <div key={index} className="p-6 rounded-lg bg-outline dark:bg-[#0a0a0a] bg-[#FFFFF] border border-sm dark:border-[#282828]">
-                        <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                        <p className="text-3xl font-bold">{item.value}</p>
-                    </div>
+                    <Card key={index}>
+                        <CardHeader>
+                            <CardTitle>{item.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-3xl font-bold">{item.value}</p>
+                        </CardContent>
+                    </Card>
                 ))}
             </div>
 
-       
-                <div className="p-6 rounded-lg bg-outline dark:bg-[#0a0a0a] bg-[#FFFFF] border border-sm dark:border-[#282828]">
-                    <h2 className="text-xl font-semibold mb-4">Recent Tests</h2>
-
+            <Card>
+                <CardHeader>
+                    <CardTitle>Recent Tests</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="mb-4">
+                        <Input
+                            placeholder="Filter tests..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="max-w-sm"
+                        />
+                    </div>
                     <DataTable
                         columns={recentTestsColumns}
                         data={filteredTests}
                         onDeleteSelected={handleDeleteSelected}
                     />
-                </div>
-
+                </CardContent>
+            </Card>
         </div>
     );
 };

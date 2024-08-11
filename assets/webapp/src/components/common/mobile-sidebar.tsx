@@ -17,10 +17,10 @@ const MobileSideBar: React.FC = () => {
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="lg:hidden dark:bg-black">
-                    <Menu className="h-5 w-5"/>
+                    <Menu className="h-8 w-8"/>
                 </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-50 border-r-black/20 dark:border-r-white/20">
+            <SheetContent side="left" className="p-0 w-50 ">
                 <SheetSideBar/>
             </SheetContent>
         </Sheet>

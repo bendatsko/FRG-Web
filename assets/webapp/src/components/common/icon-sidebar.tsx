@@ -12,8 +12,8 @@ const IconSidebar: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="w-16 h-screen fixed top-0 left-0 border-r dark:border-white/20 flex flex-col bg-outline dark:bg-[#0a0a0a] bg-[#FFFFF] border border-sm dark:border-[#282828]">
-            <div className="h-16 flex items-center justify-center border-b dark:border-white/20">
+        <div className="w-16 h-screen fixed top-0 left-0 flex flex-col bg-outline dark:bg-[#0a0a0a] bg-[#FFFFF] ">
+            <div className="h-16 flex items-center justify-center">
                 <DAQROCLogo className="h-8 w-8"  onClick={() => navigate('/')}/>
             </div>
             <ScrollArea className="flex-grow">
