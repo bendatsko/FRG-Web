@@ -97,6 +97,7 @@ function formatDateTime(isoString) {
 /* -------------------------------------------------------------------------- */
 
 
+// Update test status function
 async function updateTestStatus(testId, status) {
     return new Promise((resolve, reject) => {
         db.run('UPDATE tests SET status = ? WHERE id = ?', [status, testId], (err) => {
@@ -110,7 +111,6 @@ async function updateTestStatus(testId, status) {
         });
     });
 }
-
 
 async function updateTestTimes(testId, startTime, endTime) {
     const duration = calculateDuration(startTime, endTime);
@@ -160,106 +160,93 @@ setInterval(() => {
 }, 5000);
 
 // Handle incoming data from Teensy
-parser.on('data', (data) => {
+parser.on('data', async (data) => {
     console.log('Received data from Teensy:', data);
     try {
-      const jsonData = JSON.parse(data);
-      switch (jsonData.type) {
-        case 'heartbeat':
-          console.log('Received heartbeat from Teensy');
-          break;
-        case 'status_check':
-          console.log('Received status check request from Teensy');
-          sendStatusToTeensy('ONLINE');
-          break;
-        case 'chip_status':
-          if (jsonData.chips) {
-            jsonData.chips.forEach(chip => {
-              const dbChip = chips.find(c => c.id === chip.id);
-              if (dbChip) {
-                dbChip.status = chip.status;
-              }
-            });
-          }
-          break;
-        default:
-          console.log('Received message from Teensy:', jsonData);
-      }
+        const jsonData = JSON.parse(data);
+        switch (jsonData.type) {
+            case 'heartbeat':
+                console.log('Received heartbeat from Teensy');
+                break;
+            case 'status_check':
+                console.log('Received status check request from Teensy');
+                sendStatusToTeensy('ONLINE');
+                break;
+            case 'chip_status':
+                if (jsonData.chips) {
+                    jsonData.chips.forEach(chip => {
+                        const dbChip = chips.find(c => c.id === chip.id);
+                        if (dbChip) {
+                            dbChip.status = chip.status;
+                        }
+                    });
+                }
+                break;
+            case 'test_completed':
+                console.log(`Test ${jsonData.testId} completed on chip ${jsonData.chipId}`);
+                await handleTestCompletion(jsonData.testId);
+                break;
+            default:
+                console.log('Received message from Teensy:', jsonData);
+        }
     } catch (error) {
-      // Handle non-JSON data
-      console.log('Received non-JSON data from Teensy:', data);
+        // Handle non-JSON data
+        console.log('Received non-JSON data from Teensy:', data);
     }
-  });
-  
+});
+async function handleTestCompletion(testId) {
+    try {
+        const endTime = new Date().toISOString();
+        const test = await getTestFromDatabase(testId);
+        if (!test) {
+            console.error(`Test with ID ${testId} not found`);
+            return;
+        }
+        const duration = calculateDuration(test.start_time, endTime);
+        await updateTestInDatabase(testId, { status: 'Completed', duration, end_time: endTime });
+        console.log(`Test ${testId} marked as completed. Duration: ${duration} seconds`);
+    } catch (error) {
+        console.error(`Error handling test completion for test ${testId}:`, error);
+    }
+}
 
 
-  async function processTestQueue() {
+
+
+
+
+async function processTestQueue() {
     if (isProcessingQueue || testQueue.length === 0) return;
 
     isProcessingQueue = true;
     const test = testQueue.shift();
-    const startTime = new Date().toISOString();
-    let resultsStream = null;
 
     try {
         console.log(`Processing test:`, JSON.stringify(test, null, 2));
         await updateTestStatus(test.id, 'Running');
         console.log(`Test ${test.id} status updated to Running`);
 
-        // Validate test object
-        if (!test || !test.id) {
-            throw new Error(`Invalid test object: missing id`);
-        }
-        if (!test.username) {
-            console.warn(`Warning: username is missing for test ${test.id}`);
-            test.username = 'unknown_user';
-        }
-
-        // Save test configuration
-        const configPath = await saveTestConfig(test.username, test.id, {
-            snrRange: test.snrRange,
-            batchSize: test.batchSize,
-            // Add other test parameters here
-        });
-
-        // Create results stream
-        resultsStream = await createResultsStream(test.username, test.id);
-
-        // Write CSV header
-        resultsStream.write('iteration,snr,ber,fer\n');
-
         // Run test on Teensy
-        await runTestOnTeensy(test, resultsStream);
+        await runTestOnTeensy(test);
 
-        // Close the results stream
-        resultsStream.end();
-
-        const endTime = new Date().toISOString();
-        const duration = calculateDuration(startTime, endTime);
-
-        // Update test with results file path
-        await updateTestWithResults(test.id, resultsStream.path, startTime, endTime, duration);
-
+        // Update test status to Completed
         await updateTestStatus(test.id, 'Completed');
-        
-        console.log(`Test ID ${test.id} completed. Status updated in database.`);
-
-        // Fetch the updated test data
-        const updatedTest = await getTestFromDatabase(test.id);
-        console.log(`Updated test data:`, JSON.stringify(updatedTest, null, 2));
+        console.log(`Test ${test.id} completed. Status updated in database.`);
 
     } catch (error) {
         console.error(`Error processing test ID ${test.id}:`, error);
         await updateTestStatus(test.id, 'Failed');
-        console.log(`Test ID ${test.id} failed. Status updated in database.`);
+        console.log(`Test ${test.id} failed. Status updated in database.`);
     } finally {
-        if (resultsStream) {
-            resultsStream.end();
-        }
         isProcessingQueue = false;
-        processTestQueue(); // Process next test in queue
+        // Process next test in queue
+        setTimeout(processTestQueue, 0);
     }
 }
+
+setInterval(processTestQueue, 5000);
+
+
 
 async function updateTestWithResults(testId, resultsFilePath) {
     try {
@@ -796,12 +783,11 @@ app.get('/tests', (req, res) => {
     });
 });
 
-// Run test on specific chip
 app.post('/tests', async (req, res) => {
-    const {title, author, testBench, snrRange, batchSize, username, accessible_to, DUT, status, duration} = req.body;
+    const {title, author, testBench, snrRange, batchSize, username, accessible_to, DUT} = req.body;
 
     try {
-        const startTime = new Date();
+        const startTime = new Date().toISOString();
         db.run(`INSERT INTO tests (
             title, 
             author, 
@@ -812,10 +798,8 @@ app.post('/tests', async (req, res) => {
             accessible_to, 
             DUT, 
             status, 
-            start_time, 
-            end_time, 
-            duration
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Queued', ?, NULL, NULL)`, [
+            start_time
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Queued', ?)`, [
             title, 
             author, 
             testBench, 
@@ -824,7 +808,7 @@ app.post('/tests', async (req, res) => {
             username, 
             JSON.stringify(accessible_to), 
             DUT, 
-            new Date().toISOString()
+            startTime
         ], function(err) {
             if (err) {
                 console.error('Error creating test:', err);
@@ -835,20 +819,16 @@ app.post('/tests', async (req, res) => {
                     id: testId, 
                     snrRange, 
                     batchSize, 
-                    username,  // Passed in testQueue object
+                    username,
                     chipId: testBench, 
-                    startTime: new Date()
+                    startTime: startTime
                 });
-                processTestQueue(); // Try to process queue
                 res.status(200).send({
                     message: "Test created and queued successfully",
                     testId: testId
                 });
             }
         });
-        
-
-        
     } catch (error) {
         console.error('Error creating test:', error);
         res.status(500).send("Test creation failed: " + error.message);
@@ -858,7 +838,7 @@ app.post('/tests', async (req, res) => {
 
 
 
-function runTestOnTeensy(testParams, resultsStream) {
+function runTestOnTeensy(testParams) {
     return new Promise((resolve, reject) => {
         if (!testParams || !testParams.id || !testParams.snrRange || !testParams.batchSize || !testParams.chipId) {
             reject(new Error(`Invalid test parameters: ${JSON.stringify(testParams)}`));
@@ -880,16 +860,10 @@ function runTestOnTeensy(testParams, resultsStream) {
             
             try {
                 const parsedData = JSON.parse(data);
-                if (parsedData.status === "started") {
-                    console.log(`Test ${testParams.id} started on chip ${testParams.chipId}`);
-                } else if (parsedData.status === "completed") {
+                if (parsedData.type === "test_completed" && parsedData.testId === testParams.id) {
                     parser.removeListener('data', dataHandler);
                     console.log(`Test ${testParams.id} completed on chip ${testParams.chipId}`);
                     resolve();
-                } else if (parsedData.testId === testParams.id) {
-                    // Process test results
-                    const resultLine = `${parsedData.iteration},${parsedData.snr},${parsedData.ber},${parsedData.fer}\n`;
-                    resultsStream.write(resultLine);
                 }
             } catch (err) {
                 console.error('Error parsing JSON:', err, 'Raw data:', data);
@@ -904,6 +878,7 @@ function runTestOnTeensy(testParams, resultsStream) {
         }, 30000 * 60); // 30 minute timeout for long-running tests
     });
 }
+
 
 
 // Edit test
