@@ -21,7 +21,7 @@ const MenuItem: React.FC<{
 }> = React.memo(({ menu, isActive, onClick }) => (
     <Button
         variant="ghost"
-        className={`w-full justify-start py-2 px-3 text-sm ${isActive ? "bg-accent" : ""}`}
+        className={`w-full justify-start py-2 px-0 text-sm `}
         onClick={onClick}
     >
         {menu.icon}
@@ -60,13 +60,10 @@ const CollapsibleMenuItem: React.FC<{
 ));
 
 const Header: React.FC<{ onLogoClick: () => void }> = React.memo(({ onLogoClick }) => (
-    <div className="h-16 flex items-center px-4 border-b">
+    <div className=" flex items-center mb-2 mt-2">
         <div className="flex items-center space-x-2 w-full">
-            <DAQROCLogo className="h-8 w-8 cursor-pointer" onClick={onLogoClick} />
-            <div className="flex flex-col">
-                <span className="font-bold text-xl">daqroc</span>
-                <span className="text-xs text-gray-500">v4.0</span>
-            </div>
+            <DAQROCLogo className=" h-6 w-6 cursor-pointer" onClick={onLogoClick} />
+                <span className="font-bold text-xl ">DAQROC</span>
         </div>
     </div>
 ));
@@ -106,10 +103,13 @@ const SheetSideBar: React.FC = () => {
     }, [navigate]);
 
     return (
-        <div className="flex flex-col h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
-            <Header onLogoClick={() => navigate('/')}/>
+        <div className="flex flex-col h-screen bg-white dark:bg-black  mx-3 border-r dark:border-[#333333]">
+            <div className="mt-4">
+
+            
+            <Header onLogoClick={() => navigate('/')} />
             <ScrollArea className="flex-grow">
-                <nav className="p-2 space-y-1">
+                <nav className="">
                     {filteredMenus.map((menu, index) => (
                         menu.children ? (
                             <CollapsibleMenuItem
@@ -131,12 +131,7 @@ const SheetSideBar: React.FC = () => {
                     ))}
                 </nav>
             </ScrollArea>
-            {/*<div className="p-4 border-t border-gray-200 dark:border-gray-800">*/}
-            {/*    <div className="flex items-center justify-between">*/}
-            {/*        */}
-            {/*        <ToggleMode/>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
+            </div>
         </div>
     );
 };

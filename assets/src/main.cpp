@@ -78,7 +78,7 @@ void sendJsonMessage(const String& type, const String& content = "") {
 }
 
 void runTest(int testId, const String& chipId) {
-  sendJsonMessage("started", testId, chipId);
+  sendJsonMessage(testId, chipId);
   blinkLED(BLINK_COUNT, BLINK_DELAY);
   for (int i = 1; i <= 10; i++) {
     DynamicJsonDocument resultDoc(128);
@@ -90,7 +90,7 @@ void runTest(int testId, const String& chipId) {
     Serial.flush();
     delay(1000);
   }
-  sendJsonMessage("completed", testId, chipId);
+  sendJsonMessage(testId, chipId);
 }
 
 void processCommand(const String& command) {

@@ -33,7 +33,7 @@ const Users = () => {
                 <Card className="border-0 shadow-none">
                     <CardHeader>
                         <CardTitle className>Access Control</CardTitle>
-                        <CardDescription>Userbase management tools.</CardDescription>
+                        <CardDescription>Userbase management tools</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <DataTable columns={columns} data={data}/>
