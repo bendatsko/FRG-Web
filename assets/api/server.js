@@ -199,26 +199,47 @@ parser.on('data', (data) => {
     isProcessingQueue = true;
     const test = testQueue.shift();
     const startTime = new Date().toISOString();
+    let resultsStream = null;
+
     try {
         console.log(`Processing test:`, JSON.stringify(test, null, 2));
         await updateTestStatus(test.id, 'Running');
         console.log(`Test ${test.id} status updated to Running`);
 
-        // ... (keep existing validation and configuration code)
+        // Validate test object
+        if (!test || !test.id) {
+            throw new Error(`Invalid test object: missing id`);
+        }
+        if (!test.username) {
+            console.warn(`Warning: username is missing for test ${test.id}`);
+            test.username = 'unknown_user';
+        }
+
+        // Save test configuration
+        const configPath = await saveTestConfig(test.username, test.id, {
+            snrRange: test.snrRange,
+            batchSize: test.batchSize,
+            // Add other test parameters here
+        });
+
+        // Create results stream
+        resultsStream = await createResultsStream(test.username, test.id);
+
+        // Write CSV header
+        resultsStream.write('iteration,snr,ber,fer\n');
 
         // Run test on Teensy
-        const results = await runTestOnTeensy(test, resultsStream);
+        await runTestOnTeensy(test, resultsStream);
 
         // Close the results stream
         resultsStream.end();
 
-        // Update test with results file path
-        await updateTestWithResults(test.id, resultsStream.path);
-
         const endTime = new Date().toISOString();
         const duration = calculateDuration(startTime, endTime);
 
-        await updateTestTimes(test.id, startTime, endTime);
+        // Update test with results file path
+        await updateTestWithResults(test.id, resultsStream.path, startTime, endTime, duration);
+
         await updateTestStatus(test.id, 'Completed');
         
         console.log(`Test ID ${test.id} completed. Status updated in database.`);
@@ -232,6 +253,9 @@ parser.on('data', (data) => {
         await updateTestStatus(test.id, 'Failed');
         console.log(`Test ID ${test.id} failed. Status updated in database.`);
     } finally {
+        if (resultsStream) {
+            resultsStream.end();
+        }
         isProcessingQueue = false;
         processTestQueue(); // Process next test in queue
     }
@@ -834,7 +858,7 @@ app.post('/tests', async (req, res) => {
 
 
 
-function runTestOnTeensy(testParams) {
+function runTestOnTeensy(testParams, resultsStream) {
     return new Promise((resolve, reject) => {
         if (!testParams || !testParams.id || !testParams.snrRange || !testParams.batchSize || !testParams.chipId) {
             reject(new Error(`Invalid test parameters: ${JSON.stringify(testParams)}`));
@@ -864,7 +888,8 @@ function runTestOnTeensy(testParams) {
                     resolve();
                 } else if (parsedData.testId === testParams.id) {
                     // Process test results
-                    // You may want to save these results to a database or file
+                    const resultLine = `${parsedData.iteration},${parsedData.snr},${parsedData.ber},${parsedData.fer}\n`;
+                    resultsStream.write(resultLine);
                 }
             } catch (err) {
                 console.error('Error parsing JSON:', err, 'Raw data:', data);
