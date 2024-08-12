@@ -100,8 +100,16 @@ const Dashboard = () => {
 
   return (
       <div className="min-h-screen bg-[#fafafa] dark:bg-[#0A0A0A] flex justify-center ">
-        <div className="container bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg overflow-hidden m-6 border-b dark:border-[#333333] ">
+
+
+
+        <div className="m-6 container bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg overflow-hidden border-b dark:border-[#333333] ">
+
+
           <div className="flex justify-between items-center py-6 border-b border-gray-200 dark:border-[#333333]">
+
+
+
             <h1 className="text-3xl font-bold text-black dark:text-white">Dashboard</h1>
             <div className="flex space-x-4">
               <Button onClick={handleRefresh} className="bg-gray-200 hover:bg-gray-300 text-black dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white">
@@ -140,14 +148,7 @@ const Dashboard = () => {
                 <p className="text-sm text-gray-500 dark:text-white/80">View and manage your previous test runs</p>
               </CardHeader>
               <CardContent>
-                <div className="mb-4">
-                  <Input
-                      placeholder="Search tests..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="max-w-sm"
-                  />
-                </div>
+
                 <DataTable
                     columns={recentTestsColumns}
                     data={filteredTests}

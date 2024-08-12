@@ -12,7 +12,7 @@ const MainLayout: React.FC = () => {
     return (
         <AuthGuard>
             <div className="flex h-screen overflow-hidden">
-                <div className={`hidden lg:block transition-all duration-300 ease-in-out ${isSideBarOpen ? 'w-40' : 'w-20'}`}>
+                <div className={`hidden lg:block transition-all duration-300 ease-in-out w-60 `}>
                     <SideBar />
 
                 </div>
