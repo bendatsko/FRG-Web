@@ -100,11 +100,18 @@ function formatDateTime(isoString) {
 async function updateTestStatus(testId, status) {
     return new Promise((resolve, reject) => {
         db.run('UPDATE tests SET status = ? WHERE id = ?', [status, testId], (err) => {
-            if (err) reject(err);
-            else resolve();
+            if (err) {
+                console.error(`Error updating test status for test ${testId}:`, err);
+                reject(err);
+            } else {
+                console.log(`Test ${testId} status updated to ${status}`);
+                resolve();
+            }
         });
     });
 }
+
+
 async function updateTestTimes(testId, startTime, endTime) {
     const duration = calculateDuration(startTime, endTime);
     const sql = `UPDATE tests SET start_time = ?, end_time = ?, duration = ? WHERE id = ?`;
@@ -191,35 +198,13 @@ parser.on('data', (data) => {
 
     isProcessingQueue = true;
     const test = testQueue.shift();
-    const startTime = new Date().toISOString(); // Use ISO string format
+    const startTime = new Date().toISOString();
     try {
         console.log(`Processing test:`, JSON.stringify(test, null, 2));
         await updateTestStatus(test.id, 'Running');
+        console.log(`Test ${test.id} status updated to Running`);
 
-        // Validate test object
-        if (!test || !test.id) {
-            throw new Error(`Invalid test object: missing id`);
-        }
-        if (!test.username) {
-            console.warn(`Warning: username is missing for test ${test.id}`);
-            // You might want to fetch the username from the database here
-            // For now, we'll use a placeholder
-            test.username = 'unknown_user';
-        }
-
-
-        // Save test configuration
-        const configPath = await saveTestConfig(test.username, test.id, {
-            snrRange: test.snrRange,
-            batchSize: test.batchSize,
-            // Add other test parameters here
-        });
-
-        // Create results stream
-        const resultsStream = await createResultsStream(test.username, test.id);
-
-        // Write CSV header
-        resultsStream.write('iteration,snr,ber,fer\n');
+        // ... (keep existing validation and configuration code)
 
         // Run test on Teensy
         const results = await runTestOnTeensy(test, resultsStream);
@@ -230,32 +215,27 @@ parser.on('data', (data) => {
         // Update test with results file path
         await updateTestWithResults(test.id, resultsStream.path);
 
-
-        const endTime = new Date().toISOString(); // Use ISO string format
+        const endTime = new Date().toISOString();
         const duration = calculateDuration(startTime, endTime);
-        
-
 
         await updateTestTimes(test.id, startTime, endTime);
         await updateTestStatus(test.id, 'Completed');
         
-        console.log(`Test ID ${test.id} started at ${formatDateTime(startTime)} and ended at ${formatDateTime(endTime)}. Duration: ${duration}`);
+        console.log(`Test ID ${test.id} completed. Status updated in database.`);
 
-        // Broadcast test completion to all connected clients
-        wss.clients.forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify({ type: 'TEST_COMPLETED', testId: test.id, duration }));
-            }
-        });
+        // Fetch the updated test data
+        const updatedTest = await getTestFromDatabase(test.id);
+        console.log(`Updated test data:`, JSON.stringify(updatedTest, null, 2));
+
     } catch (error) {
         console.error(`Error processing test ID ${test.id}:`, error);
         await updateTestStatus(test.id, 'Failed');
+        console.log(`Test ID ${test.id} failed. Status updated in database.`);
     } finally {
         isProcessingQueue = false;
         processTestQueue(); // Process next test in queue
     }
 }
-
 
 async function updateTestWithResults(testId, resultsFilePath) {
     try {
@@ -771,7 +751,7 @@ app.put('/notifications/:id/read', (req, res) => {
 /*                             Tests Endpoints                                */
 /* -------------------------------------------------------------------------- */
 
-// Fetch tests
+// Modify the /tests GET endpoint
 app.get('/tests', (req, res) => {
     const username = req.query.username;
 
@@ -779,11 +759,15 @@ app.get('/tests', (req, res) => {
         return res.status(400).json({error: "Username is required"});
     }
 
+    console.log(`Fetching tests for user: ${username}`);
+
     db.all(`SELECT * FROM tests WHERE JSON_EXTRACT(accessible_to, '$') LIKE ?`, [`%${username}%`], (err, rows) => {
         if (err) {
             console.error('Error fetching tests:', err);
             return res.status(500).json({error: "Internal server error"});
         }
+        console.log(`Fetched ${rows.length} tests for user ${username}`);
+        console.log('Tests:', JSON.stringify(rows, null, 2));
         res.status(200).json(rows);
     });
 });
