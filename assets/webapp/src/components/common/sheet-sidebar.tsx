@@ -10,11 +10,12 @@ import menus from "@/services/data/menus";
 import { selectUser } from "@/store/slice/auth";
 import { MenuItemType } from "@/types";
 
+
 const MenuItem = React.memo(({ menu, isActive, onClick }) => (
     <Button
         variant="ghost"
-        className={`w-full justify-start py-3 px-4 text-base ${
-            isActive ? "bg-gray-100 dark:bg-gray-800" : ""
+        className={`w-full justify-start py-2 px-4 text-sm ${
+            isActive ? "border-l-4 border-blue-500 bg-gray-100 dark:bg-gray-700" : ""
         }`}
         onClick={onClick}
     >
@@ -53,12 +54,12 @@ const CollapsibleMenuItem = React.memo(
 );
 
 const Header = React.memo(({ onLogoClick }) => (
-    <div className="flex items-center p-4 mb-4">
+    <div className="flex items-center p-4 ml-1 ">
         <DAQROCLogo
-            className="h-8 w-8 cursor-pointer mr-3"
+            className="h-8 w-8 cursor-pointer mr-1"
             onClick={onLogoClick}
         />
-        <span className="font-bold text-2xl">DAQROC</span>
+        <span className="font-bold text-3xl">DAQROC</span>
     </div>
 ));
 
@@ -92,10 +93,10 @@ const SheetSideBar = () => {
     );
 
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-black border-r dark:border-gray-800">
+        <div className="h-full bg-white dark:bg-gray-800">
             <Header onLogoClick={() => navigate("/")} />
-            <ScrollArea className="flex-grow px-2">
-                <nav className="space-y-1">
+            <ScrollArea className="h-[calc(100%-64px)]">
+                <nav className="space-y-1 p-2">
                     {filteredMenus.map((menu, index) =>
                         menu.children ? (
                             <CollapsibleMenuItem
