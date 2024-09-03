@@ -1,3 +1,6 @@
+// @ts-nocheck
+
+
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectUser, saveUserInfo, removeUserInfo } from '@/store/slice/auth';

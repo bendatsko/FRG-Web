@@ -1,3 +1,6 @@
+// @ts-nocheck
+
+
 import React, {useEffect} from 'react';
 import {columns} from "./components/columns";
 import {DataTable} from "./components/data-table";

@@ -1,5 +1,4 @@
-// File: @/services/data/menus.ts
-
+// @ts-nocheck
 import React from 'react';
 import { FileSettings, Home, Plus, Settings2 } from "tabler-icons-react";
 

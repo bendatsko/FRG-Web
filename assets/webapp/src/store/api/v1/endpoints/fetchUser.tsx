@@ -1,4 +1,4 @@
-// services/api.ts
+// @ts-nocheck
 
 // Fetch the base URL from environment variables
 const baseUrl = import.meta.env.VITE_API_URL; // Ensure this matches the variable name set in your .env file

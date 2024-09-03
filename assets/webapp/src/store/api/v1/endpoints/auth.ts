@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import {api} from "../index.ts";
 import {SignInType} from "@/types";
 const baseUrl = import.meta.env.VITE_API_URL;

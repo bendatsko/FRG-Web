@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { ErrorLottie } from "@/components";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";

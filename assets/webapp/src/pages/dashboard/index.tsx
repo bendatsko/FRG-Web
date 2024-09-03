@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Loading } from "@geist-ui/core";

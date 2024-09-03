@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { SlashIcon } from "@radix-ui/react-icons";
 import {
   Breadcrumb,

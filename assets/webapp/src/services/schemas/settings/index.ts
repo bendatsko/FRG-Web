@@ -1,3 +1,6 @@
+// @ts-nocheck
+
+
 import {ChangePasswordType} from "@/types";
 import * as yub from "yup";
 

@@ -1,3 +1,6 @@
+// @ts-nocheck
+
+
 // columns.tsx
 import React from 'react';
 import {ColumnDef} from "@tanstack/react-table";

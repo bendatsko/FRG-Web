@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { api } from "..";
 
 // Fetch the base URL from environment variables

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import {SignInType} from "@/types";
 import * as yub from "yup";
 

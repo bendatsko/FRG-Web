@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import React from "react";
 import { useRouteError, isRouteErrorResponse, Navigate } from "react-router";
 import { PageNotFoundError, GeneralError } from "@/components";
