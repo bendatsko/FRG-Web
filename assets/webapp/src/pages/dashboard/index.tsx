@@ -112,11 +112,11 @@ const Dashboard = () => {
 
             <h1 className="text-3xl font-bold text-black dark:text-white">Dashboard</h1>
             <div className="flex space-x-4">
-              <Button onClick={handleRefresh} className="bg-gray-200 hover:bg-gray-300 text-black dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white">
+              <Button onClick={handleRefresh} className="bg-gray-200 hover:bg-gray-300 text-black dark:bg-white dark:hover:bg-white/80 dark:text-black">
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Refresh
               </Button>
-              <Button onClick={() => navigate("/create-ldpc")} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button onClick={() => navigate("/create")} className="bg-blue-600 hover:bg-blue-700 text-white">
                 <Plus className="mr-2 h-4 w-4" />
                 New Test
               </Button>

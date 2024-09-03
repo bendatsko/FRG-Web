@@ -9,12 +9,12 @@ const MainLayout: React.FC = () => {
 
     return (
         <AuthGuard>
-            <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-                <div className={`hidden lg:block w-52 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700`}>
+            <div className="flex h-screen bg-white dark:bg-black">
+                <div className={`hidden lg:block w-52 bg-white dark:bg-black border-r border-gray-200 dark:border-gray-700`}>
                     <SideBar />
                 </div>
                 <main className="flex-1 flex flex-col overflow-hidden">
-                    <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center justify-between p-4 bg-white dark:bg-black border-b border-black/10 dark:border-white/10">
                         <MobileSideBar />
                         <ToggleMode />
                     </div>

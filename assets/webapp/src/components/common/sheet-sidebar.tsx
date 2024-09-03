@@ -93,7 +93,7 @@ const SheetSideBar = () => {
     );
 
     return (
-        <div className="h-full bg-white dark:bg-gray-800">
+        <div className="h-full bg-white dark:bg-black">
             <Header onLogoClick={() => navigate("/")} />
             <ScrollArea className="h-[calc(100%-64px)]">
                 <nav className="space-y-1 p-2">

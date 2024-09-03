@@ -85,7 +85,7 @@ const Create: React.FC = () => {
             setBreadCrumb([
                 {title: "Dashboard", link: "/dashboard"},
                 {title: "Create", link: ""},
-                {title: "LDPC", link: "create-ldpc"},
+                {title: "LDPC", link: "create"},
 
 
             ])
@@ -177,9 +177,20 @@ const Create: React.FC = () => {
     };
 
     return (
+
         <div className="min-h-screen bg-[#fafafa] dark:bg-[#0A0A0A] flex justify-center ">
 
-            <div className="space-y-6 w-full">
+
+
+            <div className="m-6 container bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg overflow-hidden border-b dark:border-[#333333] ">
+
+
+
+
+
+
+
+
                 <div>
                     <h1 className="text-3xl font-bold">Create Test</h1>
                     <p className="text-muted-foreground mt-2">Configure test parameters for LDPC Decoder ASIC.</p>
@@ -266,9 +277,12 @@ const Create: React.FC = () => {
                         </div>
                     </form>
                 </Form>
+
+
             </div>
         </div>
-    );
+
+                );
 };
 
 export default Create;

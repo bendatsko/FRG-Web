@@ -22,7 +22,7 @@ const TopHeader: React.FC = () => {
     };
 
     return (<header
-            className="w-full h-16 flex justify-between items-center px-4 dark:bg-[#0a0a0a] bg-[#FFFFF]">
+            className="w-full h-16 flex justify-between items-center px-4 dark:bg-black bg-white">
             <div className="flex items-center space-x-4">
                 <Button
                     variant="ghost"
@@ -32,25 +32,8 @@ const TopHeader: React.FC = () => {
                 >
                     <Menu className="h-5 w-5"/>
                 </Button>
-                {/* <MobileSideBar/> */}
-                {/* <BreadCrumb/> */}
             </div>
-            <div className="flex items-center space-x-3 ">
-                {/*<Button*/}
-                {/*    variant="outline"*/}
-                {/*    size="sm"*/}
-                {/*    className="text-xs font-semibold h-9 " onClick={() => navigate('/create-ldpc')}*/}
-                {/*>*/}
-                {/*    Create*/}
-                {/*    <Plus className="ml-1 h-3 w-3"/>*/}
-                {/*</Button>*/}
-                {/*<Button*/}
-                {/*    variant="outline"*/}
-                {/*    size="sm"*/}
-                {/*    className="text-sm h-9"*/}
-                {/*>*/}
-                {/*    Docs*/}
-                {/*</Button>*/}
+            <div className="flex items-center space-x-3 dark:bg-black bg-white">
 
                 <ToggleMode/>
                 <DropdownMenu>

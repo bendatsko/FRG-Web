@@ -42,7 +42,7 @@ let isProcessingQueue = false;
 
 // Serial port setup
 const port = new SerialPort({
-    path: 'COM8', // Update this to match your Teensy's port
+    path: '/dev/cu.usbmodem106098201', // Update this to match your Teensy's port
     baudRate: 115200
 });
 const parser = port.pipe(new ReadlineParser({delimiter: '\n'}));

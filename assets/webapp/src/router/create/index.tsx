@@ -1,12 +1,11 @@
 import {ErrorBoundary} from "@/components";
 import {MainLayout} from "@/layouts";
-// import { Settings } from "@/pages";
 import {RouteObject} from "react-router-dom";
-import Create from "@/pages/create-ldpc";
+import Create from "@/pages/create";
 
 const CreateRoutes: RouteObject[] = [
     {
-        path: "/create-ldpc",
+        path: "/create",
         element: <MainLayout/>,
         errorElement: <ErrorBoundary/>,
         children: [

@@ -6,7 +6,7 @@ import DashboardRoutes from "@/router/dashboard";
 import SettingRoutes from "@/router/settings";
 import ProductRoutes from "./products";
 import UserRoutes from "./users";
-import CreateRoutes from "@/router/create-ldpc";
+import CreateRoutes from "@/router/create";
 import ViewRoutes from "@/router/view";
 
 const router = createBrowserRouter([
