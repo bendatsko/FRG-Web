@@ -16,6 +16,7 @@ import { SignInType } from '@/types';
 import Logo from './components/logo';
 import MobileLogo from './components/mobile-logo';
 import { useTheme } from 'next-themes';
+import {DAQROCLogo} from "@/components/common/DaqrocSquareIcon.tsx";
 
 const initialFormValues: SignInType = {
   email: '',
@@ -42,7 +43,7 @@ const SignIn: React.FC = () => {
 
       dispatch(saveUserInfo({ token: result.access_token, user: userInfo }));
       actions.resetForm();
-      navigate('/dashboard');  // Navigate to dashboard after successful login
+      navigate('/dashboard');
     } catch (err) {
       toast({
         duration: 3000,
@@ -54,23 +55,38 @@ const SignIn: React.FC = () => {
   };
 
   return (
-      <div className={`flex min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+      <div className={`flex min-h-screen bg-white text-black`}>
         <div className="hidden lg:flex lg:w-1/2 bg-black items-center justify-center">
           <Logo />
         </div>
-        <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8">
-          <div className="lg:hidden mb-8">
-            <MobileLogo />
+        <div className="w-full lg:w-1/2 flex flex-col justify-center items-center">
+          <div className="lg:hidden ">
+            {/*<MobileLogo />*/}
+            <div className="lg:hidden basis-1/2 flex flex-col justify-center items-center">
+              <div className="flex items-center justify-center ">
+                <DAQROCLogo
+                    className="text-[90px] lg:text-[150px]"
+                    height="6rem"
+                    width="6rem"
+                    overrideColor="dark"
+                />
+              </div>
+            </div>
+
+            <h1 className="text-2xl font-bold text-center">DAQROC</h1>
+            <h2 className="text-xs font-normal text-center">Flynn Lab, University of Michigan</h2>
+
           </div>
-          <div className={`w-full max-w-md p-8 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg`}>
-            <h1 className="text-3xl font-bold mb-6 text-center">Sign In</h1>
+
+          <div className={`w-full max-w-md p-8 rounded-lg bg-white `}>
+            <h1 className="text-2xl font-bold mb-6 text-center">Sign In</h1>
             <Formik
                 initialValues={initialFormValues}
                 validationSchema={signInSchema}
                 onSubmit={handleSubmit}
             >
-              {({ values, handleBlur, handleChange, isSubmitting }) => (
-                  <Form className="space-y-6">
+              {({values, handleBlur, handleChange, isSubmitting}) => (
+                  <Form className="space-y-6 ">
                     <FormField
                         label="Email Address"
                         name="email"
@@ -87,7 +103,7 @@ const SignIn: React.FC = () => {
                         onBlur={handleBlur}
                         onChange={handleChange}
                     />
-                    <SubmitButton isSubmitting={isSubmitting} />
+                    <SubmitButton isSubmitting={isSubmitting}/>
                   </Form>
               )}
             </Formik>
@@ -113,11 +129,6 @@ const FormField: React.FC<{
         </Label>
         {type === 'password' ? (
             <InputPassword
-                className={`w-full rounded-md ${
-                    theme === 'dark'
-                        ? 'bg-gray-700 border-gray-600 focus:border-blue-500'
-                        : 'bg-gray-50 border-gray-300 focus:border-blue-500'
-                }`}
                 name={name}
                 id={name}
                 value={value}
@@ -126,11 +137,6 @@ const FormField: React.FC<{
             />
         ) : (
             <Input
-                className={`w-full rounded-md ${
-                    theme === 'dark'
-                        ? 'bg-gray-700 border-gray-600 focus:border-blue-500'
-                        : 'bg-gray-50 border-gray-300 focus:border-blue-500'
-                }`}
                 type={type}
                 name={name}
                 id={name}
@@ -153,7 +159,7 @@ const SubmitButton: React.FC<{ isSubmitting: boolean }> = ({ isSubmitting }) => 
         type="submit"
         variant="default"
         disabled={isSubmitting}
-        className="w-full bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
+        className="w-full bg-black dark:bg-black dark:text-white text-white hover:bg-blue-700 transition-colors duration-200"
     >
       {isSubmitting ? (
           <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
