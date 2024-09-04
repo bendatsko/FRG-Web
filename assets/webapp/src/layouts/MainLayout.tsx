@@ -16,7 +16,7 @@ const MainLayout: React.FC = () => {
                     <SideBar />
                 </div>
                 <main className="flex-1 flex flex-col overflow-hidden">
-                    <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center justify-between p-4 bg-white dark:bg-black border-b border-gray-200 dark:border-white/20">
                         <MobileSideBar />
                         <ToggleMode />
                     </div>

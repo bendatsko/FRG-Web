@@ -83,7 +83,7 @@ const Dashboard = () => {
             <CardTitle className="text-red-600 dark:text-red-400">Error</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mt-2">An error occurred while fetching the tests.</p>
+            <p className="mt-2">Failed to fetch tests from test API. Please try again later.</p>
             <p className="mt-1 text-sm opacity-75">{error.toString()}</p>
           </CardContent>
         </Card>
@@ -105,7 +105,7 @@ const Dashboard = () => {
 
 
 
-        <div className="m-6 container bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg overflow-hidden border-b dark:border-[#333333] ">
+        <div className="container bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg overflow-hidden border-b dark:border-[#333333] ">
 
 
           <div className="flex justify-between items-center py-6 border-b border-gray-200 dark:border-[#333333]">
@@ -114,12 +114,12 @@ const Dashboard = () => {
 
             <h1 className="text-3xl font-bold text-black dark:text-white">Dashboard</h1>
             <div className="flex space-x-4">
-              <Button onClick={handleRefresh} className="bg-gray-200 hover:bg-gray-300 text-black dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh
-              </Button>
+              {/*<Button onClick={handleRefresh} className="bg-gray-200 hover:bg-gray-300 text-black dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white">*/}
+              {/*  <RefreshCw className="mr-2 h-4 w-4" />*/}
+              {/*  Refresh*/}
+              {/*</Button>*/}
               <Button onClick={() => navigate("/create-ldpc")} className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="h-4 w-4" />
                 New Test
               </Button>
             </div>

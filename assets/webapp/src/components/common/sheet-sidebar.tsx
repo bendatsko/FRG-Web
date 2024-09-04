@@ -17,7 +17,7 @@ const MenuItem = React.memo(({ menu, isActive, onClick }) => (
     <Button
         variant="ghost"
         className={`w-full justify-start py-2 px-4 text-sm ${
-            isActive ? "border-l-4 border-blue-500 bg-gray-100 dark:bg-gray-700" : ""
+            isActive ? "border-l-4 border-blue-500 bg-gray-100 dark:bg-white/15" : ""
         }`}
         onClick={onClick}
     >
@@ -95,7 +95,7 @@ const SheetSideBar = () => {
     );
 
     return (
-        <div className="h-full bg-white dark:bg-gray-800">
+        <div className="h-full bg-white dark:bg-black">
             <Header onLogoClick={() => navigate("/")} />
             <ScrollArea className="h-[calc(100%-64px)]">
                 <nav className="space-y-1 p-2">
