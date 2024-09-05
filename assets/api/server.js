@@ -42,11 +42,11 @@ let isProcessingQueue = false;
 
 // Serial port setup
 const port = new SerialPort({
-    path: 'COM8', // Update this to match your Teensy's port
+    path: 'COM3', // Update this to match your Teensy's port
     baudRate: 115200
 });
 const parser = port.pipe(new ReadlineParser({delimiter: '\n'}));
-const USE_TEENSY = true; // Set this to true when you're ready to use the actual Teensy
+const USE_TEENSY = true; // Set this to true when youc're ready to use the actual Teensy
 
 port.on('error', (err) => {
     console.error('Serial port error:', err.message);
@@ -907,10 +907,22 @@ app.get('/tests/:id', (req, res) => {
         if (!row) {
             return res.status(404).json({error: "Test not found"});
         }
-        row.results = JSON.parse(row.results);
+
+        // If results_file contains JSON data and needs to be parsed
+        if (row.results_file) {
+            try {
+                row.results_file = JSON.parse(row.results_file);
+            } catch (e) {
+                console.error('Error parsing results_file:', e);
+                // Handle the error as needed, e.g., set to null or send an error response
+                row.results_file = null;
+            }
+        }
+
         res.status(200).json(row);
     });
 });
+
 
 // Delete test
 app.delete('/tests/:id', (req, res) => {
@@ -1062,7 +1074,7 @@ app.get('/health', (req, res) => {
 
   
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Rest API and WebSocket server started. Running on port ${PORT}`);
     sendStatusToTeensy('ONLINE'); // Send initial status when server starts
 });
