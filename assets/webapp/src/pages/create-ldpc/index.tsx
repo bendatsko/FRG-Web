@@ -182,6 +182,13 @@ const Create: React.FC = () => {
     return (
         <div className="min-h-screen bg-[#fafafa] dark:bg-[#0A0A0A] flex justify-center ">
 
+
+
+            <div className="container bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg overflow-hidden ">
+
+
+                <div className="flex justify-between items-center py-6 ">
+
             <div className="space-y-6 w-full">
                 <div>
                     <h1 className="text-3xl font-bold">Create Test</h1>
@@ -270,8 +277,10 @@ const Create: React.FC = () => {
                     </form>
                 </Form>
             </div>
+        </div>        </div>
         </div>
-    );
+
+            );
 };
 
 export default Create;

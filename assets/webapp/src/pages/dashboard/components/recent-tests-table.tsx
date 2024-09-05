@@ -121,6 +121,7 @@ export function DataTable<TData, TValue>({
                 }
               >
                 Delete Selected
+                <DropdownMenuSeparator />
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />

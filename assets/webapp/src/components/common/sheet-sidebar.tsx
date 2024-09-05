@@ -56,9 +56,9 @@ const CollapsibleMenuItem = React.memo(
 );
 
 const Header = React.memo(({ onLogoClick }) => (
-    <div className="flex items-center p-4 ml-1 ">
+    <div className="flex items-center p-4 ml-1 border-b border-black/10 dark:border-white/20">
         <DAQROCLogo
-            className="h-8 w-8 cursor-pointer mr-1"
+            className="h-8 w-8 cursor-pointer mr-1 "
             onClick={onLogoClick}
         />
         <span className="font-bold text-3xl">DAQROC</span>

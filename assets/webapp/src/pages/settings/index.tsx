@@ -181,8 +181,16 @@ const UserSettingsPage = () => {
     }
 
     return (
-        <div className="container mx-auto py-10 px-4 max-w-3xl">
-            <Card className="bg-white shadow-sm border border-gray-200">
+        <div className="min-h-screen  flex justify-center bg-white dark:bg-black">
+
+
+
+            <div className="container rounded-lg overflow-hidden">
+
+
+                <div className="flex justify-between items-center py-6 ">
+
+                <Card className="w-full border-none shadow-none bg-transparent">
                 <CardHeader className="pb-4">
                     <CardTitle className="text-2xl font-bold text-gray-800">Account Settings</CardTitle>
                 </CardHeader>
@@ -193,57 +201,57 @@ const UserSettingsPage = () => {
                             <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-800">{user.username}</h2>
-                            <p className="text-sm text-gray-600">{user.email}</p>
+                            <h2 className="text-xl font-semibold text-black dark:text-white">{user.username}</h2>
+                            <p className="text-sm text-black dark:text-white/50">{user.email}</p>
                         </div>
                     </div>
 
                     <Tabs defaultValue="profile" className="w-full">
                         <TabsList className="grid w-full grid-cols-2 bg-gray-100 rounded-md p-1">
-                            <TabsTrigger value="profile" className="text-sm font-medium text-gray-700">Profile</TabsTrigger>
-                            <TabsTrigger value="security" className="text-sm font-medium text-gray-700">Security</TabsTrigger>
+                            <TabsTrigger value="profile" className="text-sm font-medium text-black/50 dark:text-white/50">Profile</TabsTrigger>
+                            <TabsTrigger value="security" className="text-sm font-medium text-black/50 dark:text-white/50">Security</TabsTrigger>
                         </TabsList>
                         <TabsContent value="profile">
                             <form onSubmit={handleSettingsSubmit(onSettingsSubmit)} className="space-y-4 mt-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="username" className="text-sm font-medium text-gray-700">Username</Label>
+                                    <Label htmlFor="username" className="text-sm font-medium text-black/50 dark:text-white/50">Username</Label>
                                     <div className="relative">
                                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                                         <Input
                                             id="username"
                                             {...registerSettings('username')}
-                                            className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            className="pl-10 dark:bg-white/10 bg-white border-gray-300 dark:border-white/10 focus:border-blue-500 focus:ring-blue-500"
                                         />
                                     </div>
                                     {settingsErrors.username && <p className="text-red-500 text-sm">{settingsErrors.username.message}</p>}
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
+                                    <Label htmlFor="email" className="text-sm font-medium text-black/50 dark:text-white/50">Email</Label>
                                     <div className="relative">
                                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                                         <Input
                                             id="email"
                                             type="email"
                                             {...registerSettings('email')}
-                                            className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            className="pl-10 dark:bg-white/10 bg-white border-gray-300 dark:border-white/10 focus:border-blue-500 focus:ring-blue-500"
                                         />
                                     </div>
                                     {settingsErrors.email && <p className="text-red-500 text-sm">{settingsErrors.email.message}</p>}
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="bio" className="text-sm font-medium text-gray-700">Bio</Label>
+                                    <Label htmlFor="bio" className="text-sm font-medium text-black/50 dark:text-white/50">Bio</Label>
                                     <div className="relative">
-                                        <FileText className="absolute left-3 top-3 text-gray-400" size={18} />
+                                        <FileText className="absolute left-3 top-3 text-black/50 dark:text-white/50" size={18} />
                                         <Textarea
                                             id="bio"
                                             {...registerSettings('bio')}
-                                            className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            className="pl-10 dark:bg-white/10 bg-white border-gray-300 dark:border-white/10 focus:border-blue-500 focus:ring-blue-500"
                                             rows={4}
                                         />
                                     </div>
                                     {settingsErrors.bio && <p className="text-red-500 text-sm">{settingsErrors.bio.message}</p>}
                                 </div>
-                                <Button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                                <Button type="submit" disabled={isLoading} className="w-full text-white">
                                     {isLoading ? 'Updating...' : 'Update Profile'}
                                 </Button>
                             </form>
@@ -308,7 +316,7 @@ const UserSettingsPage = () => {
                     </div>
                 </CardContent>
             </Card>
-        </div>
+        </div></div></div>
     );
 };
 

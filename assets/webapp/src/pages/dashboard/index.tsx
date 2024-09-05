@@ -144,20 +144,20 @@ const Dashboard = () => {
               ))}
             </div>
 
-            <Card className="dark:border-[#333333] mb-8 bg-white dark:bg-[#000] rounded-lg">
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-black dark:text-white">Test History</CardTitle>
-                <p className="text-sm text-gray-500 dark:text-white/80">View and manage your previous test runs</p>
-              </CardHeader>
-              <CardContent>
+            {/*<Card className="dark:border-[#333333] mb-8 bg-white dark:bg-[#000] rounded-lg">*/}
+              {/*<CardHeader>*/}
+              {/*  <CardTitle className="text-xl font-semibold text-black dark:text-white">Test History</CardTitle>*/}
+              {/*  <p className="text-sm text-gray-500 dark:text-white/80">View and manage your previous test runs</p>*/}
+              {/*</CardHeader>*/}
+              {/*<CardContent>*/}
 
                 <DataTable
                     columns={recentTestsColumns}
                     data={filteredTests}
                     onDeleteSelected={handleDeleteSelected}
                 />
-              </CardContent>
-            </Card>
+              {/*</CardContent>*/}
+            {/*</Card>*/}
           </div>
         </div>
       </div>
