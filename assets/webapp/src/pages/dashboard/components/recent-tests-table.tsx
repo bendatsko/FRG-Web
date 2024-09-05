@@ -109,7 +109,7 @@ export function DataTable<TData, TValue>({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[200px]">
             <DropdownMenuLabel>Table Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
+
             {table.getFilteredSelectedRowModel().rows.length > 0 && (
               <DropdownMenuItem
                 onClick={() =>
@@ -121,7 +121,6 @@ export function DataTable<TData, TValue>({
                 }
               >
                 Delete Selected
-                <DropdownMenuSeparator />
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />

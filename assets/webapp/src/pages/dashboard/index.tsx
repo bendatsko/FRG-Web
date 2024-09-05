@@ -119,9 +119,9 @@ const Dashboard = () => {
           <div className="py-8 ">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 ">
               {[
-                { title: "Total Tests", value: statusCounts.total, icon: Database, color: "bg-purple-100 dark:bg-[#000]" },
-                { title: "Running Tests", value: statusCounts.running, icon: Activity, color: "bg-yellow-100 dark:bg-[#000]" },
-                { title: "Completed Tests", value: statusCounts.completed, icon: CheckCircle, color: "bg-green-100 dark:bg-[#000]" },
+                { title: "Total Tests", value: statusCounts.total, icon: Database, color: "bg-white dark:bg-[#000]" },
+                { title: "Running Tests", value: statusCounts.running, icon: Activity, color: "bg-white dark:bg-[#000]" },
+                { title: "Completed Tests", value: statusCounts.completed, icon: CheckCircle, color: "bg-white dark:bg-[#000]" },
               ].map((item, index) => (
                   <Card key={index} className={`dark:border-[#333333] ${item.color} rounded-lg`} >
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
