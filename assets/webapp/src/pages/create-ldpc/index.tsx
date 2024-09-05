@@ -12,7 +12,7 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {Input} from "@/components/ui/input";
 import {toast} from "@/components/ui/use-toast";
-import {AlertCircle, CheckCircle, Loader2} from "lucide-react";
+import {AlertCircle, CheckCircle, Loader2, Plus} from "lucide-react";
 import {useNavigate} from "react-router-dom";
 import {setBreadCrumb} from "@/store/slice/app";
 const baseUrl = import.meta.env.VITE_API_URL;
@@ -183,104 +183,104 @@ const Create: React.FC = () => {
         <div className="min-h-screen bg-[#fafafa] dark:bg-[#0A0A0A] flex justify-center ">
 
 
+            <div
+                className="container bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg overflow-hidden border-b dark:border-[#333333] ">
 
-            <div className="container bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg overflow-hidden ">
 
+                <div className="flex justify-between items-center py-6 border-b border-gray-200 dark:border-[#333333]">
+                    <h1 className="text-3xl font-bold text-black dark:text-white">Create Test</h1>
+                    <div className="flex space-x-4">
+                        <ServerStatus className="h-4 w-4" status={serverStatus}/>
 
-                <div className="flex justify-between items-center py-6 ">
-
-            <div className="space-y-6 w-full">
-                <div>
-                    <h1 className="text-3xl font-bold">Create Test</h1>
-                    <p className="text-muted-foreground mt-2">Configure test parameters for LDPC Decoder ASIC.</p>
-                </div>
-
-                <ServerStatus status={serverStatus}/>
-
-                <div>
-                    <p className="text-muted-foreground font-semibold text-sm mb-2">Load Preset</p>
-                    <PresetSelector presets={presets} onSelect={onPresetSelect} onSave={onPresetSave}/>
-                </div>
-
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <FormField
-                            control={form.control}
-                            name="title"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel>Title</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Untitled test" {...field} />
-                                    </FormControl>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="testBench"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel>Test Bench</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a test bench"/>
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {['ldpc1', 'ldpc2', 'ldpc3'].map((bench) => (
-                                                <SelectItem key={bench} value={bench}>{bench.toUpperCase()}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="snrRange"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel>SNR Range</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="start:step:stop (e.g., 0:1:5)" {...field} />
-                                    </FormControl>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="batchSize"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel>Batch Size</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" placeholder="e.g., 3" {...field} />
-                                    </FormControl>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
-                        <div className="flex justify-end">
-                            <Button
-                                type="submit"
-                                className="w-auto"
-                                disabled={serverStatus !== 'online'}
-                            >
-                                Create LDPC Chip Test
-                            </Button>
+                        <div>
+                            <PresetSelector presets={presets} onSelect={onPresetSelect} onSave={onPresetSave}/>
                         </div>
-                    </form>
-                </Form>
-            </div>
-        </div>        </div>
-        </div>
+                    </div>
+                </div>
 
-            );
+
+
+                <div className="py-8 ">
+
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                                <FormField
+                                    control={form.control}
+                                    name="title"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Title</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Untitled test" {...field} className="dark:border-white/20 border-black/20"/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="testBench"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Test Bench</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select a test bench"/>
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {['ldpc1', 'ldpc2', 'ldpc3'].map((bench) => (
+                                                        <SelectItem key={bench}
+                                                                    value={bench}>{bench.toUpperCase()}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="snrRange"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>SNR Range</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="start:step:stop (e.g., 0:1:5)" {...field} className="dark:border-white/20 border-black/20"/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="batchSize"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Batch Size</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" placeholder="e.g., 3" {...field} className="dark:border-white/20 border-black/20" />
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className="flex justify-end">
+                                    <Button
+                                        type="submit"
+                                        className="w-auto"
+                                        disabled={serverStatus !== 'online'}
+                                    >
+                                        Create LDPC Chip Test
+                                    </Button>
+                                </div>
+                            </form>
+                        </Form>
+                    </div>
+                </div>
+        </div>
+    );
 };
 
 export default Create;

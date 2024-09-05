@@ -106,19 +106,10 @@ const Dashboard = () => {
 
 
         <div className="container bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg overflow-hidden border-b dark:border-[#333333] ">
-
-
           <div className="flex justify-between items-center py-6 border-b border-gray-200 dark:border-[#333333]">
-
-
-
             <h1 className="text-3xl font-bold text-black dark:text-white">Dashboard</h1>
             <div className="flex space-x-4">
-              {/*<Button onClick={handleRefresh} className="bg-gray-200 hover:bg-gray-300 text-black dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white">*/}
-              {/*  <RefreshCw className="mr-2 h-4 w-4" />*/}
-              {/*  Refresh*/}
-              {/*</Button>*/}
-              <Button onClick={() => navigate("/create-ldpc")} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button onClick={() => navigate("/create-ldpc")} className="bg-black dark:bg-white dark:text-black text-white">
                 <Plus className="h-4 w-4" />
                 New Test
               </Button>

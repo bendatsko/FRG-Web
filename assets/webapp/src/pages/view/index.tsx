@@ -137,29 +137,29 @@ const View: React.FC = () => {
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">{test.title}</h1>
-            <Tabs defaultValue="details" className="space-y-6">
-                <TabsList className="bg-secondary">
-                    <TabsTrigger value="details"
-                                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        Test Details
-                    </TabsTrigger>
-                    <TabsTrigger value="analytics"
-                                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        Analytics
-                    </TabsTrigger>
-                </TabsList>
-                <TabsContent value="details" className="bg-card p-6 rounded-lg shadow-lg">
+            {/*<Tabs defaultValue="details" className="space-y-6">*/}
+                {/*<TabsList className="bg-secondary">*/}
+                {/*    /!*<TabsTrigger value="details"*!/*/}
+                {/*    /!*             className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">*!/*/}
+                {/*    /!*    Test Details*!/*/}
+                {/*    /!*</TabsTrigger>*!/*/}
+                {/*    /!*<TabsTrigger value="analytics"*!/*/}
+                {/*    /!*             className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">*!/*/}
+                {/*    /!*    Analytics*!/*/}
+                {/*    /!*</TabsTrigger>*!/*/}
+                {/*</TabsList>*/}
+                {/*<TabsContent value="details" className="bg-card p-6 rounded-lg shadow-lg">*/}
                     <Details
                         test={test}
                         onUpdateThreshold={handleUpdateThreshold}
                         onRerunTest={handleRerunTest}
                         onDownloadResults={handleDownloadResults}
                     />
-                </TabsContent>
-                <TabsContent value="analytics" className="bg-card p-6 rounded-lg shadow-lg">
-                    <Analytics testResults={test.results}/>
-                </TabsContent>
-            </Tabs>
+                {/*</TabsContent>*/}
+                {/*<TabsContent value="analytics" className="bg-card p-6 rounded-lg shadow-lg">*/}
+                {/*    <Analytics testResults={test.results}/>*/}
+                {/*</TabsContent>*/}
+            {/*</Tabs>*/}
         </div>
     );
 };

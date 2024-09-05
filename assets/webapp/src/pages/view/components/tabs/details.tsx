@@ -44,12 +44,8 @@ const Details: React.FC<TestDetailsProps> = ({
 
   return (
     <div className="space-y-6">
-      <Card className="overflow-hidden">
-        <CardHeader className="bg-primary text-primary-foreground">
-          <CardTitle className="text-2xl flex items-center">
-            <span className="mr-2">🧪</span> Test Details
-          </CardTitle>
-        </CardHeader>
+      <Card className="overflow-hidden dark:border-white/20 border-black/20">
+
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InfoItem label="Test ID" value={test.id} />
@@ -108,14 +104,12 @@ const Details: React.FC<TestDetailsProps> = ({
               </div>
             </div>
           </div>
+
+
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="bg-secondary">
-          <CardTitle className="text-xl">Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
+
           <div className="flex flex-wrap gap-4">
             <Button onClick={onRerunTest} className="flex items-center">
               <RefreshCw className="mr-2 h-4 w-4" /> Rerun Test
@@ -124,8 +118,7 @@ const Details: React.FC<TestDetailsProps> = ({
               <Download className="mr-2 h-4 w-4" /> Download Results
             </Button>
           </div>
-        </CardContent>
-      </Card>
+
 
       {test.status === 'Failed' && (
         <Card className="bg-red-100 dark:bg-red-900 border-red-500">
