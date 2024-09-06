@@ -101,15 +101,15 @@ const Dashboard = () => {
   };
 
   return (
-      <div className="min-h-screen bg-[#fafafa] dark:bg-[#0A0A0A] flex justify-center ">
+      <div className=" bg-[#fafafa] dark:bg-black flex justify-center ">
 
 
 
-        <div className="container bg-white dark:bg-[#0A0A0A] pb-16">
-          <div className="flex justify-between items-center py-6 border-b border-gray-200 dark:border-[#333333]">
+        <div className="container bg-white dark:bg-black pb-16">
+          <div className="flex justify-between items-center overflow-hidden py-6 border-b border-gray-200 dark:border-[#333333]">
             <h1 className="text-3xl font-bold text-black dark:text-white">Dashboard</h1>
             <div className="flex space-x-4">
-              <Button onClick={() => navigate("/create-ldpc")} className="bg-black dark:bg-white dark:text-black text-white">
+              <Button onClick={() => navigate("/new-test")} className="bg-black dark:bg-white dark:text-black text-white">
                 <Plus className="h-4 w-4" />
                 New Test
               </Button>

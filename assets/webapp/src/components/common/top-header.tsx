@@ -39,22 +39,6 @@ const TopHeader: React.FC = () => {
                 {/* <BreadCrumb/> */}
             </div>
             <div className="flex items-center space-x-3 ">
-                {/*<Button*/}
-                {/*    variant="outline"*/}
-                {/*    size="sm"*/}
-                {/*    className="text-xs font-semibold h-9 " onClick={() => navigate('/create-ldpc')}*/}
-                {/*>*/}
-                {/*    Create*/}
-                {/*    <Plus className="ml-1 h-3 w-3"/>*/}
-                {/*</Button>*/}
-                {/*<Button*/}
-                {/*    variant="outline"*/}
-                {/*    size="sm"*/}
-                {/*    className="text-sm h-9"*/}
-                {/*>*/}
-                {/*    Docs*/}
-                {/*</Button>*/}
-
                 <ToggleMode/>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

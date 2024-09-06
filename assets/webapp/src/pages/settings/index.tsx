@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import { LogOut, Key, User, Mail, FileText } from 'lucide-react';
+import {LogOut, Key, User, Mail, FileText, Plus} from 'lucide-react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const settingsSchema = z.object({
@@ -181,23 +181,20 @@ const UserSettingsPage = () => {
     }
 
     return (
-        <div className="min-h-screen  flex justify-center bg-white dark:bg-black">
+        <div className=" bg-[#fafafa] dark:bg-black flex justify-center ">
 
 
+            <div className="container bg-white dark:bg-black pb-16">
+                <div
+                    className="flex justify-between items-center overflow-hidden py-6 border-b border-gray-200 dark:border-[#333333]">
+                    <h1 className="text-3xl font-bold text-black dark:text-white">Settings</h1>
 
-            <div className="container rounded-lg overflow-hidden">
+                </div>
 
-
-                <div className="flex justify-between items-center py-6 ">
-
-                <Card className="w-full border-none shadow-none bg-transparent">
-                <CardHeader className="pb-4">
-                    <CardTitle className="text-2xl font-bold text-gray-800">Account Settings</CardTitle>
-                </CardHeader>
-                <CardContent>
+                <div className="py-8 ">
                     <div className="flex items-center space-x-4 mb-6">
                         <Avatar className="h-20 w-20">
-                            <AvatarImage src={user.avatarUrl} alt={user.username} />
+                            <AvatarImage src={user.avatarUrl} alt={user.username}/>
                             <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -208,116 +205,131 @@ const UserSettingsPage = () => {
 
                     <Tabs defaultValue="profile" className="w-full">
                         <TabsList className="grid w-full grid-cols-2 bg-gray-100 rounded-md p-1">
-                            <TabsTrigger value="profile" className="text-sm font-medium text-black/50 dark:text-white/50">Profile</TabsTrigger>
-                            <TabsTrigger value="security" className="text-sm font-medium text-black/50 dark:text-white/50">Security</TabsTrigger>
+                            <TabsTrigger value="profile"
+                                         className="text-sm font-medium text-black/50 dark:text-white/50">Profile</TabsTrigger>
+                            <TabsTrigger value="security"
+                                         className="text-sm font-medium text-black/50 dark:text-white/50">Security</TabsTrigger>
                         </TabsList>
                         <TabsContent value="profile">
                             <form onSubmit={handleSettingsSubmit(onSettingsSubmit)} className="space-y-4 mt-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="username" className="text-sm font-medium text-black/50 dark:text-white/50">Username</Label>
+                                    <Label htmlFor="username"
+                                           className="text-sm font-medium text-black/50 dark:text-white/50">Username</Label>
                                     <div className="relative">
-                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+
                                         <Input
                                             id="username"
                                             {...registerSettings('username')}
-                                            className="pl-10 dark:bg-white/10 bg-white border-gray-300 dark:border-white/10 focus:border-blue-500 focus:ring-blue-500"
+                                            className="dark:bg-white/10 bg-white border-gray-300 dark:border-white/10 focus:border-blue-500 focus:ring-blue-500"
                                         />
                                     </div>
-                                    {settingsErrors.username && <p className="text-red-500 text-sm">{settingsErrors.username.message}</p>}
+                                    {settingsErrors.username &&
+                                        <p className="text-red-500 text-sm">{settingsErrors.username.message}</p>}
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="email" className="text-sm font-medium text-black/50 dark:text-white/50">Email</Label>
+                                    <Label htmlFor="email"
+                                           className="text-sm font-medium text-black/50 dark:text-white/50">Email</Label>
                                     <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+
                                         <Input
                                             id="email"
                                             type="email"
                                             {...registerSettings('email')}
-                                            className="pl-10 dark:bg-white/10 bg-white border-gray-300 dark:border-white/10 focus:border-blue-500 focus:ring-blue-500"
+                                            className="dark:bg-white/10 bg-white border-gray-300 dark:border-white/10 focus:border-blue-500 focus:ring-blue-500"
                                         />
                                     </div>
-                                    {settingsErrors.email && <p className="text-red-500 text-sm">{settingsErrors.email.message}</p>}
+                                    {settingsErrors.email &&
+                                        <p className="text-red-500 text-sm">{settingsErrors.email.message}</p>}
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="bio" className="text-sm font-medium text-black/50 dark:text-white/50">Bio</Label>
+                                    <Label htmlFor="bio"
+                                           className="text-sm font-medium text-black/50 dark:text-white/50">Bio</Label>
                                     <div className="relative">
-                                        <FileText className="absolute left-3 top-3 text-black/50 dark:text-white/50" size={18} />
+
                                         <Textarea
                                             id="bio"
                                             {...registerSettings('bio')}
-                                            className="pl-10 dark:bg-white/10 bg-white border-gray-300 dark:border-white/10 focus:border-blue-500 focus:ring-blue-500"
+                                            className="dark:bg-white/10 bg-white border-gray-300 dark:border-white/10 focus:border-blue-500 focus:ring-blue-500"
                                             rows={4}
                                         />
                                     </div>
-                                    {settingsErrors.bio && <p className="text-red-500 text-sm">{settingsErrors.bio.message}</p>}
+                                    {settingsErrors.bio &&
+                                        <p className="text-red-500 text-sm">{settingsErrors.bio.message}</p>}
                                 </div>
-                                <Button type="submit" disabled={isLoading} className="w-full text-white">
-                                    {isLoading ? 'Updating...' : 'Update Profile'}
-                                </Button>
+
                             </form>
                         </TabsContent>
                         <TabsContent value="security">
                             <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4 mt-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="currentPassword" className="text-sm font-medium text-gray-700">Current Password</Label>
+                                    <Label htmlFor="currentPassword" className="text-sm font-medium text-black dark:text-white">Current
+                                        Password</Label>
                                     <div className="relative">
-                                        <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+
+
                                         <Input
                                             id="currentPassword"
                                             type="password"
                                             {...registerPassword('currentPassword')}
-                                            className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            className="border-black/20  dark:border-white/20 focus:border-blue-500 focus:ring-blue-500"
                                         />
                                     </div>
-                                    {passwordErrors.currentPassword && <p className="text-red-500 text-sm">{passwordErrors.currentPassword.message}</p>}
+                                    {passwordErrors.currentPassword &&
+                                        <p className="text-red-500 text-sm">{passwordErrors.currentPassword.message}</p>}
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="newPassword" className="text-sm font-medium text-gray-700">New Password</Label>
+                                    <Label htmlFor="newPassword" className="text-sm font-medium dark:text-white text-black">New
+                                        Password</Label>
                                     <div className="relative">
-                                        <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+
                                         <Input
                                             id="newPassword"
                                             type="password"
                                             {...registerPassword('newPassword')}
-                                            className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            className="border-black/20 dark:border-white/20 focus:border-blue-500 focus:ring-blue-500"
                                         />
                                     </div>
-                                    {passwordErrors.newPassword && <p className="text-red-500 text-sm">{passwordErrors.newPassword.message}</p>}
+                                    {passwordErrors.newPassword &&
+                                        <p className="text-red-500 text-sm">{passwordErrors.newPassword.message}</p>}
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">Confirm New Password</Label>
+                                    <Label htmlFor="confirmPassword" className="text-sm font-medium dark:text-white text-black">Confirm
+                                        New Password</Label>
                                     <div className="relative">
-                                        <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+
                                         <Input
                                             id="confirmPassword"
                                             type="password"
                                             {...registerPassword('confirmPassword')}
-                                            className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            className="border-black/20 dark:border-white/20"
                                         />
                                     </div>
-                                    {passwordErrors.confirmPassword && <p className="text-red-500 text-sm">{passwordErrors.confirmPassword.message}</p>}
+                                    {passwordErrors.confirmPassword &&
+                                        <p className="text-red-500 text-sm">{passwordErrors.confirmPassword.message}</p>}
                                 </div>
-                                <Button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                                    {isLoading ? 'Updating...' : 'Change Password'}
+                                <Button type="submit" disabled={isLoading}
+                                        className="w-full bg-black dark:bg-white text-white">
+                                    {isLoading ? 'Updating...' : 'Update Password'}
                                 </Button>
                             </form>
                         </TabsContent>
                     </Tabs>
 
-                    <div className="mt-6">
-                        <Button
-                            variant="destructive"
-                            className="w-full hover:bg-red-700 text-white"
-                            onClick={handleLogout}
-                        >
-                            <LogOut className="mr-2 h-4 w-4" />
-                            Log out
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-        </div></div></div>
-    );
+                    {/*<div className="mt-6">*/}
+                    {/*    <Button*/}
+                    {/*        variant="destructive"*/}
+                    {/*        className="w-full hover:bg-red-700 text-white"*/}
+                    {/*        onClick={handleLogout}*/}
+                    {/*    >*/}
+                    {/*        <LogOut className="mr-2 h-4 w-4"/>*/}
+                    {/*        Log out*/}
+                    {/*    </Button>*/}
+                    {/*</div>*/}
+
+        </div>
+</div></div>
+)
+    ;
 };
 
 export default UserSettingsPage;

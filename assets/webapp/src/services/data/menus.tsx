@@ -20,9 +20,9 @@ const menus: MenuItem[] = [
     },
     {
         icon: <Plus size={20} strokeWidth={2}/>,
-        title: "Create",
+        title: "New Test",
         isOpen: false,
-        link: "/create-ldpc",
+        link: "/new-test",
     },
     {
         icon: <Settings2 size={18} strokeWidth={2}/>,

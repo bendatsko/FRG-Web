@@ -17,7 +17,7 @@ const MenuItem = React.memo(({ menu, isActive, onClick }) => (
     <Button
         variant="ghost"
         className={`w-full justify-start py-2 px-4 text-sm ${
-            isActive ? "border-l-4 border-blue-500 bg-gray-100 dark:bg-white/15" : ""
+            isActive ? "border-l-4 border-blue-500 bg-black/5 dark:bg-white/5" : ""
         }`}
         onClick={onClick}
     >

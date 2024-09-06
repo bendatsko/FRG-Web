@@ -32,22 +32,23 @@ const Users = () => {
         );
     } else {
         return (
-            <div className="container mx-auto mb-4 border-none">
-                <Card className="border-0 shadow-none">
-                    <CardHeader>
-                        <CardTitle className>Access Control</CardTitle>
-                        <CardDescription>Userbase management tools</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <DataTable columns={columns} data={data}/>
-                    </CardContent>
-                </Card>
 
+            <div className=" bg-white dark:bg-black flex justify-center ">
+
+
+                <div className="container bg-white dark:bg-black pb-16">
+                    <div
+                        className="flex justify-between items-center overflow-hidden py-6 border-b border-gray-200 dark:border-[#333333]">
+                        <h1 className="text-3xl font-bold text-black dark:text-white">Administrator</h1>
+
+                    </div>
+                    <DataTable columns={columns} data={data}/>
+                </div>
             </div>
 
 
-        );
-    }
-};
+                    );
+                    }
+                    };
 
-export default Users;
+                    export default Users;

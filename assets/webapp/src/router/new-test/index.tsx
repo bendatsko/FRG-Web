@@ -2,11 +2,11 @@ import {ErrorBoundary} from "@/components";
 import {MainLayout} from "@/layouts";
 // import { Settings } from "@/pages";
 import {RouteObject} from "react-router-dom";
-import Create from "@/pages/create-ldpc";
+import {Create } from "@/pages"
 
-const CreateRoutes: RouteObject[] = [
+const NewTestRoutes: RouteObject[] = [
     {
-        path: "/create-ldpc",
+        path: "/new-test",
         element: <MainLayout/>,
         errorElement: <ErrorBoundary/>,
         children: [
@@ -17,4 +17,4 @@ const CreateRoutes: RouteObject[] = [
         ],
     },
 ];
-export default CreateRoutes;
+export default NewTestRoutes;

@@ -131,16 +131,16 @@ export function DataTable<TData, TValue>({
         <>
             <div className="flex items-center py-4">
                 <Input
-                    placeholder="Filter email..."
+                    placeholder="Search userbase"
                     value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
                         table.getColumn("email")?.setFilterValue(event.target.value)
                     }
-                    className="max-w-sm"
+                    className="max-w-sm border-black/20 dark:border-white/20 "
                 />
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button className="ml-4">New User</Button>
+                        <Button className="ml-4">Add User</Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>

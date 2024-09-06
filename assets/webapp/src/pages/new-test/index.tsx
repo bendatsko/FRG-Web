@@ -40,8 +40,8 @@ type Preset = {
 const samplePresets: Preset[] = [
     {
         id: "1",
-        name: "Default Test",
-        config: {title: "Default Test Profile", testBench: "LDPC1", snrRange: "0:1:5", batchSize: "3"}
+        name: "LDPC Chip Test",
+        config: {title: "LDPC Default", testBench: "LDPC1", snrRange: "0:1:5", batchSize: "3"}
     },
 ];
 
@@ -87,7 +87,7 @@ const Create: React.FC = () => {
             setBreadCrumb([
                 {title: "Dashboard", link: "/dashboard"},
                 {title: "Create", link: ""},
-                {title: "LDPC", link: "create-ldpc"},
+                {title: "LDPC", link: "new-test"},
 
 
             ])
@@ -107,7 +107,7 @@ const Create: React.FC = () => {
 
     const checkServerHealth = async () => {
         try {
-            const response = await fetch(`${baseUrl}/health`, { method: 'GET' });
+            const response = await fetch(`${baseUrl}/health`, {method: 'GET'});
             const data = await response.json();
             setServerStatus(data.status === "OK" ? 'online' : 'offline');
         } catch (error) {
@@ -179,118 +179,113 @@ const Create: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#fafafa] dark:bg-[#0A0A0A] flex justify-center ">
 
 
+    <div className=" bg-white dark:bg-black flex justify-center ">
+
+
+        <div className="container bg-white dark:bg-black pb-16">
             <div
-                className="container bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg overflow-hidden border-b dark:border-[#333333] ">
+                className="flex justify-between items-center overflow-hidden py-6 border-b border-gray-200 dark:border-[#333333]">
+                <h1 className="text-3xl font-bold text-black dark:text-white">New Test</h1>
+
+            </div>
+
+            <div className="py-4 ">
+
+                <Form {...form}>
 
 
-                <div className="flex justify-between items-center py-4 border-b border-gray-200 dark:border-[#333333]">
-                    <h1 className="text-3xl font-bold text-black dark:text-white">New Test</h1>
-                    <div className="flex space-x-4">
-                        <ServerStatus className="h-4 w-4" status={serverStatus}/>
-                    </div>
-                </div>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
 
-
-
-                <div className="py-8 ">
-
-                        <Form {...form}>
-
-
-
-                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-
-
-                                <FormField
-                                    control={form.control}
-                                    name="title"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Title</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Untitled test" {...field}
-                                                       className="dark:border-white/20 border-black/20"/>
-                                            </FormControl>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
-
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({field}) => (
                                 <FormItem>
-                                    <FormLabel>Autofill with preset</FormLabel>
-                                    <PresetSelector presets={presets} onSelect={onPresetSelect} onSave={onPresetSave}/>
+                                    <FormLabel>Title</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Untitled test" {...field}
+                                               className="dark:border-white/20 border-black/20"/>
+                                    </FormControl>
+                                    <FormMessage/>
                                 </FormItem>
+                            )}
+                        />
 
-                                <FormField
-                                    control={form.control}
-                                    name="testBench"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Test Bench</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="None selected"/>
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {['LDPC1',].map((bench) => (
-                                                        <SelectItem key={bench}
-                                                                    value={bench}>{bench.toUpperCase()}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="snrRange"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>SNR Range</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="start:step:stop (e.g., 0:1:5)" {...field}
-                                                       className="dark:border-white/20 border-black/20"/>
-                                            </FormControl>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="batchSize"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Batch Size</FormLabel>
-                                            <FormControl>
-                                                <Input type="number" placeholder="e.g., 3" {...field}
-                                                       className="dark:border-white/20 border-black/20"/>
-                                            </FormControl>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
-                                <div className="flex justify-end">
-                                    <Button
-                                        type="submit"
-                                        className="w-auto"
-                                        disabled={serverStatus !== 'online'}
-                                    >
-                                        Add Test to Queue
-                                    </Button>
-                                </div>
-                            </form>
-                        </Form>
-                </div>
+                        <FormItem>
+                            <FormLabel>Autofill with preset</FormLabel>
+                            <PresetSelector presets={presets} onSelect={onPresetSelect} onSave={onPresetSave}/>
+                        </FormItem>
+
+                        <FormField
+                            control={form.control}
+                            name="testBench"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Test Bench</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="None selected"/>
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {['LDPC1',].map((bench) => (
+                                                <SelectItem key={bench}
+                                                            value={bench}>{bench.toUpperCase()}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="snrRange"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>SNR Range</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="start:step:stop (e.g., 0:1:5)" {...field}
+                                               className="dark:border-white/20 border-black/20"/>
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="batchSize"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Batch Size</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" placeholder="e.g., 3" {...field}
+                                               className="dark:border-white/20 border-black/20"/>
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        <div className="flex justify-end">
+                            <Button
+                                type="submit"
+                                className="w-auto"
+                                disabled={serverStatus !== 'online'}
+                            >
+                                Add Test to Queue
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
             </div>
         </div>
-    );
+    </div>
+)
+    ;
 };
 
 export default Create;

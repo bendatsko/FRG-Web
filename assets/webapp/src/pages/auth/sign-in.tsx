@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,12 +23,40 @@ const initialFormValues: SignInType = {
   password: '',
 };
 
+
+
+
 const SignIn: React.FC = () => {
   const [signIn] = useSignInMutation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const dispatch = useDispatch();
   const { theme } = useTheme();
+
+
+  // New function for auto-login
+  const autoLogin = async () => {
+    const demoCredentials = {
+      email: 'user@umich.edu',
+      password: 'password123'
+    };
+    toast({
+      title: "Auto Login",
+      description: "You've been logged in automatically.",
+      variant: "",
+      duration: 5000,
+    });
+
+
+    await handleSubmit(demoCredentials, { resetForm: () => {} });
+  };
+
+// Use useEffect to trigger auto-login when component mounts
+  useEffect(() => {
+    // autoLogin();
+  }, []);
+
+
 
   const handleSubmit = async (values: SignInType, actions: any) => {
     try {
