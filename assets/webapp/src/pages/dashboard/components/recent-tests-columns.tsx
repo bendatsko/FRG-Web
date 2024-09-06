@@ -91,11 +91,10 @@ export const recentTestsColumns: ColumnDef<any>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel>Test Actions</DropdownMenuLabel>
 
             <DropdownMenuItem asChild>
               <Link to={`/view/${test.id}`}>
-                <Eye className="mr-2 h-4 w-4" />
                 View details
               </Link>
             </DropdownMenuItem>

@@ -105,7 +105,7 @@ const Dashboard = () => {
 
 
 
-        <div className="container bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg overflow-hidden border-b dark:border-[#333333] ">
+        <div className="container bg-white dark:bg-[#0A0A0A] pb-16">
           <div className="flex justify-between items-center py-6 border-b border-gray-200 dark:border-[#333333]">
             <h1 className="text-3xl font-bold text-black dark:text-white">Dashboard</h1>
             <div className="flex space-x-4">
@@ -117,13 +117,13 @@ const Dashboard = () => {
           </div>
 
           <div className="py-8 ">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 ">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 ">
               {[
                 { title: "Total Tests", value: statusCounts.total, icon: Database, color: "bg-white dark:bg-[#000]" },
                 { title: "Running Tests", value: statusCounts.running, icon: Activity, color: "bg-white dark:bg-[#000]" },
                 { title: "Completed Tests", value: statusCounts.completed, icon: CheckCircle, color: "bg-white dark:bg-[#000]" },
               ].map((item, index) => (
-                  <Card key={index} className={`dark:border-[#333333] ${item.color} rounded-lg`} >
+                  <Card key={index} className={`dark:border-[#333333] ${item.color} rounded-lg shadow-none`} >
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                       <CardTitle className="text-sm font-medium text-black dark:text-white">{item.title}</CardTitle>
                       <item.icon className="h-4 w-4 text-black dark:text-white" />

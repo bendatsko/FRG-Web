@@ -90,7 +90,7 @@ export function DataTable<TData, TValue>({
   };
 
   return (
-    <div className="space-y-4 ">
+    <div className="space-y-4 w-full">
       <div className="flex items-center justify-between ">
         <Input
           placeholder="Filter tests..."
@@ -98,13 +98,13 @@ export function DataTable<TData, TValue>({
           onChange={(event) =>
             table.getColumn("title")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm border-gray-200 dark:border-[#333333]"
+          className="w-full mr-6 border-gray-200 dark:border-[#333333]"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
               <MoreHorizontal className="mr-2 h-4 w-4" />
-              Actions
+              Table Actions
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[200px]">

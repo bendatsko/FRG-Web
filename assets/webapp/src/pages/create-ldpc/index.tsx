@@ -41,9 +41,8 @@ const samplePresets: Preset[] = [
     {
         id: "1",
         name: "Default Test",
-        config: {title: "Default Test Profile", testBench: "ldpc1", snrRange: "0:1:5", batchSize: "3"}
+        config: {title: "Default Test Profile", testBench: "LDPC1", snrRange: "0:1:5", batchSize: "3"}
     },
-    {id: "2", name: "High Precision", config: {testBench: "ldpc2", snrRange: "0:0.5:10", batchSize: "5"}},
 ];
 
 const PresetSelector: React.FC<{
@@ -51,10 +50,10 @@ const PresetSelector: React.FC<{
     onSelect: (preset: Preset) => void,
     onSave: () => void
 }> = ({presets, onSelect, onSave}) => (
-    <div className="flex items-center space-x-2 mb-6">
+    <div className="flex items-center space-x-2 ">
         <Select onValueChange={(value) => onSelect(presets.find(p => p.id === value)!)}>
-            <SelectTrigger className="w-full max-w-xs">
-                <SelectValue placeholder="Select a preset"/>
+            <SelectTrigger className="w-full">
+                <SelectValue placeholder="None selected"/>
             </SelectTrigger>
             <SelectContent>
                 {presets.map((preset) => (
@@ -66,8 +65,8 @@ const PresetSelector: React.FC<{
 );
 
 const ServerStatus: React.FC<{ status: 'online' | 'offline' | 'checking' }> = ({status}) => (
-    <div className="flex items-center space-x-2 mb-4">
-        <span className="text-sm font-medium">Test Manager Server Status:</span>
+    <div className="flex items-center space-x-2 mt-1 ">
+        <span className="text-sm font-medium">Hardware API:</span>
         {status === 'checking' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground"/>}
         {status === 'online' && <CheckCircle className="h-4 w-4 text-green-500"/>}
         {status === 'offline' && <AlertCircle className="h-4 w-4 text-red-500"/>}
@@ -187,23 +186,25 @@ const Create: React.FC = () => {
                 className="container bg-white dark:bg-[#0A0A0A] rounded-lg shadow-lg overflow-hidden border-b dark:border-[#333333] ">
 
 
-                <div className="flex justify-between items-center py-6 border-b border-gray-200 dark:border-[#333333]">
-                    <h1 className="text-3xl font-bold text-black dark:text-white">Create Test</h1>
+                <div className="flex justify-between items-center py-4 border-b border-gray-200 dark:border-[#333333]">
+                    <h1 className="text-3xl font-bold text-black dark:text-white">New Test</h1>
                     <div className="flex space-x-4">
                         <ServerStatus className="h-4 w-4" status={serverStatus}/>
-
-                        <div>
-                            <PresetSelector presets={presets} onSelect={onPresetSelect} onSave={onPresetSave}/>
-                        </div>
                     </div>
                 </div>
+
 
 
 
                 <div className="py-8 ">
 
                         <Form {...form}>
+
+
+
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+
                                 <FormField
                                     control={form.control}
                                     name="title"
@@ -211,12 +212,19 @@ const Create: React.FC = () => {
                                         <FormItem>
                                             <FormLabel>Title</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Untitled test" {...field} className="dark:border-white/20 border-black/20"/>
+                                                <Input placeholder="Untitled test" {...field}
+                                                       className="dark:border-white/20 border-black/20"/>
                                             </FormControl>
                                             <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
+
+                                <FormItem>
+                                    <FormLabel>Autofill with preset</FormLabel>
+                                    <PresetSelector presets={presets} onSelect={onPresetSelect} onSave={onPresetSave}/>
+                                </FormItem>
+
                                 <FormField
                                     control={form.control}
                                     name="testBench"
@@ -226,11 +234,11 @@ const Create: React.FC = () => {
                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
-                                                        <SelectValue placeholder="Select a test bench"/>
+                                                        <SelectValue placeholder="None selected"/>
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    {['ldpc1', 'ldpc2', 'ldpc3'].map((bench) => (
+                                                    {['LDPC1',].map((bench) => (
                                                         <SelectItem key={bench}
                                                                     value={bench}>{bench.toUpperCase()}</SelectItem>
                                                     ))}
@@ -247,7 +255,8 @@ const Create: React.FC = () => {
                                         <FormItem>
                                             <FormLabel>SNR Range</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="start:step:stop (e.g., 0:1:5)" {...field} className="dark:border-white/20 border-black/20"/>
+                                                <Input placeholder="start:step:stop (e.g., 0:1:5)" {...field}
+                                                       className="dark:border-white/20 border-black/20"/>
                                             </FormControl>
                                             <FormMessage/>
                                         </FormItem>
@@ -260,7 +269,8 @@ const Create: React.FC = () => {
                                         <FormItem>
                                             <FormLabel>Batch Size</FormLabel>
                                             <FormControl>
-                                                <Input type="number" placeholder="e.g., 3" {...field} className="dark:border-white/20 border-black/20" />
+                                                <Input type="number" placeholder="e.g., 3" {...field}
+                                                       className="dark:border-white/20 border-black/20"/>
                                             </FormControl>
                                             <FormMessage/>
                                         </FormItem>
@@ -272,13 +282,13 @@ const Create: React.FC = () => {
                                         className="w-auto"
                                         disabled={serverStatus !== 'online'}
                                     >
-                                        Create LDPC Chip Test
+                                        Add Test to Queue
                                     </Button>
                                 </div>
                             </form>
                         </Form>
-                    </div>
                 </div>
+            </div>
         </div>
     );
 };

@@ -307,7 +307,7 @@ const UserSettingsPage = () => {
                     <div className="mt-6">
                         <Button
                             variant="destructive"
-                            className="w-full bg-red-600 hover:bg-red-700 text-white"
+                            className="w-full hover:bg-red-700 text-white"
                             onClick={handleLogout}
                         >
                             <LogOut className="mr-2 h-4 w-4" />
