@@ -10,6 +10,17 @@ const fsp = fs.promises;
 const path = require('path');
 const http = require('http');
 const WebSocket = require('ws');
+const crypto = require('crypto');
+
+
+// Function to generate a random password
+function generateRandomPassword(length = 12) {
+    return crypto.randomBytes(length).toString('hex').slice(0, length);
+}
+
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey('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');
+
 
 const {SerialPort} = require('serialport');
 const {ReadlineParser} = require('@serialport/parser-readline');
@@ -36,13 +47,78 @@ app.use(cors());
 const chipsConfig = JSON.parse(fs.readFileSync('../chips_config.json', 'utf8'));
 const chips = chipsConfig.chips;
 
+
+// Function to send user credentials email with a link to complete registration
+function sendPasswordResetEmail(email, username, tempPassword) {
+    const msg = {
+        to: email,
+        from: 'webmaster@daqroc.bendatsko.com', // Verified sender
+        subject: 'Your DAQROC Password Reset',
+        text: `Hello,\n\nYour DAQROC password has been reset. Please sign in with the following temporary password to reset your password.\n\nPassword: ${tempPassword}\n\nClick here to go to sign-in page: https://daqroc.bendatsko.com/auth/sign-in\n\n---\nDAQROC Webmaster\nFlynn Research Group\nMichigan Integrated Circuits Lab`,
+        html: `<p>Hello,</p><p>Your DAQROC password has been reset. Please sign in with the following temporary password to reset your password.</p><p><strong>Password:</strong> ${tempPassword}</p><p>Finish resetting your password by clicking <a href="https://daqroc.bendatsko.com/auth/sign-in">here</a>.</p><hr><p>DAQROC Webmaster<br>Flynn Research Group<br>Michigan Integrated Circuits Lab</p>`
+    };
+
+    sgMail.send(msg)
+        .then(() => {
+            console.log('User credentials email sent successfully');
+        })
+        .catch((error) => {
+            console.error('Error sending user credentials email:', error);
+        });
+}
+
+
+// Function to send user credentials email with a link to complete registration
+function sendUserCredentialsEmail(email, username, tempPassword) {
+    const msg = {
+        to: email,
+        from: 'webmaster@daqroc.bendatsko.com', // Verified sender
+        subject: 'Finish Setting Up Your Account',
+        text: `Hello,\n\nYour DAQROC account has been created. Please sign in with the following credentials to finish setting up your account.\n\nEmail: ${email}\nPassword: ${tempPassword}\n\nFinish setting up your account by clicking here: https://daqroc.bendatsko.com/auth/sign-in\n\n---\nDAQROC Webmaster\nFlynn Research Group\nMichigan Integrated Circuits Lab`,
+        html: `<p>Hello,</p><p>Your DAQROC account has been created. Please sign in with the following credentials to finish setting up your account:</p><p><strong>Email:</strong> ${email}<br><strong>Password:</strong> ${tempPassword}</p><p>Finish setting up your account by clicking <a href="https://daqroc.bendatsko.com/auth/sign-in">here</a>.</p><hr><p>DAQROC Webmaster<br>Flynn Research Group<br>Michigan Integrated Circuits Lab</p>`
+    };
+
+    sgMail.send(msg)
+        .then(() => {
+            console.log('User credentials email sent successfully');
+        })
+        .catch((error) => {
+            console.error('Error sending user credentials email:', error);
+        });
+}
+
+app.post('/register', (req, res) => {
+    const { email, username, bio, role } = req.body;
+    const tempPassword = generateRandomPassword(); // Generate a random password
+    const hashedPassword = bcrypt.hashSync(tempPassword, 8);
+    const uuid = uuidv4();
+
+    db.run(
+        'INSERT INTO users (email, password, username, bio, uuid, role) VALUES (?, ?, ?, ?, ?, ?)',
+        [email, hashedPassword, username, bio, uuid, role],
+        function (err) {
+            if (err) {
+                console.error('Error during user registration', err);
+                return res.status(500).send('User registration failed');
+            }
+            
+            // Send the email with credentials and the sign-in link
+            sendUserCredentialsEmail(email, username, tempPassword);
+
+            res.status(200).send('User registered successfully');
+        }
+    );
+});
+
+
+
 // Global queue for tests
 const testQueue = [];
 let isProcessingQueue = false;
 
 // Serial port setup
 const port = new SerialPort({
-    path: 'COM3', // Update this to match your Teensy's port
+    path: '/dev/cu.usbmodem158962301', // Update this to match your Teensy's port
     baudRate: 115200
 });
 const parser = port.pipe(new ReadlineParser({delimiter: '\n'}));
@@ -51,6 +127,30 @@ const USE_TEENSY = true; // Set this to true when youc're ready to use the actua
 port.on('error', (err) => {
     console.error('Serial port error:', err.message);
 });
+
+
+
+
+function sendEmail() {
+    const msg = {
+      to: 'bdatsko@umich.edu',
+      from: 'webmaster@daqroc.bendatsko.com', // This must be a verified sender in your SendGrid account
+      subject: 'Hello from DAQRoc',
+      text: 'Hello, this is a test email from DAQRoc.',
+      html: '<strong>Hello, this is a test email from DAQRoc.</strong>',
+    };
+  
+    sgMail
+      .send(msg)
+      .then(() => {
+        console.log('Email sent successfully');
+      })
+      .catch((error) => {
+        console.error('Error sending email:', error);
+      });
+  }
+
+  
 
 // WebSocket connection handling
 wss.on('connection', (ws) => {
@@ -401,6 +501,40 @@ const updateTestInDatabase = (testId, updates) => {
 };
 
 
+app.post('/change-password', (req, res) => {
+    const { email, currentPassword, newPassword } = req.body;
+
+    // Find user by email
+    db.get(`SELECT * FROM users WHERE email = ?`, [email], (err, user) => {
+        if (err) {
+            console.error('Error fetching user information', err);
+            return res.status(500).send("Internal server error");
+        }
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        // Validate the current password
+        const passwordIsValid = bcrypt.compareSync(currentPassword, user.password);
+        if (!passwordIsValid) {
+            return res.status(401).send("Current password is incorrect");
+        }
+
+        // Hash the new password and update it in the database
+        const hashedNewPassword = bcrypt.hashSync(newPassword, 8);
+
+        db.run(`UPDATE users SET password = ? WHERE email = ?`, [hashedNewPassword, email], function (err) {
+            if (err) {
+                console.error('Error updating password', err);
+                return res.status(500).send("Password update failed");
+            }
+
+            res.status(200).send("Password updated successfully");
+        });
+    });
+});
+
+
 
 
 const testCompletionHandler = async (testId) => {
@@ -519,18 +653,26 @@ async function createResultsStream(username, testId) {
 
 // Register
 app.post('/register', (req, res) => {
-    const {email, password, username, bio, role} = req.body;
-    const hashedPassword = bcrypt.hashSync(password, 8);
+    const { email, password, username, bio, role } = req.body;
+    const tempPassword = password; // In production, generate a stronger random password
+    const hashedPassword = bcrypt.hashSync(tempPassword, 8);
     const uuid = uuidv4();
 
-    db.run(`INSERT INTO users (email, password, username, bio, uuid, role) VALUES (?, ?, ?, ?, ?, ?)`,
-        [email, hashedPassword, username, bio, uuid, role], function (err) {
+    db.run(
+        'INSERT INTO users (email, password, username, bio, uuid, role) VALUES (?, ?, ?, ?, ?, ?)',
+        [email, hashedPassword, username, bio, uuid, role],
+        function (err) {
             if (err) {
                 console.error('Error during user registration', err);
-                return res.status(500).send("User registration failed");
+                return res.status(500).send('User registration failed');
             }
-            res.status(200).send("User registered successfully");
-        });
+            
+            // Send the email with credentials
+            sendUserCredentialsEmail(email, username, tempPassword);
+
+            res.status(200).send('User registered successfully');
+        }
+    );
 });
 
 // Login
@@ -675,11 +817,12 @@ app.get('/user/uuid/:uuid', (req, res) => {
     });
 });
 
-// Password reset
+// Password reset endpoint by email
 app.post('/reset-password', (req, res) => {
-    const {userId, newPassword} = req.body;
+    const { email } = req.body;
 
-    db.get(`SELECT * FROM users WHERE id = ?`, [userId], (err, user) => {
+    // Find user by email
+    db.get(`SELECT * FROM users WHERE email = ?`, [email], (err, user) => {
         if (err) {
             console.error('Error fetching user information', err);
             return res.status(500).send("Internal server error");
@@ -688,17 +831,26 @@ app.post('/reset-password', (req, res) => {
             return res.status(404).send("User not found");
         }
 
+        // Generate a new random password
+        const newPassword = generateRandomPassword();
         const hashedPassword = bcrypt.hashSync(newPassword, 8);
 
-        db.run(`UPDATE users SET password = ? WHERE id = ?`, [hashedPassword, userId], function (err) {
+        // Update the user's password in the database
+        db.run(`UPDATE users SET password = ? WHERE id = ?`, [hashedPassword, user.id], function (err) {
             if (err) {
                 console.error('Error resetting password', err);
                 return res.status(500).send("Password reset failed");
             }
+
+            // Send the new password to the user via email
+            sendUserCredentialsEmail(user.email, user.username, newPassword);
+
             res.status(200).send("Password reset successfully");
         });
     });
 });
+
+
 
 /* -------------------------------------------------------------------------- */
 /*                           Notification endpoints                           */
@@ -1077,4 +1229,6 @@ app.get('/health', (req, res) => {
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Rest API and WebSocket server started. Running on port ${PORT}`);
     sendStatusToTeensy('ONLINE'); // Send initial status when server starts
+    // sendEmail(); // Send the test email
+
 });
