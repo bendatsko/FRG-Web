@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -58,14 +58,42 @@ export function DataTable<TData, TValue>({
   data,
   onDeleteSelected,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState([
+    { id: "start_time", desc: false }
+  ]);
+
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
+
+  // Function to format the date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString(); // Adjust this format as needed
+  };
+
+
+  // Ensure the columns include the optimized startTime column
+  const optimizedColumns: ColumnDef<TData, TValue>[] = columns.map(column => {
+    if (column.accessorKey === "startTime") {
+      return {
+        ...column,
+        cell: ({ row }) => formatDate(row.getValue("startTime")),
+        sortingFn: (rowA, rowB, columnId) => {
+          const a = rowA.getValue(columnId) as string;
+          const b = rowB.getValue(columnId) as string;
+          return new Date(b).getTime() - new Date(a).getTime();
+        }
+      };
+    }
+    return column;
+  });
+
+
   const table = useReactTable({
     data,
-    columns,
+    columns: optimizedColumns,
     state: {
       sorting,
       columnFilters,
@@ -81,6 +109,13 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onRowSelectionChange: setRowSelection,
   });
+
+
+  // Use effect to set initial sorting when the component mounts
+  useEffect(() => {
+    table.setSorting([{ id: "startTime", desc: true }]);
+  }, []);
+
 
   const handleDelete = () => {
     const selectedRows = table

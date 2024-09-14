@@ -44,17 +44,7 @@ export const recentTestsColumns: ColumnDef<any>[] = [
   },
   {
     accessorKey: "title",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Title
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+
     cell: ({ row }) => <div>{row.getValue("title")}</div>,
   },
   {
@@ -69,8 +59,32 @@ export const recentTestsColumns: ColumnDef<any>[] = [
   },
   {
     accessorKey: "start_time",
-    header: "Start Time",
-    cell: ({ row }) => <div>{row.getValue("start_time")}</div>,
+    header: ({ column }) => {
+      return (
+          <div className="flex items-center">
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
+                className="p-0 h-auto font-normal text-xs hover:bg-transparent"
+            >
+              <ArrowUpDown className="h-4 w-4 mr-2" />
+            </Button>
+            <span className="text-xs font-medium uppercase text-[#172B4D] dark:text-[#E1E1E1]">
+            Start Time
+          </span>
+          </div>
+      );
+    },
+    cell: ({ row }) => {
+      const date = new Date(row.getValue("start_time"));
+      return <div>{date.toLocaleString()}</div>;
+    },
+    sortingFn: (rowA, rowB, columnId) => {
+      const dateA = new Date(rowA.getValue(columnId));
+      const dateB = new Date(rowB.getValue(columnId));
+      return dateB.getTime() - dateA.getTime(); // Descending order (most recent first)
+    },
+    sortDescFirst: true, // This ensures it starts in descending order
   },
   {
     accessorKey: "duration",
