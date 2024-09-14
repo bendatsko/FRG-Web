@@ -52,9 +52,9 @@ const SignIn: React.FC = () => {
   };
 
 // Use useEffect to trigger auto-login when component mounts
-  useEffect(() => {
-    autoLogin();
-  }, []);
+  // useEffect(() => {
+  //   autoLogin();
+  // }, []);
 
 
 
