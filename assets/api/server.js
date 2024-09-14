@@ -13,6 +13,8 @@ const WebSocket = require('ws');
 
 const {SerialPort} = require('serialport');
 const {ReadlineParser} = require('@serialport/parser-readline');
+require('dotenv').config();
+
 
 const app = express();
 const server = http.createServer(app);
@@ -28,6 +30,14 @@ const TESTS_FOLDER = path.join(__dirname, 'tests');
 if (!fs.existsSync(TESTS_FOLDER)) {
     fs.mkdirSync(TESTS_FOLDER, { recursive: true });
 }
+
+
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+
+
+
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -518,17 +528,32 @@ async function createResultsStream(username, testId) {
 /* -------------------------------------------------------------------------- */
 
 // Register
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
     const {email, password, username, bio, role} = req.body;
     const hashedPassword = bcrypt.hashSync(password, 8);
     const uuid = uuidv4();
 
     db.run(`INSERT INTO users (email, password, username, bio, uuid, role) VALUES (?, ?, ?, ?, ?, ?)`,
-        [email, hashedPassword, username, bio, uuid, role], function (err) {
+        [email, hashedPassword, username, bio, uuid, role], async function (err) {
             if (err) {
                 console.error('Error during user registration', err);
                 return res.status(500).send("User registration failed");
             }
+
+            try {
+                const msg = {
+                    to: email,
+                    from: 'noreply@daqroc.bendatsko.com',
+                    subject: 'Welcome to DAQRoc!',
+                    text: `Hello ${username},\n\nWelcome to DAQRoc! We're excited to have you on board.\n\nBest regards,\nThe DAQRoc Team`,
+                    html: `<p>Hello ${username},</p><p>Welcome to DAQRoc! We're excited to have you on board.</p><p>Best regards,<br>The DAQRoc Team</p>`
+                };
+                await sgMail.send(msg);
+                console.log('Welcome email sent successfully');
+            } catch (error) {
+                console.error('Error sending welcome email', error);
+            }
+
             res.status(200).send("User registered successfully");
         });
 });
@@ -1075,6 +1100,28 @@ app.get('/health', (req, res) => {
   
 
 server.listen(PORT, '0.0.0.0', () => {
+
+        // using Twilio SendGrid's v3 Node.js Library
+    // https://github.com/sendgrid/sendgrid-nodejs
+    const sgMail = require('@sendgrid/mail')
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+    const msg = {
+    to: 'test@example.com', // Change to your recipient
+    from: 'test@example.com', // Change to your verified sender
+    subject: 'Sending with SendGrid is Fun',
+    text: 'and easy to do anywhere, even with Node.js',
+    html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+    }
+    sgMail
+    .send(msg)
+    .then(() => {
+        console.log('Email sent')
+    })
+    .catch((error) => {
+        console.error(error)
+    })
+
+
     console.log(`Rest API and WebSocket server started. Running on port ${PORT}`);
     sendStatusToTeensy('ONLINE'); // Send initial status when server starts
 });
