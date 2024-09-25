@@ -105,7 +105,7 @@ const SignIn: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-white text-black">
-      <div className="hidden lg:flex lg:w-1/2 dark:bg-[#09090b] items-center justify-center">
+      <div className="hidden lg:flex lg:w-1/2 dark:bg-[#09090b] bg-[#09090b] items-center justify-center">
         <Logo />
       </div>
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center">

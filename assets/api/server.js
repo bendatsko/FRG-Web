@@ -61,7 +61,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Read chip configuration
-const chipsConfig = JSON.parse(fs.readFileSync('../chips_config.json', 'utf8'));
+const chipsConfig = JSON.parse(fs.readFileSync('chips_config.json', 'utf8'));
 const chips = chipsConfig.chips;
 
 
