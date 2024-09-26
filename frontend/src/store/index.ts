@@ -1,8 +1,8 @@
 // src/store/index.ts
 import { configureStore } from "@reduxjs/toolkit";
-import { api as v1 } from "./api/v1";
+import { api as v1 } from "./api/v1/index.ts";
 import authReducer from "./slice/auth/index.ts";
-import appReducer from "./slice/app";
+import appReducer from "./slice/app/index.ts";
 
 export const store = configureStore({
   reducer: {
