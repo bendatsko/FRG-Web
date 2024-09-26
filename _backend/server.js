@@ -308,10 +308,10 @@ parser.on('data', async (data) => {
         const jsonData = JSON.parse(data);
         switch (jsonData.type) {
             case 'heartbeat':
-                console.log('Received heartbeat from Teensy');
+                // console.log('Received heartbeat from Teensy');
                 break;
             case 'status_check':
-                console.log('Received status check request from Teensy');
+                // console.log('Received status check request from Teensy');
                 sendStatusToTeensy('ONLINE');
                 break;
             case 'chip_status':
@@ -329,11 +329,11 @@ parser.on('data', async (data) => {
                 await handleTestCompletion(jsonData.testId);
                 break;
             default:
-                console.log('Received message from Teensy:', jsonData);
+                // console.log('Received message from Teensy:', jsonData);
         }
     } catch (error) {
         // Handle non-JSON data
-        console.log('Received non-JSON data from Teensy:', data);
+        // console.log('Received non-JSON data from Teensy:', data);
     }
 });
 async function handleTestCompletion(testId) {
@@ -758,6 +758,7 @@ app.post('/login', (req, res) => {
         }
 
         const token = jwt.sign({id: user.id}, SECRET_KEY, {expiresIn: 86400}); // 24 hours
+        
         res.status(200).send({
             access_token: token,
             user: {
@@ -769,6 +770,9 @@ app.post('/login', (req, res) => {
                 bio: user.bio,
             }
         });
+        
+        console.log("User authenticated: " + email);
+
     });
 });
 
@@ -995,15 +999,15 @@ app.get('/tests', (req, res) => {
         return res.status(400).json({error: "Username is required"});
     }
 
-    console.log(`Fetching tests for user: ${username}`);
+    // console.log(`Fetching tests for user: ${username}`);
 
     db.all(`SELECT * FROM tests WHERE JSON_EXTRACT(accessible_to, '$') LIKE ?`, [`%${username}%`], (err, rows) => {
         if (err) {
             console.error('Error fetching tests:', err);
             return res.status(500).json({error: "Internal server error"});
         }
-        console.log(`Fetched ${rows.length} tests for user ${username}`);
-        console.log('Tests:', JSON.stringify(rows, null, 2));
+        // console.log(`Fetched ${rows.length} tests for user ${username}`);
+        // console.log('Tests:', JSON.stringify(rows, null, 2));
         res.status(200).json(rows);
     });
 });
@@ -1070,7 +1074,7 @@ function runTestOnTeensy(testParams) {
             return;
         }
 
-        console.log('Sending test parameters to Teensy:', testParams);
+        // console.log('Sending test parameters to Teensy:', testParams);
         port.write(`TEST${testParams.id} ${testParams.chipId} ${testParams.snrRange} ${testParams.batchSize}\n`, (err) => {
             if (err) {
                 console.error('Error writing to serial port:', err);
