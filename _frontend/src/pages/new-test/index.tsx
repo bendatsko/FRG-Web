@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import React, { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -23,18 +21,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
-import { AlertCircle, CheckCircle, Loader2, Plus } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { AlertCircle, CheckCircle, Loader2, Plus, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { setBreadCrumb } from "@/store/slice/app";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 const baseUrl = import.meta.env.VITE_API_URL;
 
 const NewTestSchema = z.object({
   title: z.string().nonempty("Title is required"),
   testBench: z.string().nonempty("Test Bench is required"),
   snrRange: z
-    .string()
-    .regex(/^\d+:\d+:\d+$/, "SNR Range must be in the format start:step:stop"),
+      .string()
+      .regex(/^\d+:\d+:\d+$/, "SNR Range must be in the format start:step:stop"),
   batchSize: z.string().regex(/^\d+$/, "Batch Size must be a positive integer"),
 });
 
@@ -49,7 +50,7 @@ type Preset = {
 const samplePresets: Preset[] = [
   {
     id: "1",
-    name: "LDPC Chip Test",
+    name: "LDPC",
     config: {
       title: "LDPC Default",
       testBench: "LDPC1",
@@ -64,54 +65,45 @@ const PresetSelector: React.FC<{
   onSelect: (preset: Preset) => void;
   onSave: () => void;
 }> = ({ presets, onSelect, onSave }) => (
-  <div className="flex items-center space-x-2 ">
-    <Select
-      onValueChange={(value) => onSelect(presets.find((p) => p.id === value)!)}
-    >
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="None selected" />
-      </SelectTrigger>
-      <SelectContent>
-        {presets.map((preset) => (
-          <SelectItem key={preset.id} value={preset.id}>
-            {preset.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-);
-
-const ServerStatus: React.FC<{ status: "online" | "offline" | "checking" }> = ({
-  status,
-}) => (
-  <div className="flex items-center space-x-2 mt-1 ">
-    <span className="text-sm font-medium">Hardware API:</span>
-    {status === "checking" && (
-      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-    )}
-    {status === "online" && <CheckCircle className="h-4 w-4 text-green-500" />}
-    {status === "offline" && <AlertCircle className="h-4 w-4 text-red-500" />}
-    <span className="text-sm text-muted-foreground capitalize">{status}</span>
-  </div>
+    <div className="flex items-center space-x-2">
+      <Select
+          onValueChange={(value) => onSelect(presets.find((p) => p.id === value)!)}
+      >
+        <SelectTrigger className="w-full border-lightborder">
+          <SelectValue placeholder="Select" />
+        </SelectTrigger>
+        <SelectContent>
+          {presets.map((preset) => (
+              <SelectItem key={preset.id} value={preset.id}>
+                {preset.name}
+              </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Button variant="outline" disabled onClick={onSave} className="border-lightborder">
+        <Save className="h-4 w-4 mr-2" />
+        Save
+      </Button>
+    </div>
 );
 
 const Create: React.FC = () => {
   const user = useSelector(selectUser);
   const navigate = useNavigate();
   const [serverStatus, setServerStatus] = useState<
-    "online" | "offline" | "checking"
+      "online" | "offline" | "checking"
   >("checking");
   const [presets, setPresets] = useState<Preset[]>(samplePresets);
   const dispatch = useDispatch();
+  const { toast } = useToast();
 
   useEffect(() => {
     dispatch(
-      setBreadCrumb([
-        { title: "Dashboard", link: "/dashboard" },
-        { title: "Create", link: "" },
-        { title: "LDPC", link: "new-test" },
-      ])
+        setBreadCrumb([
+          { title: "Dashboard", link: "/dashboard" },
+          { title: "Create", link: "" },
+          { title: "LDPC", link: "new-test" },
+        ])
     );
   }, [dispatch]);
 
@@ -157,7 +149,6 @@ const Create: React.FC = () => {
 
     try {
       const response = await fetch(`${baseUrl}/tests`, {
-        // Correct usage of backticks and variable
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(fullData),
@@ -178,7 +169,7 @@ const Create: React.FC = () => {
       toast({
         title: "Error",
         description: error.message,
-        variant: "negative",
+        variant: "destructive",
       });
     }
   };
@@ -207,123 +198,170 @@ const Create: React.FC = () => {
   };
 
   return (
-    <div className=" bg-[#fafafa] dark:bg-[#09090b] min-h-screen">
-      <div className="container  pb-16">
-        <div className="flex justify-between items-center overflow-hidden py-6 border-b border-gray-200 dark:border-[#333333]">
-          <h1 className="text-3xl font-bold text-black dark:text-white">
-            New Test
-          </h1>
-        </div>
+      <div className="bg-background min-h-screen">
+        <div className="container mx-auto px-4  w-11/12">
+          <div className="flex flex-row justify-between items-center border-b border-lightborder py-4">
+            <h1 className="text-3xl font-bold text-lighth1">
+              New Test
+            </h1>
+          </div>
 
-        <div className="py-4 ">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Untitled test"
-                        {...field}
-                        className="dark:border-white/20 border-black/20 dark:placeholder-white/50 placeholder-black/50"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              <FormItem>
-                <FormLabel>Autofill with preset</FormLabel>
-                <PresetSelector
-                  presets={presets}
-                  onSelect={onPresetSelect}
-                  onSave={onPresetSave}
-                />
-              </FormItem>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-lighth1">Test Configuration</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField
+                        control={form.control}
+                        name="title"
+                        render={({field}) => (
+                            <FormItem>
+                              <FormLabel className="text-lighth1">Title</FormLabel>
+                              <FormControl>
+                                <Input
+                                    placeholder="Untitled test"
+                                    {...field}
+                                    className="border-lightborder placeholder-lighth2 dark:placeholder-foreground text-sm"
+                                />
+                              </FormControl>
+                              <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
 
-              <FormField
-                control={form.control}
-                name="testBench"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Test Bench</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder="None selected"
-                            className="dark:placeholder-white/50 placeholder-black/50"
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {["LDPC1"].map((bench) => (
-                          <SelectItem key={bench} value={bench}>
-                            {bench.toUpperCase()}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="snrRange"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SNR Range</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="start:step:stop (e.g., 0:1:5)"
-                        {...field}
-                        className="dark:border-white/20 border-black/20 dark:placeholder-white/50 placeholder-black/50"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="batchSize"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Batch Size</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="e.g., 3"
-                        {...field}
-                        className="dark:border-white/20 border-black/20 dark:placeholder-white/50 placeholder-black/50"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  className="w-auto"
-                  disabled={serverStatus !== "online"}
-                >
-                  Add Test to Queue
-                </Button>
-              </div>
-            </form>
-          </Form>
+                    <FormField
+                        control={form.control}
+                        name="testBench"
+                        render={({field}) => (
+                            <FormItem>
+                              <FormLabel className="text-lighth1">Test Bench</FormLabel>
+                              <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="border-lightborder">
+                                    <SelectValue
+                                        placeholder="Select a test bench"
+                                        className="placeholder-lighth2"
+                                    />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {["LDPC1"].map((bench) => (
+                                      <SelectItem key={bench} value={bench}>
+                                        {bench.toUpperCase()}
+                                      </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="snrRange"
+                        render={({field}) => (
+                            <FormItem>
+                              <FormLabel className="text-lighth1 ">SNR Range</FormLabel>
+                              <FormControl>
+                                <Input
+                                    placeholder="start:step:stop (e.g., 0:1:5)"
+                                    {...field}
+                                    className="border-lightborder placeholder-lighth2 dark:placeholder-foreground text-sm"
+                                />
+                              </FormControl>
+                              <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="batchSize"
+                        render={({field}) => (
+                            <FormItem>
+                              <FormLabel className="text-lighth1">Batch Size</FormLabel>
+                              <FormControl>
+                                <Input
+                                    type="number"
+                                    placeholder="e.g., 3"
+                                    {...field}
+                                    className="border-lightborder placeholder-lighth2 dark:placeholder-foreground text-sm"
+                                />
+                              </FormControl>
+                              <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+
+                    <div className="flex justify-end">
+                      <Button
+                          type="submit"
+                          className="w-auto"
+                          disabled={serverStatus !== "online"}
+                      >
+                        <Plus className="h-4 w-4 mr-2"/>
+                        Add Test to Queue
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lighth1">Presets</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PresetSelector
+                      presets={presets}
+                      onSelect={onPresetSelect}
+                      onSave={onPresetSave}
+                  />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lighth1">Server Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-2">
+                    {serverStatus === "online" ? (
+                        <CheckCircle className="h-5 w-5 text-green-500"/>
+                    ) : serverStatus === "offline" ? (
+                        <AlertCircle className="h-5 w-5 text-red-500"/>
+                    ) : (
+                        <Loader2 className="h-5 w-5 animate-spin text-yellow-500"/>
+                    )}
+                    <span className="text-lighth1 capitalize">{serverStatus}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {serverStatus === "offline" && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4"/>
+                    <AlertTitle>Server Offline</AlertTitle>
+                    <AlertDescription>
+                      The server is currently offline. You can create a test, but it won't be added to the queue until
+                      the server is back online.
+                    </AlertDescription>
+                  </Alert>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
   );
 };
 

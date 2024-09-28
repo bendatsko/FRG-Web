@@ -1,6 +1,3 @@
-// @ts-nocheck
-
-
 import React, {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate} from "react-router-dom";
@@ -12,7 +9,7 @@ import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {BreadCrumb, MobileSideBar, ToggleMode} from "@/components";
+import {BreadCrumb, MobileSidebar, ToggleMode} from "@/components";
 
 const TopHeader: React.FC = () => {
     const dispatch = useDispatch();
@@ -21,7 +18,7 @@ const TopHeader: React.FC = () => {
 
     const handleLogout = () => {
         dispatch(removeUserInfo());
-        navigate("/auth/sign-in");
+        navigate("/login");
     };
 
     return (<header
@@ -35,8 +32,7 @@ const TopHeader: React.FC = () => {
                 >
                     <Menu className="h-5 w-5"/>
                 </Button>
-                {/* <MobileSideBar/> */}
-                {/* <BreadCrumb/> */}
+
             </div>
             <div className="flex items-center space-x-3 ">
                 <ToggleMode/>

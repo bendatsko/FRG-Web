@@ -20,14 +20,13 @@ const AuthGuardComponent: React.FC<ChildrenType> = ({children}) => {
     // Checking Authentication
     const checkAuth = () => {
         if (!isAuth) {
-            navigate("/auth/sign-in");
+            navigate("/login");
             dispatch(removeUserInfo());
         } else {
             dispatch(saveUserInfo({token: getCookie("token")}));
             // Redirect Back Home is Auth Layout
             if (
-                location.pathname === "/auth/sign-in" ||
-                location.pathname === "/auth/sign-up"
+                location.pathname === "/login"
             ) {
                 navigate("/");
             }

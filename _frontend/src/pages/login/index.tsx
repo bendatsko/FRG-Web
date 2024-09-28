@@ -22,7 +22,7 @@ const initialFormValues: SignInType = {
   password: "",
 };
 
-const SignIn: React.FC = () => {
+const Index: React.FC = () => {
   const [signIn] = useSignInMutation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -251,4 +251,4 @@ const SubmitButton: React.FC<{ isSubmitting: boolean }> = ({
   </Button>
 );
 
-export default SignIn;
+export default Index;

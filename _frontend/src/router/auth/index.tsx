@@ -4,11 +4,11 @@ import { AuthLayout } from "@/layouts";
 
 const AuthRoutes: RouteObject[] = [
   {
-    path: "/auth",
+    path: "/login",
     element: <AuthLayout />,
     children: [
       {
-        path: "sign-in",
+        path: "",
         element: <SignIn />,
       },
     ],

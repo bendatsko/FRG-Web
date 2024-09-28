@@ -193,7 +193,7 @@ export function DataTable<TData, TValue>({
           onChange={(event) =>
             table.getColumn("email")?.setFilterValue(event.target.value)
           }
-          className=" border-black/20 dark:border-white/20 dark:placeholder-white/50 "
+          className=" border dark:border-foreground border-foreground placeholder-foreground text-sm "
         />
         <Dialog>
           <DialogTrigger asChild>
@@ -337,9 +337,9 @@ export function DataTable<TData, TValue>({
       </div>
       <div>
         <Table className="w-full">
-          <TableHeader>
+          <TableHeader className="">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="dark:border-foreground">
+              <TableRow key={headerGroup.id} className="dark:border-foreground bg-light1 dark:bg-dark1">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
@@ -386,18 +386,18 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
         <div className="flex items-center justify-end space-x-2 py-4">
-          <Button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
+          {/*<Button className="border dark:border-foreground border-foreground placeholder-foreground text-sm"*/}
+          {/*  onClick={() => table.previousPage()}*/}
+          {/*  disabled={!table.getCanPreviousPage()}*/}
+          {/*>*/}
+          {/*  Previous*/}
+          {/*</Button>*/}
+          {/*<Button*/}
+          {/*  onClick={() => table.nextPage()}*/}
+          {/*  disabled={!table.getCanNextPage()}*/}
+          {/*>*/}
+          {/*  Next*/}
+          {/*</Button>*/}
         </div>
       </div>
     </>

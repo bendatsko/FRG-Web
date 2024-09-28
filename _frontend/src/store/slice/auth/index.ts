@@ -23,7 +23,7 @@ const initialState: InitialState = {
   user: "",
 };
 
-// Create the auth slice
+// Create the login slice
 const authSlice = createSlice({
   name: "auth",
   initialState,

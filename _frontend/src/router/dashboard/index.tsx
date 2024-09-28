@@ -10,10 +10,22 @@ const DashboardRoutes: RouteObject[] = [
     errorElement: <ErrorBoundary />,
     children: [
       {
-        path: "",
+        path: "", // Matches "/dashboard"
+        element: <Dashboard />,
+      },
+    ],
+  },
+  {
+    path: "/", // Matches the root path "/"
+    element: <MainLayout />,
+    errorElement: <ErrorBoundary />,
+    children: [
+      {
+        path: "", // Matches the base route
         element: <Dashboard />,
       },
     ],
   },
 ];
+
 export default DashboardRoutes;

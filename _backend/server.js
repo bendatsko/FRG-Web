@@ -12,6 +12,10 @@ const http = require('http');
 const WebSocket = require('ws');
 const crypto = require('crypto');
 
+
+// what would it look like if we were to migrate this to go?
+
+
 // Function to generate a random password
 function generateRandomPassword(length = 12) {
     return crypto.randomBytes(length).toString('hex').slice(0, length);
@@ -31,22 +35,6 @@ const wss = new WebSocket.Server({ server });
 
 const PORT = process.env.PORT || 3001;
 const SECRET_KEY = "your_secret_key";
-
-
-// JWT Authentication Middleware
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) return res.sendStatus(401); // If no token is provided, return 401 Unauthorized
-
-    jwt.verify(token, SECRET_KEY, (err, user) => {
-        if (err) return res.sendStatus(403); // Invalid token, return 403 Forbidden
-
-        req.user = user; // Attach user info to the request object
-        next();
-    });
-}
 
 
 // Define TESTS_FOLDER
@@ -170,30 +158,6 @@ port.on('error', (err) => {
     console.error('Serial port error:', err.message);
 });
 
-
-
-
-function sendEmail() {
-    const msg = {
-      to: 'bdatsko@umich.edu',
-      from: 'webmaster@daqroc.bendatsko.com', // This must be a verified sender in your SendGrid account
-      subject: 'Hello from DAQRoc',
-      text: 'Hello, this is a test email from DAQRoc.',
-      html: '<strong>Hello, this is a test email from DAQRoc.</strong>',
-    };
-  
-    sgMail
-      .send(msg)
-      .then(() => {
-        console.log('Email sent successfully');
-      })
-      .catch((error) => {
-        console.error('Error sending email:', error);
-      });
-  }
-
-  
-
 // WebSocket connection handling
 wss.on('connection', (ws) => {
   console.log('New WebSocket connection');
@@ -217,25 +181,8 @@ function calculateDuration(creationDateString, endTimeString) {
     return Math.floor((endDate - startDate) / 1000); // Duration in seconds
 }
 
-function formatDateTime(isoString) {
-    const date = new Date(isoString);
-    return date.toLocaleString('en-US', { 
-        year: '2-digit', 
-        month: '2-digit', 
-        day: '2-digit',
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit',
-        hour12: true 
-    });
-}
-
-
-
-
 /* -------------------------------------------------------------------------- */
 /*                              Database connect                              */
-
 /* -------------------------------------------------------------------------- */
 
 
@@ -276,20 +223,6 @@ function sendStatusToTeensy(status) {
                 console.error('Error writing to serial port:', err);
             } else {
                 console.log(`Sent ${status} status to Teensy`);
-            }
-        });
-    }
-}
-
-
-// Function to send chip status to Teensy
-function sendChipStatusToTeensy(chipId, status) {
-    if (USE_TEENSY) {
-        port.write(`CHIP_STATUS ${chipId} ${status}\n`, (err) => {
-            if (err) {
-                console.error('Error writing to serial port:', err);
-            } else {
-                console.log(`Sent ${status} status for chip ${chipId} to Teensy`);
             }
         });
     }
@@ -490,24 +423,6 @@ const db = new sqlite3.Database('data.db', (err) => {
 
 
 // Function to safely execute SQL statements
-function safeDbRun(sql, params = []) {
-    return new Promise((resolve, reject) => {
-        db.run(sql, params, function (err) {
-            if (err) {
-                console.error(`Error executing SQL: ${sql}`, err);
-                reject(err);
-            } else {
-                resolve(this);
-            }
-        });
-    });
-}
-const getFormattedStartTimestamp = () => {
-    const now = new Date();
-    return now.toISOString(); // This format is universally recognized
-};
-
-
 const getTestFromDatabase = (testId) => {
     return new Promise((resolve, reject) => {
         db.get(`SELECT * FROM tests WHERE id = ?`, [testId], (err, row) => {
@@ -621,45 +536,7 @@ app.post('/change-password', (req, res) => {
     });
 });
 
-
-
-
-const testCompletionHandler = async (testId) => {
-    try {
-        const test = await getTestFromDatabase(testId);
-        if (!test.start_time || !test.end_time) {
-            console.error(`Missing start_time or end_time for test ${testId}`);
-            return;
-        }
-        const duration = calculateDuration(test.start_time, test.end_time);
-        await updateTestInDatabase(testId, { status: 'Completed', duration });
-    } catch (error) {
-        console.error(`Error completing test ${testId}:`, error);
-    }
-};
-
-
 // Function to check if a column exists in a table
-function columnExists(table, column) {
-    return new Promise((resolve, reject) => {
-        db.all(`PRAGMA table_info(${table})`, (err, rows) => {
-            if (err) {
-                reject(err);
-            } else {
-                if (Array.isArray(rows)) {
-                    resolve(rows.some(row => row.name === column));
-                } else if (typeof rows === 'object' && rows !== null) {
-                    // If rows is an object, check if any of its properties match the column name
-                    resolve(Object.values(rows).some(row => row.name === column));
-                } else {
-                    console.error('Unexpected result from PRAGMA table_info:', rows);
-                    resolve(false);
-                }
-            }
-        });
-    });
-}
-
 db.serialize(() => {
             db.run(`CREATE TABLE IF NOT EXISTS tests (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -738,8 +615,7 @@ async function createResultsStream(username, testId) {
 /*                              Authentication                                */
 /* -------------------------------------------------------------------------- */
 
-
-// Login
+// Index
 app.post('/login', (req, res) => {
     const {email, password} = req.body;
 
@@ -805,16 +681,6 @@ app.get('/users/:id', (req, res) => {
         res.status(200).json(user);
     });
 });
-
-
-async function markTestAsCompleted(testId, startTime) {
-    const endTime = new Date();  
-
-    await updateTestTimes(testId, startTime, endTime);
-    await updateTestStatus(testId, 'Completed');
-
-    console.log(`Test ID ${testId} completed. Duration: ${calculateDuration(new Date(startTime), endTime)}`);
-}
 
 
 // Update user
@@ -1311,6 +1177,6 @@ app.use(cors(corsOptions));
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Rest API and WebSocket server started. Running on port ${PORT}`);
-    sendStatusToTeensy('ONLINE'); // Send initial status when server starts
+    sendStatusToTeensy('ONLINE');
 
 });

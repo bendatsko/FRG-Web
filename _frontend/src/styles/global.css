@@ -1,19 +1,55 @@
+/* global.css */
+
+/* Import statements remain the same */
 @import url("https://fonts.googleapis.com/css2?family=Geist+Sans:wght@100..900&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Define CSS variables for light mode */
+:root {
+  --color-primary: #0964e6;
+  --color-secondary: rgba(9, 100, 230, 0.93);
+  --color-danger: #ff204e;
+  --color-background: #fafafa;
+
+  --color-foreground: #1f1f1f;
+  --color-foreground2: rgb(31, 31, 31);
+
+  --color-light-border: #1f1f1f;
+  --color-light-h1: rgb(31, 31, 31);
+  --color-light-h2: rgb(31, 31, 31);
+
+  --color-light1: rgb(239, 239, 239);
+  --color-light2: #ffffff;
+
+  --font-sans: "Geist Sans", sans-serif;
+}
+
+/* Override variables for dark mode */
+.dark {
+  --color-primary: #8fd8fc;
+  --color-secondary: #5396fb;
+  --color-danger: #ff204e;
+  --color-background: #000000;
+  --color-foreground: #f2f2f2;
+
+  --color-light-border: #2d2d2d;
+  --color-dark1: #0a0a0a;
+  --color-dark2: #2d2d2d;
+  --color-light-h1: #f2f2f2;
+  --color-light-h2: rgba(31, 31, 31, 0.55);
+
+}
+
+/* Base styles */
 @layer base {
-  :root {
-    --primary: #5396fb;
-    --secondary: #8fd8fc;
-    --danger: #ff204e;
-    --background: black;
-    --foreground: #1f1f1f;
-    --dark: #09090b;
-    --light: #fafafa;
-    --font-sans: "Geist Sans", sans-serif;
+  body {
+    @apply font-sans text-foreground bg-background;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
   }
 
   input:-webkit-autofill,
@@ -24,53 +60,3 @@
   }
 }
 
-@layer utilities {
-  body {
-    @apply font-sans text-dark bg-light dark:bg-dark dark:text-light;
-    margin: 0;
-    padding: 0;
-    overflow-x: none;
-  }
-
-  .toast-top-left {
-    @apply fixed top-2 left-2 z-[100] md:max-w-[420px];
-  }
-
-  .nav-link {
-    @apply flex items-center gap-2 text-sm px-4 py-3 my-[2px] rounded-none cursor-pointer;
-  }
-
-}
-
-.button-relative {
-  position: relative; /* This will contain the Badge correctly */
-}
-
-.table-badge {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start; /* Ensure the badge text aligns nicely with other text in the table */
-  padding: 5px 10px;
-  color: white;
-  border-radius: 5px;
-  font-size: 0.9rem;
-  margin-right: 8px; /* Space between badge and any text or element after it */
-}
-
-/* Add specific background colors for each status directly in the class to avoid conflicts */
-.table-badge.running {
-  animation: fade 2s infinite;
-  background-color: #ffc107; /* Initial color for the animation */
-}
-
-.table-badge.completed {
-  background-color: #4caf50;
-}
-
-.table-badge.failed {
-  background-color: #f44336;
-}
-
-.table-badge.queued {
-  background-color: #ffeb3b;
-}

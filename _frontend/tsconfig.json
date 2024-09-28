@@ -30,7 +30,7 @@
   },
   "include": [
     "src",
-    "src/pages/dashboard/components/recent-tests-table.tsx"
+    "src/pages/dashboard/components/table.tsx"
   ],
   "references": [
     {

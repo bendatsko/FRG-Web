@@ -9,7 +9,7 @@ const Table = React.forwardRef<
   <div className="relative overflow-none">
     <table
       ref={ref}
-      className={cn("caption-bottom text-sm", className)}
+      className={cn("caption-bottom text-sm ", className)}
       {...props}
     />
   </div>
@@ -20,7 +20,7 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
+  <thead ref={ref} className={cn("[&_tr]:border-b bg-foreground2 ", className)} {...props} />
 ))
 TableHeader.displayName = "TableHeader"
 
@@ -58,7 +58,7 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors  data-[state=selected]:bg-white-100 dark:hover:bg-white/5 dark:data-[state=selected]:bg-white/5",
+      "border-b  transition-colors  data-[state=selected]:bg-white-100 dark:hover:bg-white/5 dark:data-[state=selected]:bg-white/5",
       className
     )}
     {...props}
@@ -73,7 +73,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-10 px-2 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] ",
+      "h-10 px-2 text-left border-b border-lightborder align-middle font-medium [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] ",
       className
     )}
     {...props}
@@ -102,7 +102,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-sm text- dark:text-", className)}
+    className={cn("mt-4 text-sm", className)}
     {...props}
   />
 ))

@@ -10,7 +10,7 @@ const GeneralError = () => {
 
   return (
     <div className="h-svh">
-      <Navigate to={"/auth/sign-in"} />
+      <Navigate to={"/login"} />
 
       <div className="m-auto flex h-full w-full flex-col items-center justify-center ">
         <div className=" w-[300px] ">
