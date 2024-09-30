@@ -1,5 +1,3 @@
-// DataTable.tsx
-
 import React, { useState } from "react";
 import {
     ColumnDef,
@@ -16,7 +14,7 @@ import {
 import {
     Table,
     TableBody,
-    TableCell, TableFooter,
+    TableCell,
     TableHead,
     TableHeader,
     TableRow,
@@ -36,6 +34,7 @@ import {
     ChevronsLeft,
     ChevronsRight,
     MoreHorizontal,
+    Trash2,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -43,11 +42,9 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 
-// Define the props for the DataTable component
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
@@ -59,20 +56,13 @@ export function DataTable<TData, TValue>({
                                              data,
                                              onDeleteSelected,
                                          }: DataTableProps<TData, TValue>) {
-
-
-
-    // State for sorting, filtering, column visibility, and row selection
     const [sorting, setSorting] = useState<SortingState>([
         { id: "start_time", desc: true },
     ]);
-
-
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = useState({});
 
-    // Initialize the table instance
     const table = useReactTable({
         data,
         columns,
@@ -92,7 +82,6 @@ export function DataTable<TData, TValue>({
         onRowSelectionChange: setRowSelection,
     });
 
-    // Handle deletion of selected rows
     const handleDelete = () => {
         const selectedRows = table
             .getFilteredSelectedRowModel()
@@ -100,37 +89,45 @@ export function DataTable<TData, TValue>({
         onDeleteSelected(selectedRows);
     };
 
-    // Render the table and its controls
+    const selectedRowsCount = table.getFilteredSelectedRowModel().rows.length;
+
     return (
         <div className="space-y-4">
-
-            {/* Top Controls */}
-            <div className="flex flex-row lg:flex-row items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0 sm:space-x-2">
                 <Input
                     placeholder="Search by name or id"
                     value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
                         table.getColumn("title")?.setFilterValue(event.target.value)
                     }
-                    className="border border-lightborder placeholder-lighth2 dark:placeholder-foreground text-sm w-8/12 md:w-10/12"
+                    className="border border-lightborder dark:border-darkborder  placeholder-lighth2 dark:placeholder-foreground text-sm w-full sm:flex-grow"
                 />
-                <TableActions table={table} handleDelete={handleDelete}/>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant="subtle"
+                        onClick={handleDelete}
+                        disabled={selectedRowsCount === 0}
+                        className="border border-lightborder dark:border-darkborder  dark:text-foreground text-lighth1"
+                    >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete ({selectedRowsCount})
+                    </Button>
+                    <TableActions table={table} />
+                </div>
             </div>
 
-            <div className="overflow-x-auto text-lighth1 rounded-lg border border-lightborder">
-                <Table className="min-w-full ">
-
-
+            <div className="overflow-x-auto text-lighth1 rounded-lg border border-lightborder dark:border-darkborder">
+                <Table className="min-w-full">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow
                                 key={headerGroup.id}
-                                className="bg-surface "
+                                className="bg-surface dark:border-darkborder "
                             >
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         key={header.id}
-                                        className="font-medium bg-light1 dark:bg-dark1 text-lighth1 text-sm uppercase tracking-wider"
+                                        className="font-medium bg-background dark:bg-dark1 text-lighth1 text-sm uppercase tracking-wider"
                                     >
                                         {header.isPlaceholder
                                             ? null
@@ -143,25 +140,20 @@ export function DataTable<TData, TValue>({
                             </TableRow>
                         ))}
                     </TableHeader>
-
-
                     <TableBody>
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    className=" hover:bg-hover transition-colors"
+                                    className="hover:bg-hover transition-colors dark:border-darkborder "
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell
                                             key={cell.id}
                                             className="text-sm text-lighth1 whitespace-nowrap"
                                         >
-                                            {flexRender(cell.column.columnDef.cell, {
-                                                ...cell.getContext(),
-                                                handleDelete,
-                                            })}
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
                                 </TableRow>
@@ -174,15 +166,9 @@ export function DataTable<TData, TValue>({
                             </TableRow>
                         )}
                     </TableBody>
-
-
                 </Table>
-
             </div>
-
-            <PaginationControls table={table}/>
-
-
+            <PaginationControls table={table} />
         </div>
     );
 }
@@ -199,10 +185,10 @@ const TableActions = ({table, handleDelete}) => (
             <div className="flex items-center justify-center w-min">
                 <Button
                     variant="outline"
-                    className=" border w-full shadow-none border-lightborder text-lighth1"
+                    className=" border w-full shadow-none border-lightborder dark:border-darkborder text-lighth1"
                 >
                     <MoreHorizontal className="mr-2 h-4 w-4"/>
-                    Actions
+                    Filter
                 </Button>
 
             </div>
@@ -210,7 +196,7 @@ const TableActions = ({table, handleDelete}) => (
         </DropdownMenuTrigger>
 
         {/*This is the actions dropdown menu*/}
-        <DropdownMenuContent align="end" className="w-[200px] shadow-none bg-background border-lightborder text-lighth1">
+        <DropdownMenuContent align="end" className="w-[200px] shadow-none bg-background border-lightborder dark:border-darkborder  text-lighth1">
 
             <DropdownMenuLabel>Toggle Columns</DropdownMenuLabel>
             {table
@@ -226,15 +212,7 @@ const TableActions = ({table, handleDelete}) => (
                         {column.id}
                     </DropdownMenuCheckboxItem>
                 ))}
-            {table.getFilteredSelectedRowModel().rows.length > 0 && (
-                <div>
-                    <DropdownMenuLabel>Delete Selected</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={handleDelete}>
-                        Confirm
-                    </DropdownMenuItem>
 
-                </div>
-            )}
         </DropdownMenuContent>
     </DropdownMenu>
 );

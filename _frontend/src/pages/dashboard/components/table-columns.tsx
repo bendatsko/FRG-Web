@@ -116,9 +116,9 @@ const ActionsCell = ({ test }) => {
         <div className="flex items-center justify-center w-full">
             <Link to={`/view/${test.id}`} className="w-full">
                 <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
-                    className="bg-black text-white hover:bg-gray-800 w-full"
+                    className="shadow-none border-lightborder text-lighth2 dark:border-darkborder dark:text-foreground w-full"
                 >
                     <Eye className="h-3 w-3 mr-1" />
                     <span className="text-xs">View</span>

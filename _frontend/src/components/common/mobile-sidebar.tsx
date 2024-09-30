@@ -19,7 +19,8 @@ const MobileSideBar: React.FC = () => {
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden display-none border border-foreground">
+
+                <Button variant="ghost" size="icon" className="lg:hidden display-none border border-none">
                     <Menu className="h-7 w-7" aria-label="Open Sidebar" />
                 </Button>
             </SheetTrigger>

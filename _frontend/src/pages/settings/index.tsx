@@ -129,7 +129,7 @@ const UserSettingsPage = () => {
 
   return (
       <div className="bg-background min-h-screen">
-        <div className="container mx-auto px-4  w-11/12">
+        <div className="container ">
           <div className="flex flex-row justify-between items-center border-b border-lightborder py-4">
             <h1 className="text-3xl font-bold text-lighth1">Settings</h1>
           </div>

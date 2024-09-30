@@ -120,7 +120,7 @@ const View = () => {
   if (isLoading) {
     return (
         <div className="bg-background min-h-screen">
-          <div className="container mx-auto px-4 w-11/12">
+          <div className="container ">
             <div className="flex flex-row justify-between items-center border-b border-lightborder py-4">
               <h1 className="text-3xl font-bold text-lighth1">
                 <Skeleton className="h-9 w-32" />
@@ -139,7 +139,7 @@ const View = () => {
   if (error || !test) {
     return (
         <div className="bg-background min-h-screen">
-          <div className="container mx-auto px-4 w-11/12">
+          <div className="container ">
             <div className="flex flex-row justify-between items-center border-b border-lightborder py-4">
               <h1 className="text-3xl font-bold text-lighth1">Error</h1>
             </div>
@@ -159,26 +159,24 @@ const View = () => {
 
   return (
       <div className="bg-background min-h-screen">
-        <div className="container mx-auto px-4 w-11/12">
+        <div className="container">
           <div className="flex flex-row justify-between items-center border-b border-lightborder py-4">
             <div className="flex items-center">
-              <Button variant="ghost" className="mr-4" onClick={() => window.history.back()}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
+
               <h1 className="text-3xl font-bold text-lighth1">
                 Test #{test.id}: {test.title}
               </h1>
             </div>
+
             <Badge
-                variant={
-                  test.status === "Failed"
-                      ? "destructive"
-                      : test.status === "Completed"
-                          ? "success"
-                          : "default"
+                variant="outline"
+                className={`
+              text-sm font-medium px-3 py-1 rounded-full
+              ${test.status === "Completed"
+                    ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-900 dark:text-green-300 dark:border-green-700"
+                    : "bg-red-100 text-red-800 border-red-300 dark:bg-red-900 dark:text-red-300 dark:border-red-700"
                 }
-                className="text-sm font-medium px-3 py-1 rounded-full"
+            `}
             >
               {test.status}
             </Badge>

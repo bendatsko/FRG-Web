@@ -12,12 +12,14 @@
   --color-primary: #0964e6;
   --color-secondary: rgba(9, 100, 230, 0.93);
   --color-danger: #ff204e;
-  --color-background: #fafafa;
+  /*--color-background: #fafafa;*/
+  --color-header: #fff;
+  --color-background: #fff;
 
   --color-foreground: #1f1f1f;
   --color-foreground2: rgb(31, 31, 31);
 
-  --color-light-border: #1f1f1f;
+  --color-light-border: rgba(0, 0, 0, 0.08);
   --color-light-h1: rgb(31, 31, 31);
   --color-light-h2: rgb(31, 31, 31);
 
@@ -35,7 +37,7 @@
   --color-background: #0a0a0a;
   --color-foreground: #fefefe;
 
-  --color-light-border: #2d2d2d;
+  --color-dark-border: #939393;
   --color-dark1: #0a0a0a;
   --color-dark2: #2d2d2d;
   --color-light-h1: #f2f2f2;

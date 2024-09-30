@@ -14,12 +14,12 @@ import { selectUser } from "@/store/slice/auth";
 const MenuItem = React.memo(({ menu, isActive, onClick, isMobile }) => (
     <Button
         variant="ghost"
-        className={`justify-start ${
-            isActive ? "bg-gray-100 dark:bg-gray-800" : ""
+        className={`justify-start rounded-none ${
+            isActive ? " border-b border-black dark:bg-gray-800" : ""
         } ${isMobile ? "w-full py-3" : "py-2 px-3"}`}
         onClick={onClick}
     >
-        {menu.icon && <span className="mr-3">{menu.icon}</span>}
+        {/*{menu.icon && <span className="">{menu.icon}</span>}*/}
         <span className="font-medium">{menu.title}</span>
     </Button>
 ));
@@ -72,7 +72,6 @@ const SheetSideBar = ({ isMobile = false }) => {
         [navigate]
     );
 
-    // Swapped the class names for mobile and desktop
     const mobileClassName = "flex flex-col space-y-1 w-full";
     const desktopClassName = "flex flex-row items-center space-x-2";
 
@@ -82,7 +81,6 @@ const SheetSideBar = ({ isMobile = false }) => {
 
     return (
         <nav className={navClassName}>
-
             <div className={isMobile ? "text-red-500" : "text-blue-500"}>
                 {isMobile ? "" : ""}
             </div>

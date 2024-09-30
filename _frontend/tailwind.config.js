@@ -28,7 +28,7 @@ module.exports = {
                 lighth2: 'var(--color-light-h2)',
                 dark1: 'var(--color-dark1)',
                 dark2: 'var(--color-dark2)',
-
+                darkborder: 'var(--color-dark-border)',
 
                 light1: 'var(--color-light1)',
                 light2: 'var(--color-light2)',
