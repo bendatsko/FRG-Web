@@ -3,7 +3,7 @@
 ## Tech Stack
 
 **Client:** TypeScript, React, React Redux, RTK Query, ShadcnUI, Formik, Yup
-
+/home/bdatsko/DAQROC/Prod/FRG-Web/_frontend
 ## Deployment
 
 Package Installation

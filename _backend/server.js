@@ -117,24 +117,20 @@ app.post('/set-password', (req, res) => {
 });
 
 
-app.post('/register', (req, res) => {
-    const { email, username, bio, role } = req.body;
-    const tempPassword = generateRandomPassword(); // Generate a random password
-    const hashedPassword = bcrypt.hashSync(tempPassword, 8);
+app.post('/api/register', (req, res) => {
+    const { email, username, password, role } = req.body;
+    const hashedPassword = bcrypt.hashSync(password, 8);
     const uuid = uuidv4();
 
     db.run(
-        'INSERT INTO users (email, password, username, bio, uuid, role) VALUES (?, ?, ?, ?, ?, ?)',
-        [email, hashedPassword, username, bio, uuid, role],
+        'INSERT INTO users (email, password, username, uuid, role) VALUES (?, ?, ?, ?, ?)',
+        [email, hashedPassword, username, uuid, role],
         function (err) {
             if (err) {
                 console.error('Error during user registration', err);
                 return res.status(500).send('User registration failed');
             }
             
-            // Send the email with credentials and the sign-in link
-            sendUserCredentialsEmail(email, username, tempPassword);
-
             res.status(200).send('User registered successfully');
         }
     );
@@ -499,7 +495,7 @@ async function generateMockTestResults(test) {
     return resultsFilePath;
 }
 
-app.post('/change-password', (req, res) => {
+app.post('/api/change-password', (req, res) => {
     const { email, currentPassword, newPassword } = req.body;
 
     // Find the user by email
@@ -616,7 +612,7 @@ async function createResultsStream(username, testId) {
 /* -------------------------------------------------------------------------- */
 
 // Index
-app.post('/login', (req, res) => {
+app.post('/api/login', (req, res) => {
     const {email, password} = req.body;
 
     db.get(`SELECT * FROM users WHERE email = ?`, [email], (err, user) => {
@@ -657,7 +653,7 @@ app.post('/login', (req, res) => {
 /* -------------------------------------------------------------------------- */
 
 // Fetch users
-app.get('/users', (req, res) => {
+app.get('/api/users', (req, res) => {
     db.all(`SELECT id, email, username, role, bio FROM users`, [], (err, rows) => {
         if (err) {
             console.error('Error fetching users:', err);
@@ -684,7 +680,7 @@ app.get('/users/:id', (req, res) => {
 
 
 // Update user
-app.put('/users/:id', (req, res) => {
+app.put('/api/users/:id', (req, res) => {
     const {id} = req.params;
     const {username, email, role, bio} = req.body;
 
@@ -699,7 +695,7 @@ app.put('/users/:id', (req, res) => {
 });
 
 // Delete user
-app.delete('/users/:id', (req, res) => {
+app.delete('/api/users/:id', (req, res) => {
     const {id} = req.params;
 
     db.run(`DELETE FROM users WHERE id = ?`, [id], function (err) {
@@ -734,7 +730,7 @@ app.delete('/api/tests/batch-delete', (req, res) => {
 
 
 // Fetch user by uuid
-app.get('/user/uuid/:uuid', (req, res) => {
+app.get('/api/user/uuid/:uuid', (req, res) => {
     const {uuid} = req.params;
 
     db.get(`SELECT id, username, email, uuid, role, bio FROM users WHERE uuid = ?`, [uuid], (err, user) => {
@@ -749,7 +745,7 @@ app.get('/user/uuid/:uuid', (req, res) => {
     });
 });
 
-app.post('/reset-password', (req, res) => {
+app.post('/api/reset-password', (req, res) => {
     const { email } = req.body;
 
     if (!email) {
@@ -800,7 +796,7 @@ app.post('/reset-password', (req, res) => {
 /* -------------------------------------------------------------------------- */
 
 // Fetch notifications
-app.get('/notifications', (req, res) => {
+app.get('/api/notifications', (req, res) => {
     const user_id = req.query.user_id;
     db.all(`SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC`, [user_id], (err, rows) => {
         if (err) {
@@ -812,7 +808,7 @@ app.get('/notifications', (req, res) => {
 });
 
 // Create a new notification
-app.post('/notifications', (req, res) => {
+app.post('/api/notifications', (req, res) => {
     const {user_id, message} = req.body;
 
     db.run(`INSERT INTO notifications (user_id, message) VALUES (?, ?)`, [user_id, message], function (err) {
@@ -828,7 +824,7 @@ app.post('/notifications', (req, res) => {
 });
 
 // Clear all notifications for a user
-app.post('/notifications/clear', (req, res) => {
+app.post('/api/notifications/clear', (req, res) => {
     const user_id = req.body.user_id;
 
     db.run(`DELETE FROM notifications WHERE user_id = ?`, [user_id], function (err) {
@@ -858,7 +854,7 @@ app.put('/notifications/:id/read', (req, res) => {
 /* -------------------------------------------------------------------------- */
 
 // Modify the /tests GET endpoint
-app.get('/tests', (req, res) => {
+app.get('/api/tests', (req, res) => {
     const username = req.query.username;
 
     if (!username) {
@@ -878,7 +874,7 @@ app.get('/tests', (req, res) => {
     });
 });
 
-app.post('/tests', async (req, res) => {
+app.post('/api/tests', async (req, res) => {
     const {title, author, testBench, snrRange, batchSize, username, accessible_to, DUT} = req.body;
 
     try {
@@ -977,7 +973,7 @@ function runTestOnTeensy(testParams) {
 
 
 // Edit test
-app.put('/tests/:id', (req, res) => {
+app.put('/api/tests/:id', (req, res) => {
     const {id} = req.params;
     const {title, author, DUT, status, duration} = req.body;
 
@@ -992,7 +988,7 @@ app.put('/tests/:id', (req, res) => {
 });
 
 // /tests/:id endpoint
-app.get('/tests/:id', (req, res) => {
+app.get('/api/tests/:id', (req, res) => {
     const {id} = req.params;
     db.get(`SELECT * FROM tests WHERE id = ?`, [id], async (err, row) => {
         if (err) {
@@ -1019,7 +1015,7 @@ app.get('/tests/:id', (req, res) => {
 
 
 // Delete test
-app.delete('/tests/:id', (req, res) => {
+app.delete('/api/tests/:id', (req, res) => {
     const {id} = req.params;
 
     db.run(`DELETE FROM tests WHERE id = ?`, [id], function (err) {
@@ -1068,7 +1064,7 @@ app.post('/tests/:id/share', (req, res) => {
 
 
 // Remove a user's access to a test
-app.post('/tests/:id/remove-access', (req, res) => {
+app.post('/api/tests/:id/remove-access', (req, res) => {
     const {id} = req.params;
     const {username} = req.body;
 
@@ -1100,7 +1096,7 @@ app.post('/tests/:id/remove-access', (req, res) => {
 });
 
 // Update test threshold
-app.put('/tests/:id/threshold', (req, res) => {
+app.put('/api/tests/:id/threshold', (req, res) => {
     const {id} = req.params;
     const {threshold} = req.body;
     db.run(`UPDATE tests SET threshold = ? WHERE id = ?`, [threshold, id], (err) => {
@@ -1113,7 +1109,7 @@ app.put('/tests/:id/threshold', (req, res) => {
 });
 
 // Rerun test
-app.post('/tests/:id/rerun', (req, res) => {
+app.post('/api/tests/:id/rerun', (req, res) => {
     const {id} = req.params;
     // This is a placeholder for actual test logic
     const newResults = Array(5).fill().map((_, i) => ({
@@ -1134,7 +1130,7 @@ app.post('/tests/:id/rerun', (req, res) => {
 });
 
 // Download results
-app.get('/tests/:id/download', (req, res) => {
+app.get('/api/tests/:id/download', (req, res) => {
     const {id} = req.params;
     db.get(`SELECT title, results_file FROM tests WHERE id = ?`, [id], (err, row) => {
         if (err) {
@@ -1155,20 +1151,20 @@ app.get('/tests/:id/download', (req, res) => {
 });
 
 // Fetch chip statuses
-app.get('/chips', (req, res) => {
+app.get('/api/chips', (req, res) => {
     res.json(chips);
 });
 
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'OK' });
 });
 
 
   
 const corsOptions = {
-    origin: 'https://daqroc.bendatsko.com', 
+    origin: 'https://daqroc.eecs.umich.edu', 
     optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
