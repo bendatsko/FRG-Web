@@ -119,10 +119,10 @@ const View = () => {
 
   if (isLoading) {
     return (
-        <div className="bg-background min-h-screen">
-          <div className="container ">
-            <div className="flex flex-row justify-between items-center border-b border-lightborder py-4">
-              <h1 className="text-3xl font-bold text-lighth1">
+        <div className="bg-white dark:bg-black min-h-screen">
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-row justify-between items-center border-b border-gray-200 dark:border-gray-800 py-4">
+              <h1 className="text-3xl font-bold text-black dark:text-white">
                 <Skeleton className="h-9 w-32" />
               </h1>
             </div>
@@ -138,10 +138,10 @@ const View = () => {
 
   if (error || !test) {
     return (
-        <div className="bg-background min-h-screen">
-          <div className="container ">
-            <div className="flex flex-row justify-between items-center border-b border-lightborder py-4">
-              <h1 className="text-3xl font-bold text-lighth1">Error</h1>
+        <div className="bg-white dark:bg-black min-h-screen">
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-row justify-between items-center border-b border-gray-200 dark:border-gray-800 py-4">
+              <h1 className="text-3xl font-bold text-black dark:text-white">Error</h1>
             </div>
             <Alert variant="destructive" className="mt-6">
               <AlertCircle className="h-5 w-5" />
@@ -158,39 +158,41 @@ const View = () => {
   }
 
   return (
-      <div className="bg-background min-h-screen">
-        <div className="container">
-          <div className="flex flex-row justify-between items-center border-b border-lightborder py-4">
-            <div className="flex items-center">
+      <div className=" w-full border-none border-lightborder bg-background dark:bg-background dark:border-darkborder ">
+        <div className="container mx-auto py-6">
+          <div className="flex flex-row justify-between items-center">
 
-              <h1 className="text-3xl font-bold text-lighth1">
-                Test #{test.id}: {test.title}
-              </h1>
-            </div>
 
-            <Badge
-                variant="outline"
-                className={`
+            <h1 className="text-3xl font-bold text-lighth1">
+              Test #{test.id}: {test.title}
+            </h1>
+
+
+          <Badge
+              variant="outline"
+              className={`
               text-sm font-medium px-3 py-1 rounded-full
               ${test.status === "Completed"
-                    ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-900 dark:text-green-300 dark:border-green-700"
-                    : "bg-red-100 text-red-800 border-red-300 dark:bg-red-900 dark:text-red-300 dark:border-red-700"
-                }
+                ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-900 dark:text-green-300 dark:border-green-700"
+                : "bg-red-100 text-red-800 border-red-300 dark:bg-red-900 dark:text-red-300 dark:border-red-700"
+            }
             `}
-            >
-              {test.status}
-            </Badge>
-          </div>
+        >
+          {test.status}
+        </Badge>
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            {/* Test Overview Card */}
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Test Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center space-x-2">
+
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+    {/* Test Overview Card */}
+    <Card className="md:col-span-2">
+      <CardHeader>
+        <CardTitle>Test Overview</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-4">
+        <div className="flex items-center space-x-2">
                     <User className="h-4 w-4 opacity-70" />
                     <span className="text-sm font-medium">Author: {test.author}</span>
                   </div>
@@ -237,7 +239,7 @@ const View = () => {
             {/* Chart Card */}
             <Card className="md:col-span-2">
               <CardHeader>
-                <CardTitle>Test Results</CardTitle>
+                <CardTitle></CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
@@ -263,7 +265,7 @@ const View = () => {
             {/* Additional Info Card */}
             <Card>
               <CardHeader>
-                <CardTitle>Additional Information</CardTitle>
+                <CardTitle>Details</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -298,6 +300,8 @@ const View = () => {
           )}
         </div>
       </div>
+
+
   );
 };
 

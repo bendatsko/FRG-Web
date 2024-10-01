@@ -198,9 +198,11 @@ const Create: React.FC = () => {
   };
 
   return (
-      <div className="bg-background min-h-screen">
-        <div className="container">
-          <div className="flex flex-row justify-between items-center border-b border-lightborder py-4">
+      <div className=" w-full border-none border-lightborder bg-background dark:bg-background dark:border-darkborder ">
+        <div className="container mx-auto py-6">
+          <div className="flex flex-row justify-between items-center">
+
+
             <h1 className="text-3xl font-bold text-lighth1">
               New Test
             </h1>
@@ -293,7 +295,7 @@ const Create: React.FC = () => {
                                     type="number"
                                     placeholder="e.g., 3"
                                     {...field}
-                                    className="border-lightborder placeholder-lighth2 dark:placeholder-foreground text-sm"
+                                    className="border-lightborder placeholder-lighth2 "
                                 />
                               </FormControl>
                               <FormMessage/>

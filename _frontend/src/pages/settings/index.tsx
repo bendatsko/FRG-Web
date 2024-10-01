@@ -1,251 +1,224 @@
-import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { selectUser, removeUserInfo } from "@/store/slice/auth";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setBreadCrumb } from "@/store/slice/app";
+import { selectUser } from "@/store/slice/auth";
+import { useUpdateUserMutation } from "@/store/api/v1/endpoints/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
-import { Loader2, Lock, Trash2 } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User, Key, Shield, Activity, Clock } from "lucide-react";
+import {Spacer} from "@geist-ui/core";
 
-const passwordSchema = z
-    .object({
-      currentPassword: z.string().min(1, "Current password is required"),
-      newPassword: z
-          .string()
-          .min(8, "New password must be at least 8 characters"),
-      confirmPassword: z.string(),
-    })
-    .refine((data) => data.newPassword === data.confirmPassword, {
-      message: "Passwords do not match",
-      path: ["confirmPassword"],
-    });
-
-const UserSettingsPage = () => {
-  const user = useSelector(selectUser);
+const Settings: React.FC = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const user = useSelector(selectUser);
+  const [updateUser] = useUpdateUserMutation();
   const { toast } = useToast();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset: resetPasswordForm,
-  } = useForm({
-    resolver: zodResolver(passwordSchema),
+  const [profileData, setProfileData] = useState({
+    username: user.username,
+    email: user.email,
+    bio: user.bio || "",
   });
 
-  const handleResetPassword = async (data) => {
-    setIsLoading(true);
-    const token = localStorage.getItem("token");
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
-    if (!token) {
-      toast({
-        title: "Error",
-        description: "You are not authenticated. Please log in again.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
+  useEffect(() => {
+    dispatch(setBreadCrumb([{ title: "Settings", link: "/settings" }]));
+  }, [dispatch]);
 
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/change-password`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              email: user.email,
-              currentPassword: data.currentPassword,
-              newPassword: data.newPassword,
-            }),
-          }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to change password");
-      }
-
+      await updateUser(profileData).unwrap();
       toast({
-        title: "Success",
-        description: "Your password has been updated successfully.",
+        title: "Profile Updated",
+        description: "Your profile has been successfully updated.",
+        duration: 3000,
       });
-
-      resetPasswordForm();
     } catch (error) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update password. Please try again.",
+        title: "Update Failed",
+        description: "There was an error updating your profile. Please try again.",
         variant: "destructive",
+        duration: 5000,
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleDeleteAccount = async () => {
-    try {
-      // Implement actual account deletion logic here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulating API call
-
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
-        title: "Account Deleted",
-        description: "Your account has been successfully deleted.",
-        variant: "default",
+        title: "Password Mismatch",
+        description: "New password and confirm password do not match.",
+        variant: "destructive",
+        duration: 5000,
       });
-      dispatch(removeUserInfo());
-      navigate("/login");
+      return;
+    }
+    try {
+      await updateUser({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      }).unwrap();
+      toast({
+        title: "Password Changed",
+        description: "Your password has been successfully updated.",
+        duration: 3000,
+      });
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete account. Please try again.",
+        title: "Password Change Failed",
+        description: "There was an error changing your password. Please check your current password and try again.",
         variant: "destructive",
+        duration: 5000,
       });
     }
   };
 
   return (
-      <div className="bg-background min-h-screen">
-        <div className="container ">
-          <div className="flex flex-row justify-between items-center border-b border-lightborder py-4">
-            <h1 className="text-3xl font-bold text-lighth1">Settings</h1>
-          </div>
+      <div className=" w-full border-none border-lightborder bg-background dark:bg-background dark:border-darkborder ">
+        <div className="container mx-auto py-6">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+
+            <h1 className="text-3xl font-bold text-lighth1">
+              Settings
+            </h1>
+
+
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+
+
+            <Card className="md:col-span-2">
+              <CardHeader>
+              <CardTitle>Profile Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleProfileUpdate} className="space-y-4">
+                <div className="flex items-center space-x-4 mb-4">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={user.avatarUrl} alt={user.username} />
+                    <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h2 className="text-2xl font-semibold">{user.username}</h2>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                      id="username"
+                      value={profileData.username}
+                      onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
+                      className="border-gray-300 dark:border-gray-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                      id="email"
+                      type="email"
+                      value={profileData.email}
+                      onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                      className="border-gray-300 dark:border-gray-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                      id="bio"
+                      value={profileData.bio}
+                      onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                      className="border-gray-300 dark:border-gray-700"
+                      rows={4}
+                  />
+                </div>
+                <Button type="submit" className="w-full">Update Profile</Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lighth1">User Information</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center">
-                <Avatar className="h-32 w-32 mb-4">
-                  <AvatarImage src={user.avatarUrl} alt={user.username}/>
-                  <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <h2 className="text-2xl font-semibold text-lighth1 mb-1">{user.username}</h2>
-                <p className="text-sm text-lighth2 dark:text-foreground mb-4">{user.email}</p>
-              </CardContent>
-              <CardFooter className="flex justify-center">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="text-lighth2 dark:text-foreground hover:text-red-600 transition-colors">
-                      <Trash2 className="mr-2 h-4 w-4"/>
-                      Delete Account
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete your account and remove your data
-                        from our servers.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeleteAccount}
-                                         className="bg-red-600 hover:bg-red-700 text-white">
-                        Delete Account
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </CardFooter>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lighth1 ">Change Password</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Shield className="mr-2 h-4 w-4" />
+                  Security
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit(handleResetPassword)} className="space-y-4">
+                <form onSubmit={handlePasswordChange} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="currentPassword" className="text-lighth1">Current Password</Label>
-                    <div className="relative">
-                      <Input
-                          id="currentPassword"
-                          type="password"
-                          {...register("currentPassword")}
-                          placeholder="Enter your current password"
-                          className="border-lightborder placeholder-lighth2 pl-10 dark:placeholder-foreground text-sm"
-                      />
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-lighth2 dark:text-foreground"/>
-                    </div>
-                    {errors.currentPassword && (
-                        <p className="text-red-500 text-sm">{errors.currentPassword.message}</p>
-                    )}
+                    <Label htmlFor="current-password">Current Password</Label>
+                    <Input
+                        id="current-password"
+                        type="password"
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                        className="border-gray-300 dark:border-gray-700"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="newPassword" className="text-lighth1">New Password</Label>
-                    <div className="relative">
-                      <Input
-                          id="newPassword"
-                          type="password"
-                          {...register("newPassword")}
-                          placeholder="Enter a new password"
-                          className="border-lightborder placeholder-lighth2 pl-10 dark:placeholder-foreground text-sm"
-                      />
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-lighth2 dark:text-foreground"/>
-                    </div>
-                    {errors.newPassword && (
-                        <p className="text-red-500 text-sm">{errors.newPassword.message}</p>
-                    )}
+                    <Label htmlFor="new-password">New Password</Label>
+                    <Input
+                        id="new-password"
+                        type="password"
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        className="border-gray-300 dark:border-gray-700"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-lighth1">Confirm New Password</Label>
-                    <div className="relative">
-                      <Input
-                          id="confirmPassword"
-                          type="password"
-                          {...register("confirmPassword")}
-                          placeholder="Confirm your new password"
-                          className="border-lightborder placeholder-lighth2 pl-10 dark:placeholder-foreground text-sm"
-                      />
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-lighth2 dark:text-foreground"/>
-                    </div>
-                    {errors.confirmPassword && (
-                        <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>
-                    )}
+                    <Label htmlFor="confirm-password">Confirm New Password</Label>
+                    <Input
+                        id="confirm-password"
+                        type="password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                        className="border-gray-300 dark:border-gray-700"
+                    />
                   </div>
-                  <Button type="submit" disabled={isLoading} className="w-full">
-                    {isLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
-                          Updating...
-                        </>
-                    ) : (
-                        "Update Password"
-                    )}
-                  </Button>
+                  <Button type="submit" className="w-full">Change Password</Button>
                 </form>
               </CardContent>
             </Card>
-          </div>
-        </div>
-      </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Activity className="mr-2 h-4 w-4" />
+                  Account Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    <Clock className="inline mr-2 h-4 w-4" />
+                    Last login: {new Date().toLocaleString()}
+                  </p>
+                  <p className="text-sm">
+                    <Activity className="inline mr-2 h-4 w-4" />
+                    Active sessions: 1
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+          </div>  </div>  </div>  </div>
   );
 };
 
-export default UserSettingsPage;
+export default Settings;

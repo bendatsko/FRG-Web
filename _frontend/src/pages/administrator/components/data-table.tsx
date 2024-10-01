@@ -339,7 +339,7 @@ export function DataTable<TData, TValue>({
         <Table className="w-full">
           <TableHeader className="">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="dark:border-foreground bg-light1 dark:bg-dark1">
+              <TableRow key={headerGroup.id} className="dark:bg-background bg-background ">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>

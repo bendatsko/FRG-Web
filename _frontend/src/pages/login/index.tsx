@@ -9,27 +9,29 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useDispatch } from "react-redux";
 import { saveUserInfo } from "@/store/slice/auth";
-import { InputPassword } from "@/components";
 import { SignInType } from "@/types";
-import Logo from "./components/logo";
-import MobileLogo from "./components/mobile-logo";
-import { useTheme } from "next-themes";
-import { DAQROCLogo } from "@/components/common/DaqrocSquareIcon.tsx";
-const baseUrl = import.meta.env.VITE_API_URL;
+import LogoBlack from "@/components/common/logoblackfull.png";
+import LogoWhite from "@/components/common/logowhitefull.png";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const initialFormValues: SignInType = {
   email: "",
   password: "",
 };
 
-const Index: React.FC = () => {
+const Login: React.FC = () => {
   const [signIn] = useSignInMutation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const dispatch = useDispatch();
-  const { theme } = useTheme();
-  const [showResetPassword, setShowResetPassword] = useState(false);
   const [emailForReset, setEmailForReset] = useState("");
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   const handleSubmit = async (values: SignInType, actions: any) => {
     try {
@@ -42,7 +44,6 @@ const Index: React.FC = () => {
         bio: result.user.bio,
       };
 
-      // Save the token in localStorage for future requests
       localStorage.setItem("token", result.access_token);
       dispatch(saveUserInfo({ token: result.access_token, user: userInfo }));
       actions.resetForm();
@@ -52,8 +53,7 @@ const Index: React.FC = () => {
         duration: 3000,
         variant: "destructive",
         title: "Error",
-        description:
-          "Authentication failed. Please check your credentials and try again.",
+        description: "Authentication failed. Please check your credentials and try again.",
       });
     }
   };
@@ -69,23 +69,19 @@ const Index: React.FC = () => {
     }
 
     try {
-      const response = await fetch(
-        `https://daqroc-api.bendatsko.com/reset-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: emailForReset }),
-        }
-      );
+      const response = await fetch(`https://daqroc-api.bendatsko.com/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailForReset }),
+      });
 
       if (response.ok) {
         toast({
           title: "Password Reset",
           description: "A temporary password has been sent to your email.",
-          variant: "success",
+          variant: "default",
         });
+        setResetDialogOpen(false);
       } else {
         const errorData = await response.json();
         toast({
@@ -104,90 +100,92 @@ const Index: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white text-black">
-      <div className="hidden lg:flex lg:w-1/2 dark:bg-[#09090b] bg-[#09090b] items-center justify-center">
-        <Logo />
-      </div>
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center">
-        <div className="lg:hidden">
-          <div className="flex items-center justify-center">
-            <DAQROCLogo
-              className="text-[90px] lg:text-[150px]"
-              height="6rem"
-              width="6rem"
-              overrideColor="dark"
+      <div className="flex min-h-screen bg-white dark:bg-black text-black dark:text-white items-center justify-center">
+        <div className="w-full max-w-md p-8 rounded-lg transition-all duration-300 ease-in-out">
+          <div className="flex justify-center mb-8">
+            <img
+                src={LogoBlack}
+                alt="Logo"
+                className="w-48 object-contain dark:hidden"
+            />
+            <img
+                src={LogoWhite}
+                alt="Logo"
+                className="w-48 object-contain hidden dark:block"
             />
           </div>
-          <h1 className="text-2xl font-bold text-center">DAQROC</h1>
-          <h2 className="text-xs font-normal text-center">
-            Flynn Lab, University of Michigan
-          </h2>
-        </div>
-        <div className="w-full max-w-md p-8 rounded-lg ">
-          <h1 className="text-2xl font-bold mb-6 text-center">Sign In</h1>
           <Formik
-            initialValues={initialFormValues}
-            validationSchema={signInSchema}
-            onSubmit={handleSubmit}
+              initialValues={initialFormValues}
+              validationSchema={signInSchema}
+              onSubmit={handleSubmit}
           >
             {({ values, handleBlur, handleChange, isSubmitting }) => (
-              <Form className="space-y-6">
-                <FormField
-                  label="Email Address"
-                  name="email"
-                  type="email"
-                  value={values.email}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                />
-                <FormField
-                  label="Password"
-                  name="password"
-                  type="password"
-                  value={values.password}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                />
-                <SubmitButton isSubmitting={isSubmitting} />
-              </Form>
+                <Form className="space-y-6">
+                  <FormField
+                      label="Email Address"
+                      name="email"
+                      type="email"
+                      value={values.email}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                  />
+                  <FormField
+                      label="Password"
+                      name="password"
+                      type="password"
+                      value={values.password}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                  />
+                  <div className="transition-transform duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98]">
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full bg-black text-white dark:bg-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 transition-colors duration-200"
+                    >
+                      {isSubmitting ? "Signing In..." : "Sign In"}
+                    </Button>
+                  </div>
+                </Form>
             )}
           </Formik>
 
-          {/* Forgot Password Section */}
           <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setShowResetPassword(!showResetPassword)}
-              className="text-blue-600 underline text-sm"
-            >
-              Forgot Password?
-            </button>
+            <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+              <DialogTrigger asChild>
+                <button
+                    type="button"
+                    className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white text-sm transition-colors duration-200"
+                >
+                  Forgot Password?
+                </button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Reset Password</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="resetEmail" className="text-right">
+                      Email
+                    </Label>
+                    <Input
+                        id="resetEmail"
+                        type="email"
+                        className="col-span-3"
+                        value={emailForReset}
+                        onChange={(e) => setEmailForReset(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <Button onClick={handlePasswordResetRequest} className="w-full">
+                  Send Reset Email
+                </Button>
+              </DialogContent>
+            </Dialog>
           </div>
-
-          {showResetPassword && (
-            <div className="mt-4">
-              <Label htmlFor="resetEmail">
-                Enter your email to reset password:
-              </Label>
-              <Input
-                id="resetEmail"
-                type="email"
-                className="border border-black/20 placeholder-black/75 dark:placeholder-black/75"
-                placeholder="Enter your email"
-                value={emailForReset}
-                onChange={(e) => setEmailForReset(e.target.value)}
-              />
-              <Button
-                onClick={handlePasswordResetRequest}
-                className="mt-2 shadow-none w-full bg-[#09090b] dark:bg-transparent bg-transparent dark:text-black  border text-black border-black/20 dark:border-black/20 border-black/20"
-              >
-                Send Reset Email
-              </Button>
-            </div>
-          )}
         </div>
       </div>
-    </div>
   );
 };
 
@@ -199,56 +197,25 @@ const FormField: React.FC<{
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }> = ({ label, name, type, value, onBlur, onChange }) => (
-  <div className="space-y-2">
-    <Label htmlFor={name} className="text-sm font-medium">
-      {label}
-    </Label>
-    <Input
-      className="text-base" // Added this line to set font size to 16px
-      type={type}
-      name={name}
-      id={name}
-      value={value}
-      onBlur={onBlur}
-      onChange={onChange}
-    />
-    <ErrorMessage
-      name={name}
-      component="div"
-      className="text-sm text-red-500"
-    />
-  </div>
+    <div className="space-y-2">
+      <Label htmlFor={name} className="text-sm font-medium">
+        {label}
+      </Label>
+      <Input
+          className="bg-transparent border border-black/20 dark:border-white/20 focus:border-black dark:focus:border-white transition-colors duration-200"
+          type={type}
+          name={name}
+          id={name}
+          value={value}
+          onBlur={onBlur}
+          onChange={onChange}
+      />
+      <ErrorMessage
+          name={name}
+          component="div"
+          className="text-sm text-red-500 dark:text-red-400"
+      />
+    </div>
 );
 
-const SubmitButton: React.FC<{ isSubmitting: boolean }> = ({
-  isSubmitting,
-}) => (
-  <Button
-    type="submit"
-    variant="default"
-    disabled={isSubmitting}
-    className="w-full bg-black text-white bg-[#09090b] dark:bg-[#09090b] dark:text-white dark:hover:bg-black hover:bg-black transition-colors duration-200"
-  >
-    {isSubmitting ? (
-      <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        />
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        />
-      </svg>
-    ) : (
-      "Sign In"
-    )}
-  </Button>
-);
-
-export default Index;
+export default Login;

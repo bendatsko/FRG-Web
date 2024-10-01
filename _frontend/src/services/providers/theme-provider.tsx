@@ -13,6 +13,9 @@ type ThemeProviderState = {
   setTheme: (theme: Theme) => void;
 };
 
+// Toggle this flag to enable/disable forcing the light theme
+const FORCE_LIGHT_THEME = true;
+
 const initialState: ThemeProviderState = {
   theme: "system",
   setTheme: () => null,
@@ -21,13 +24,13 @@ const initialState: ThemeProviderState = {
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
-  children,
-  defaultTheme = "system",
-  storageKey = "vite-ui-theme",
-  ...props
-}: ThemeProviderProps) {
+                                children,
+                                defaultTheme = "system",
+                                storageKey = "vite-ui-theme",
+                                ...props
+                              }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+      () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   );
 
   useEffect(() => {
@@ -35,11 +38,16 @@ export function ThemeProvider({
 
     root.classList.remove("light", "dark");
 
+    // Force light theme if the flag is set to true
+    if (FORCE_LIGHT_THEME) {
+      root.classList.add("light");
+      return;
+    }
+
     if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
 
       root.classList.add(systemTheme);
       return;
@@ -57,9 +65,9 @@ export function ThemeProvider({
   };
 
   return (
-    <ThemeProviderContext.Provider {...props} value={value}>
-      {children}
-    </ThemeProviderContext.Provider>
+      <ThemeProviderContext.Provider {...props} value={value}>
+        {children}
+      </ThemeProviderContext.Provider>
   );
 }
 

@@ -82,20 +82,24 @@ export const tableColumns = (handleDeleteTest) => {
       accessorKey: "start_time",
       header: ({ column }) => (
           <div className={"items-center flex items-center "}>
-            Start time
-            <Button
-                   variant="ghost"
-                   onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                   className=""
-               >
+              Start time
+              <div className="w-2">
+              </div>
+              <Button
+                  variant="ghost"
+                  onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                  className=""
+              >
 
-            <ArrowUpDown className=" h-4 w-4" />
-          </Button>
+                  <ArrowUpDown className="h-4 w-4"/>
+
+
+              </Button>
 
           </div>
 
       ),
-      cell: ({ row }) => formatDate(row.getValue("start_time")),
+        cell: ({row }) => formatDate(row.getValue("start_time")),
       sortingFn: (rowA, rowB, columnId) =>
           sortDates(rowA.getValue(columnId), rowB.getValue(columnId)),
       sortDescFirst: true,
